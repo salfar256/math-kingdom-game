@@ -1,0 +1,231 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ============ HELPER ============
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isSelf(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    // Guru = punya dokumen di teachers/{uid} dengan active == true.
+    // Dokumen ini HANYA dibuat manual lewat Firebase Console / Admin SDK.
+    function isTeacher() {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/teachers/$(request.auth.uid))
+        && get(/databases/$(database)/documents/teachers/$(request.auth.uid)).data.active == true;
+    }
+
+    function ownsClass(classId) {
+      return isTeacher()
+        && exists(/databases/$(database)/documents/classes/$(classId))
+        && get(/databases/$(database)/documents/classes/$(classId)).data.teacherUid == request.auth.uid;
+    }
+
+    // Guru boleh membaca siswa yang activeClassId-nya adalah kelas miliknya.
+    function teacherOfStudent(studentUid) {
+      return isTeacher()
+        && exists(/databases/$(database)/documents/students/$(studentUid))
+        && ownsClass(get(/databases/$(database)/documents/students/$(studentUid)).data.activeClassId);
+    }
+
+    function isStr(v)  { return v is string; }
+    function isNum(v)  { return v is number; }
+    function isBool(v) { return v is bool; }
+
+    function strLen(v, minL, maxL) {
+      return v is string && v.size() >= minL && v.size() <= maxL;
+    }
+
+    function numRange(v, minV, maxV) {
+      return v is number && v >= minV && v <= maxV;
+    }
+
+    // Field yang dikirim harus subset dari daftar yang diizinkan.
+    function onlyFields(allowed) {
+      return request.resource.data.keys().hasOnly(allowed);
+    }
+
+    function unchanged(field) {
+      return !(field in request.resource.data)
+        || request.resource.data[field] == resource.data[field];
+    }
+
+    // ============ users ============
+    // Profil ringan. role TIDAK boleh ditulis dari klien.
+
+    match /users/{uid} {
+      allow read: if isSelf(uid) || isTeacher();
+
+      allow create: if isSelf(uid)
+        && onlyFields(['displayName', 'createdAt', 'lastLoginAt'])
+        && strLen(request.resource.data.displayName, 1, 40);
+
+      allow update: if isSelf(uid)
+        && onlyFields(['displayName', 'lastLoginAt'])
+        && strLen(request.resource.data.displayName, 1, 40);
+
+      allow delete: if false;
+    }
+
+    // ============ teachers ============
+    // Read-only dari klien. Dibuat manual di Firebase Console.
+
+    match /teachers/{teacherUid} {
+      allow read:   if isSelf(teacherUid);
+      allow write:  if false;
+    }
+
+    // ============ classCodes ============
+    // Index lookup kode kelas -> classId.
+    // Hanya boleh 'get' (bukan 'list') supaya kode tidak bisa dienumerasi.
+
+    match /classCodes/{code} {
+      allow get:    if isSignedIn();
+      allow list:   if false;
+
+      allow create: if isTeacher()
+        && onlyFields(['classId', 'teacherUid', 'createdAt'])
+        && isStr(request.resource.data.classId)
+        && request.resource.data.teacherUid == request.auth.uid;
+
+      allow update: if false;
+      allow delete: if isSignedIn()
+        && resource.data.teacherUid == request.auth.uid;
+    }
+
+    // ============ classes ============
+
+    match /classes/{classId} {
+
+      function validClassData() {
+        return strLen(request.resource.data.name, 2, 60)
+          && strLen(request.resource.data.classCode, 4, 10)
+          && isStr(request.resource.data.teacherUid)
+          && isBool(request.resource.data.active);
+      }
+
+      // Siswa perlu 'get' untuk memverifikasi kelas aktif saat login.
+      allow get: if isSignedIn();
+
+      // 'list' hanya untuk guru, dibatasi ke kelas miliknya lewat query.
+      allow list: if isTeacher();
+
+      allow create: if isTeacher()
+        && request.resource.data.teacherUid == request.auth.uid
+        && onlyFields(['name', 'classCode', 'teacherUid', 'createdAt', 'active', 'settings'])
+        && validClassData();
+
+      allow update: if ownsClass(classId)
+        && request.resource.data.teacherUid == resource.data.teacherUid
+        && request.resource.data.classCode == resource.data.classCode
+        && onlyFields(['name', 'classCode', 'teacherUid', 'createdAt', 'active', 'settings'])
+        && strLen(request.resource.data.name, 2, 60);
+
+      allow delete: if ownsClass(classId);
+
+      // ---- penugasan dari guru ----
+      match /assignments/{assignmentId} {
+        allow read:   if isSignedIn();
+        allow create: if ownsClass(classId)
+          && request.resource.data.createdBy == request.auth.uid;
+        allow update, delete: if ownsClass(classId);
+      }
+
+      // ---- roster siswa dalam kelas (ringkasan + leaderboard) ----
+      match /students/{studentUid} {
+
+        function validRoster() {
+          return onlyFields([
+                   'displayName', 'characterId', 'joinedAt', 'active',
+                   'level', 'xp', 'streak', 'lastPracticeAt',
+                   'accuracy', 'factsMastered', 'totalQuestions', 'daysActive',
+                   'hideFromLeaderboard'
+                 ])
+            && strLen(request.resource.data.displayName, 2, 30)
+            && strLen(request.resource.data.characterId, 1, 20)
+            && numRange(request.resource.data.level, 1, 999)
+            && numRange(request.resource.data.xp, 0, 10000000)
+            && numRange(request.resource.data.streak, 0, 3650)
+            && (!('accuracy' in request.resource.data)
+                || numRange(request.resource.data.accuracy, 0, 100))
+            && (!('factsMastered' in request.resource.data)
+                || numRange(request.resource.data.factsMastered, 0, 1000))
+            && (!('daysActive' in request.resource.data)
+                || numRange(request.resource.data.daysActive, 0, 3650))
+            && (!('hideFromLeaderboard' in request.resource.data)
+                || isBool(request.resource.data.hideFromLeaderboard));
+        }
+
+        // Anggota kelas yang sama boleh membaca roster ringkas (untuk leaderboard).
+        // Roster TIDAK berisi data pribadi: hanya nama, level, xp, akurasi ringkas.
+        function isClassmate() {
+          return isSignedIn()
+            && exists(/databases/$(database)/documents/students/$(request.auth.uid))
+            && get(/databases/$(database)/documents/students/$(request.auth.uid))
+                 .data.activeClassId == classId;
+        }
+
+        allow get:  if isSelf(studentUid) || ownsClass(classId) || isClassmate();
+        allow list: if ownsClass(classId) || isClassmate();
+
+        allow create: if isSelf(studentUid) && validRoster();
+
+        allow update: if (isSelf(studentUid) && validRoster())
+          || ownsClass(classId);
+
+        allow delete: if ownsClass(classId);
+
+        // ---- fakta hitungan ----
+        match /facts/{factId} {
+          allow read: if isSelf(studentUid) || teacherOfStudent(studentUid);
+
+          allow write: if isSelf(studentUid)
+            && request.resource.data.keys().hasOnly([
+                 'operation','operandA','operandB','answer','familyId','status',
+                 'totalAttempts','correctAttempts','wrongAttempts',
+                 'consecutiveCorrect','consecutiveWrong',
+                 'averageResponseMs','fastestResponseMs','helpUsedCount',
+                 'daysPracticed','practiceDays',
+                 'lastSeenAt','lastCorrectAt','nextReviewAt','updatedAt'
+               ])
+            && numRange(request.resource.data.totalAttempts, 0, 1000000)
+            && numRange(request.resource.data.correctAttempts, 0, 1000000)
+            && isStr(request.resource.data.status);
+
+          allow delete: if isSelf(studentUid) || teacherOfStudent(studentUid);
+        }
+
+        // ---- sesi latihan ----
+        match /sessions/{sessionId} {
+          allow read: if isSelf(studentUid) || teacherOfStudent(studentUid);
+
+          allow create, update: if isSelf(studentUid)
+            && numRange(request.resource.data.correct, 0, 100000)
+            && numRange(request.resource.data.wrong, 0, 100000)
+            && numRange(request.resource.data.accuracy, 0, 100);
+
+          allow delete: if isSelf(studentUid) || teacherOfStudent(studentUid);
+
+          match /attempts/{attemptId} {
+            allow read:   if isSelf(studentUid) || teacherOfStudent(studentUid);
+            allow create: if isSelf(studentUid)
+              && request.resource.data.correct is bool;
+            allow update: if false;
+            allow delete: if isSelf(studentUid) || teacherOfStudent(studentUid);
+          }
+        }
+      }
+    }
+
+    // ============ DEFAULT DENY ============
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

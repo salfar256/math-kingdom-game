@@ -1,0 +1,148 @@
+/* Gaya dasar & tata letak umum. */
+
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+}
+
+body {
+  font-family: var(--font-body);
+  font-size: var(--text-md);
+  line-height: 1.55;
+  color: var(--color-text);
+  background:
+    radial-gradient(circle at 20% 10%, #1f2c47 0%, transparent 55%),
+    radial-gradient(circle at 85% 85%, #22314c 0%, transparent 50%),
+    var(--color-bg-dark);
+  background-attachment: fixed;
+  -webkit-text-size-adjust: 100%;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  margin: 0 0 var(--space-3);
+  line-height: 1.2;
+  letter-spacing: 0.5px;
+}
+
+h1 { font-size: var(--text-2xl); }
+h2 { font-size: var(--text-xl); }
+h3 { font-size: var(--text-lg); }
+
+p { margin: 0 0 var(--space-3); }
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+a:hover, a:focus { text-decoration: underline; }
+
+img { max-width: 100%; }
+
+/* Aset pixel */
+.pixel-img,
+img[data-pixel] {
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+}
+
+.sprite {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  user-select: none;
+}
+
+/* Tata letak */
+.page {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.container {
+  width: 100%;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: var(--space-4);
+}
+
+.container--narrow { max-width: 520px; }
+.container--wide { max-width: 1320px; }
+
+.stack > * + * { margin-top: var(--space-3); }
+.stack-lg > * + * { margin-top: var(--space-5); }
+
+.row {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.row--between { justify-content: space-between; }
+.row--center { justify-content: center; }
+
+.grid {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.text-center { text-align: center; }
+.text-muted { color: var(--color-muted); }
+.text-dim { color: var(--color-dim); }
+.text-sm { font-size: var(--text-sm); }
+.text-xs { font-size: var(--text-xs); }
+.text-lg { font-size: var(--text-lg); }
+.text-bold { font-weight: 700; }
+
+.mt-0 { margin-top: 0; }
+.mb-0 { margin-bottom: 0; }
+
+/* Aksesibilitas */
+.visually-hidden {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  top: -60px;
+  left: var(--space-3);
+  background: var(--color-primary);
+  color: var(--color-primary-text);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  z-index: var(--z-loading);
+  transition: top var(--t-fast);
+}
+.skip-link:focus { top: var(--space-3); }
+
+:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+[hidden] { display: none !important; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--color-bg-darker); }
+::-webkit-scrollbar-thumb {
+  background: var(--color-panel-border);
+  border-radius: var(--radius-pill);
+}

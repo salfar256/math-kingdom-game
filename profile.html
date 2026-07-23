@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Profil — Pertarungan Empat Kerajaan Hitungan</title>
+  <meta name="theme-color" content="#172033" />
+  <link rel="stylesheet" href="./css/variables.css" />
+  <link rel="stylesheet" href="./css/global.css" />
+  <link rel="stylesheet" href="./css/components.css" />
+  <link rel="stylesheet" href="./css/game.css" />
+  <link rel="stylesheet" href="./css/dashboard.css" />
+  <link rel="stylesheet" href="./css/responsive.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Lompat ke konten utama</a>
+
+  <div class="page">
+    <main id="main" class="container stack-lg" style="padding-top:24px;">
+
+      <header class="row row--between">
+        <a class="btn btn--sm btn--ghost" href="./game.html">← Kembali ke Peta</a>
+        <h1 style="margin:0;">👤 Profil</h1>
+      </header>
+
+      <section class="panel" id="profile-header"></section>
+
+      <section aria-labelledby="stats-title">
+        <h2 id="stats-title">Statistik</h2>
+        <div class="stat-grid" id="profile-stats"></div>
+      </section>
+
+      <section aria-labelledby="ops-title">
+        <h2 id="ops-title">Progres Empat Operasi</h2>
+        <div class="panel" id="op-progress"></div>
+      </section>
+
+      <section aria-labelledby="compare-title" id="compare-section" hidden>
+        <h2 id="compare-title">Perbandingan Tes Awal</h2>
+        <div class="panel" id="compare-box"></div>
+      </section>
+
+      <section aria-labelledby="history-title">
+        <h2 id="history-title">Riwayat 30 Hari</h2>
+        <div class="panel">
+          <div class="history-strip" id="history-strip"></div>
+          <p class="text-xs text-muted" style="margin-top:12px;margin-bottom:0;" id="history-note"></p>
+        </div>
+      </section>
+
+      <section aria-labelledby="factmap-title">
+        <h2 id="factmap-title">Peta Fakta</h2>
+        <div class="panel stack" id="factmap-box"></div>
+      </section>
+
+      <section aria-labelledby="badges-title">
+        <h2 id="badges-title">Lencana</h2>
+        <div class="badge-grid" id="badge-grid"></div>
+      </section>
+
+    </main>
+  </div>
+
+  <script type="module" src="./js/pages/profile-page.js"></script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+{
+  "name": "Pertarungan Empat Kerajaan Hitungan",
+  "short_name": "4 Kerajaan",
+  "description": "Game pendidikan matematika dasar untuk siswa kelas 7 SMP.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#172033",
+  "theme_color": "#172033",
+  "lang": "id",
+  "icons": [
+    {
+      "src": "./assets/icons/star.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./assets/icons/star.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

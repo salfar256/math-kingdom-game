@@ -1,0 +1,71 @@
+/* Penyesuaian untuk tablet & HP. */
+
+@media (max-width: 860px) {
+  .container { padding: var(--space-3); }
+  h1 { font-size: var(--text-xl); }
+  .panel { padding: var(--space-4); }
+}
+
+@media (max-width: 620px) {
+  :root {
+    --text-2xl: 28px;
+    --text-3xl: 38px;
+  }
+
+  .arena__stage {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-2);
+    padding: var(--space-3);
+  }
+
+  .fighter__sprite { font-size: 46px; }
+
+  .question-panel {
+    margin: 0 var(--space-3);
+    padding: var(--space-4) var(--space-3);
+  }
+
+  .question-text { letter-spacing: 2px; }
+
+  .keypad {
+    max-width: 100%;
+    padding: 0 var(--space-3);
+    gap: var(--space-2);
+  }
+
+  .keypad__key { min-height: 52px; }
+
+  .arena__topbar { padding: var(--space-2) var(--space-3); font-size: var(--text-xs); }
+  .arena__meta { gap: var(--space-3); font-size: var(--text-xs); }
+
+  .kingdom-grid { grid-template-columns: 1fr; }
+  .stat-grid { grid-template-columns: repeat(2, 1fr); }
+  .modal__footer { flex-direction: column-reverse; }
+  .modal__footer .btn { width: 100%; }
+
+  .toolbar .input,
+  .toolbar .select { min-width: 100%; }
+
+  .fact-map { max-width: 100%; }
+}
+
+@media (max-width: 400px) {
+  .character-grid { grid-template-columns: repeat(2, 1fr); }
+  .stat-grid { grid-template-columns: 1fr; }
+  .class-code-box__code { font-size: var(--text-lg); letter-spacing: 3px; }
+}
+
+/* Layar pendek (HP dalam mode lanskap) */
+@media (max-height: 560px) and (orientation: landscape) {
+  .arena { min-height: auto; }
+  .fighter__sprite { font-size: 38px; }
+  .question-text { font-size: var(--text-xl); }
+  .keypad__key { min-height: 42px; font-size: var(--text-md); }
+}
+
+/* Cetak: dashboard guru */
+@media print {
+  body { background: #fff; color: #000; }
+  .btn, .toolbar, .sync-chip, .toast-container { display: none !important; }
+  .panel, .card { border: 1px solid #999; box-shadow: none; }
+}

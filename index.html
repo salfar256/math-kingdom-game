@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Pertarungan Empat Kerajaan Hitungan</title>
+  <meta name="description" content="Game pendidikan matematika dasar untuk siswa kelas 7 SMP. Latihan 10–15 menit setiap hari selama 30 hari." />
+  <meta name="theme-color" content="#172033" />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="stylesheet" href="./css/variables.css" />
+  <link rel="stylesheet" href="./css/global.css" />
+  <link rel="stylesheet" href="./css/components.css" />
+  <link rel="stylesheet" href="./css/game.css" />
+  <link rel="stylesheet" href="./css/responsive.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Lompat ke konten utama</a>
+
+  <div class="page">
+    <main id="main" class="container container--narrow stack-lg" style="padding-top: 32px;">
+
+      <header class="text-center">
+        <div style="font-size: 64px; line-height: 1;" role="img" aria-label="Logo empat kerajaan">⚔️</div>
+        <h1>Pertarungan<br />Empat Kerajaan Hitungan</h1>
+        <p class="text-muted">
+          Kuasai penjumlahan, pengurangan, perkalian, dan pembagian 1–9
+          dalam 30 hari.
+        </p>
+        <p class="chip chip--primary">⏱️ Cukup 10–15 menit setiap hari</p>
+      </header>
+
+      <div id="firebase-warning" class="form-error" hidden></div>
+
+      <nav class="panel stack" aria-label="Menu utama">
+        <a class="btn btn--primary btn--block btn--lg" href="./student.html">
+          🎮 Masuk Siswa
+        </a>
+        <a class="btn btn--info btn--block" href="./teacher.html">
+          🧑‍🏫 Masuk Guru
+        </a>
+        <button type="button" class="btn btn--ghost btn--block" id="btn-about">
+          📖 Tentang Game
+        </button>
+        <button type="button" class="btn btn--ghost btn--block" id="btn-sound">
+          🔊 Pengaturan Suara
+        </button>
+      </nav>
+
+      <section class="panel stack" aria-labelledby="kingdoms-heading">
+        <h2 id="kingdoms-heading">Empat Kerajaan</h2>
+        <div class="grid" style="grid-template-columns: repeat(2, 1fr);">
+          <div class="card text-center">
+            <div style="font-size: 32px;" aria-hidden="true">➕</div>
+            <strong>Penjumlahan</strong>
+          </div>
+          <div class="card text-center">
+            <div style="font-size: 32px;" aria-hidden="true">➖</div>
+            <strong>Pengurangan</strong>
+          </div>
+          <div class="card text-center">
+            <div style="font-size: 32px;" aria-hidden="true">✖️</div>
+            <strong>Perkalian</strong>
+          </div>
+          <div class="card text-center">
+            <div style="font-size: 32px;" aria-hidden="true">➗</div>
+            <strong>Pembagian</strong>
+          </div>
+        </div>
+        <p class="text-sm text-muted mb-0">
+          Selesaikan keempat kerajaan untuk membuka 🗼 Menara Operasi Campuran.
+        </p>
+      </section>
+
+      <footer class="text-center text-sm text-dim">
+        <p class="mb-0">Dibuat untuk pembelajaran matematika dasar kelas 7 SMP.</p>
+      </footer>
+
+    </main>
+  </div>
+
+  <script type="module" src="./js/pages/landing-pages.js"></script>
+</body>
+</html>
