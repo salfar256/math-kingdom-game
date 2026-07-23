@@ -12,6 +12,46 @@ mengukur kecepatan dan ketepatan, serta menyimpan perkembangan setiap siswa.
 
 ---
 
+## Pembaruan Keenam (Juli 2026) — 12 Perbaikan & Fitur
+
+1. **Karakter dibetulkan** — Pemimpin kini bertopi hijau (seni resolusi tinggi),
+   Petualang berambut merah; sprite statis dan idle keduanya konsisten.
+2. **Main menu baru** (`New_Main_Menu.png`) dengan tombol yang diselaraskan
+   ulang, plus suasana mencekam: latar bernafas pelan, bergelombang halus
+   (filter turbulensi SVG), kabut gelap melayang, dan vignette berdenyut —
+   semua hanya pada latar, tombol tidak terpengaruh; berhenti otomatis pada
+   preferensi "kurangi animasi".
+3. **Tes Awal dihapus** dari alur game sepenuhnya.
+4. **Sistem akun siswa** — nama + kode kelas + PIN 6 angka. Siswa dapat keluar
+   dan masuk kembali ke akun yang sama dari perangkat mana pun (di balik layar
+   memakai Email/Password Firebase dengan alamat sintetis deterministik).
+   Ada tab "Akun Baru" / "Sudah Punya Akun" dan tombol "Lanjutkan Petualangan"
+   bila sesi masih aktif.
+5. **Halaman kisah** tampil sekali saja tepat setelah akun dibuat
+   (ditandai `storySeen` di profil).
+6. **Progres kerajaan responsif** — fakta yang sudah dilatih bernilai 40%
+   di bar progres (fakta dikuasai tetap 100%), sehingga setiap pertarungan
+   langsung menaikkan persentase. (Catatan: bug rules Firestore pada
+   pembaruan sebelumnya juga penyebab progres tidak tersimpan — pastikan
+   rules terbaru sudah di-Publish.)
+7. **Tata letak arena baru** — status HP kedua petarung di ATAS, karakter
+   bertarung saling berhadapan di TENGAH (dengan ikon pedang di antara),
+   plakat soal di bawahnya, keypad menempel di BAWAH.
+8. **10 soal per pertarungan** (latihan 15, boss 15, campuran 10).
+9. **Font angka diganti** ke Nunito 800 bertabular pada soal, jawaban, keypad,
+   HP, HUD, dan kode kelas — angka 2/5/8 kini jelas berbeda.
+10. **Hapus siswa** dari dashboard guru (modal detail siswa → "Hapus Siswa"
+    dengan konfirmasi ketik HAPUS). Siswa dikeluarkan dari kelas; akun dan
+    progresnya tetap ada.
+11. **Aset baru terpasang** — battlefield Kerajaan Campuran asli dan
+    `Map_Petualangan.png` sebagai latar layar peta (dengan overlay gelap agar
+    kartu tetap terbaca).
+12. **Kerajaan terkunci berdasarkan level** — Penjumlahan Lv1, Pengurangan Lv3,
+    Perkalian Lv5, Pembagian Lv8, Menara Campuran Lv10; kartu terkunci
+    menampilkan "Terbuka di Level N".
+
+---
+
 ## Pembaruan Kelima (Juli 2026) — Bug Kritis: Login Siswa Selalu Ditolak
 
 **Akar masalah "Izin ditolak" saat Masuk Siswa ditemukan dan diperbaiki.**

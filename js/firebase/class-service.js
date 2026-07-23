@@ -138,6 +138,19 @@ export async function updateClassSettings(classId, settings) {
   await updateDoc(doc(getDb(), 'classes', classId), { settings });
 }
 
+/**
+ * Keluarkan siswa dari kelas: cabut activeClassId di profil, lalu hapus
+ * entri roster. Urutan penting -- pencabutan profil dilakukan SELAGI guru
+ * masih tercatat sebagai pengajar siswa tersebut (izin teacherOfStudent).
+ * Data akun & progres siswa tetap ada; ia bisa bergabung ke kelas lain.
+ */
+export async function removeStudentFromClass(classId, studentUid) {
+  const db = getDb();
+  await updateDoc(doc(db, 'students', studentUid), { activeClassId: null });
+  await deleteDoc(doc(db, 'classes', classId, 'students', studentUid));
+  devLog(`Siswa ${studentUid} dikeluarkan dari kelas ${classId}.`);
+}
+
 /** Hapus kelas: roster, index kode, lalu dokumen kelas. */
 export async function deleteClass(classId, classCode) {
   const db = getDb();

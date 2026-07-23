@@ -10,6 +10,7 @@
 import {
   signInAnonymously,
   signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
   signOut as fbSignOut,
   onAuthStateChanged
 } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js';
@@ -18,6 +19,43 @@ import {
 } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js';
 
 import { getFirebaseAuth, getDb, devLog, devError } from './firebase-app.js';
+
+/* ============ AKUN SISWA (nama + kode kelas + PIN) ============
+ * Di balik layar memakai Email/Password Firebase dengan alamat sintetis
+ * yang deterministik, sehingga siswa bisa masuk kembali ke akun yang sama
+ * dari perangkat mana pun tanpa perlu email sungguhan.
+ */
+
+/** Bentuk email sintetis deterministik dari nama + kode kelas. */
+export function buildStudentEmail(nickname, classCode) {
+  const nick = String(nickname).toLowerCase().normalize('NFKD')
+    .replace(/[^a-z0-9]/g, '').slice(0, 24) || 'siswa';
+  const code = String(classCode).toLowerCase().replace(/[^a-z0-9]/g, '');
+  return `${nick}.${code}@siswa.empatkerajaan.app`;
+}
+
+/** PIN 6 digit -> password Firebase (minimal 6 karakter terpenuhi). */
+function pinToPassword(pin) {
+  return `pin-${pin}`;
+}
+
+/** Daftarkan akun siswa baru. @returns {Promise<string>} uid */
+export async function registerStudentAccount(nickname, classCode, pin) {
+  const auth = getFirebaseAuth();
+  const email = buildStudentEmail(nickname, classCode);
+  const cred = await createUserWithEmailAndPassword(auth, email, pinToPassword(pin));
+  devLog('Akun siswa dibuat:', cred.user.uid);
+  return cred.user.uid;
+}
+
+/** Masuk ke akun siswa yang sudah ada. @returns {Promise<string>} uid */
+export async function loginStudentAccount(nickname, classCode, pin) {
+  const auth = getFirebaseAuth();
+  const email = buildStudentEmail(nickname, classCode);
+  const cred = await signInWithEmailAndPassword(auth, email, pinToPassword(pin));
+  devLog('Siswa masuk kembali:', cred.user.uid);
+  return cred.user.uid;
+}
 
 /** Masuk sebagai siswa (anonim). @returns {Promise<string>} uid */
 export async function signInStudent() {

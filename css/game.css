@@ -476,3 +476,137 @@
   display: block;
   margin: 0 auto;
 }
+
+/* ================= LAYAR KISAH ================= */
+
+.story-screen {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  background: var(--color-bg-darker);
+}
+
+.story-screen__art {
+  max-width: min(94vw, 480px);
+  max-height: 76dvh;
+  object-fit: contain;
+  image-rendering: pixelated;
+  border: 3px solid var(--color-panel-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+}
+
+/* ================= ARENA TATA LETAK BARU =================
+ * HP di atas -- petarung di tengah -- keypad di bawah.
+ */
+
+.arena {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+.arena__status {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+}
+
+.hp-card {
+  padding: var(--space-2) var(--space-3);
+  background: rgba(8, 13, 26, 0.82);
+  border: 2px solid var(--color-panel-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.hp-card__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: 4px;
+}
+
+.hp-card .fighter__name { margin-bottom: 0; font-size: var(--text-xs); padding: 1px 8px; }
+.hp-card .fighter__hp-text { font-size: var(--text-xs); color: var(--color-muted); font-variant-numeric: tabular-nums; }
+.hp-card--enemy .hp-card__top { flex-direction: row-reverse; }
+
+/* Panggung tengah: kedua petarung saling berhadapan */
+.arena__stage {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: clamp(28px, 16vw, 140px);
+  min-height: clamp(120px, 22dvh, 200px);
+  padding: var(--space-2) var(--space-3) var(--space-4);
+}
+
+.fighter { padding-bottom: 0; }
+.fighter::before { bottom: 4px; }
+
+.arena__clash {
+  align-self: center;
+  width: 26px;
+  height: 26px;
+  background: url('../assets/icons/sword.png') center / contain no-repeat;
+  image-rendering: pixelated;
+  opacity: 0.55;
+  filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.5));
+}
+
+/* Soal & keypad menempel ke bawah */
+.arena .question-panel { margin-bottom: var(--space-3); }
+
+.arena .keypad {
+  margin-top: auto;
+  margin-bottom: var(--space-2);
+}
+
+.arena__actions {
+  padding: 0 var(--space-3) calc(var(--space-3) + env(safe-area-inset-bottom));
+}
+
+/* ================= LATAR PETA PETUALANGAN ================= */
+
+#screen-map.has-bg-image {
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  image-rendering: pixelated;
+  position: relative;
+}
+
+#screen-map.has-bg-image::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: rgba(8, 12, 24, 0.62);
+  pointer-events: none;
+  z-index: 0;
+}
+
+#screen-map.has-bg-image > * { position: relative; z-index: 1; }
+
+/* ================= FONT ANGKA JELAS (2/5/8 mudah dibedakan) ========== */
+
+.question-text,
+.answer-display,
+.keypad__key,
+.stat__value,
+.fighter__hp-text,
+#hud-index, #hud-score, #hud-correct, #hud-timer,
+.class-code-box__code {
+  font-family: var(--font-body);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.question-text { letter-spacing: 2px; }
+.class-code-box__code { letter-spacing: 5px; }

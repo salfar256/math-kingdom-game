@@ -112,11 +112,13 @@ async function init() {
   updateSoundButtons();
   hideLoading();
 
-  const requestedMode = getQueryParam('mode');
-  if (requestedMode === 'placement' || state.engine.needsPlacement) {
-    await startPlacementFlow();
+  renderMap();
+  applySafeBackground($('#screen-map'), 'map');
+
+  // Halaman kisah: hanya sekali, tepat setelah akun dibuat.
+  if (state.engine.profile.storySeen !== true) {
+    showStoryScreen();
   } else {
-    renderMap();
     showScreen('screen-map');
   }
 }
@@ -253,7 +255,7 @@ function renderKingdoms() {
   const { kingdoms, tower } = state.engine.getAllProgress();
 
   for (const k of kingdoms) {
-    const locked = k.status === 'terkunci';
+    const locked = k.status.startsWith('Terbuka di Level');
     const card = el('button', {
       className: 'kingdom-card',
       attrs: {
@@ -458,6 +460,22 @@ function modeCard(m, kingdom) {
 
 /* ============ TES AWAL ============ */
 
+/** Layar kisah pembuka: tampil sekali setelah akun dibuat. */
+function showStoryScreen() {
+  const btn = $('#btn-story-continue');
+  if (!btn) { showScreen('screen-map'); return; }
+  btn.addEventListener('click', async () => {
+    soundManager.click();
+    state.engine.profile.storySeen = true;
+    try {
+      const { upsertStudentProfile } = await import('../firebase/firestore-service.js');
+      await upsertStudentProfile(state.engine.uid, { storySeen: true });
+    } catch { /* tidak fatal; akan dicoba lagi lain kali */ }
+    showScreen('screen-map');
+  }, { once: true });
+  showScreen('screen-story');
+}
+
 async function startPlacementFlow() {
   await showModal({
     title: 'Tes Awal',
@@ -481,7 +499,7 @@ function startDailySession() {
   const plan = state.engine.getTodayPlan();
   const ops = (plan.ops || []).filter((o) => state.engine.enabledOperations.includes(o));
 
-  if (plan.focus === 'placement') { startPlacementFlow(); return; }
+  if (plan.focus === 'placement') { plan.focus = 'practice'; }
 
   const operation = ops.length === 1 ? ops[0] : null;
   const mode = plan.focus === 'speed' ? MODES.SPEED

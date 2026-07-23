@@ -18,7 +18,21 @@
 <body class="menu-body">
   <a class="skip-link" href="#main">Lompat ke konten utama</a>
 
+  <!-- Filter gelombang halus untuk latar (SMIL, dinonaktifkan oleh reduce-motion lewat CSS) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <filter id="menu-wave" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.004 0.009" numOctaves="1" seed="7" result="noise">
+        <animate attributeName="baseFrequency" dur="14s" repeatCount="indefinite"
+                 values="0.004 0.009; 0.006 0.012; 0.004 0.009" />
+      </feTurbulence>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="7" xChannelSelector="R" yChannelSelector="G" />
+    </filter>
+  </svg>
+
   <main id="main" class="menu-frame" aria-label="Menu utama Pertarungan Empat Kerajaan Hitungan">
+    <div class="menu-bg" aria-hidden="true"></div>
+    <div class="menu-fog" aria-hidden="true"></div>
+    <div class="menu-vignette" aria-hidden="true"></div>
 
     <div id="firebase-warning" class="form-error" hidden></div>
 

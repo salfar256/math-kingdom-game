@@ -69,7 +69,8 @@ export class GameEngine {
   }
 
   get needsPlacement() {
-    return this.profile ? this.profile.placementDone !== true : true;
+    // Tes Awal dihapus dari alur game -- selalu false.
+    return false;
   }
 
   /* ============ PROGRES KERAJAAN ============ */
@@ -86,16 +87,20 @@ export class GameEngine {
     let attempts = 0;
     let correct = 0;
 
+    let practiced = 0;
     for (const base of allFacts) {
       const record = this.factMap.get(base.factId);
       if (!record) { weakCount += 1; continue; }
       if (isMastered(record)) mastered += 1;
-      else if (isWeak({ ...record, id: base.factId })) weakCount += 1;
+      else if ((record.totalAttempts || 0) > 0) practiced += 1;
+      if (!isMastered(record) && isWeak({ ...record, id: base.factId })) weakCount += 1;
       attempts += record.totalAttempts || 0;
       correct += record.correctAttempts || 0;
     }
 
-    const ratio = total > 0 ? mastered / total : 0;
+    // Persentase responsif: fakta dikuasai bernilai penuh, fakta yang sudah
+    // pernah dilatih bernilai 40% -- setiap pertarungan langsung menaikkan bar.
+    const ratio = total > 0 ? (mastered + practiced * 0.4) / total : 0;
     return {
       operation,
       total,
@@ -110,30 +115,30 @@ export class GameEngine {
   }
 
   #kingdomStatus(operation, ratio) {
-    if (!this.#isKingdomUnlocked(operation)) return 'terkunci';
+    if (!this.#isKingdomUnlocked(operation)) {
+      const k = KINGDOMS.find((x) => x.id === operation);
+      return `Terbuka di Level ${(k && k.requiredLevel) || 1}`;
+    }
     if (ratio >= KINGDOM_PROGRESS.expertAt) return 'mahir';
     if (ratio >= KINGDOM_PROGRESS.masteredAt) return 'dikuasai';
     if (ratio >= KINGDOM_PROGRESS.learningAt) return 'sedang dipelajari';
     return 'terbuka';
   }
 
+  /** Level pemain saat ini (dari XP profil). */
+  get playerLevel() {
+    return levelFromXp(this.profile ? this.profile.xp || 0 : 0).level;
+  }
+
   /**
-   * Kerajaan pertama selalu terbuka.
-   * Kerajaan berikutnya terbuka bila kerajaan sebelumnya mencapai 30%.
+   * Kerajaan terbuka berdasarkan LEVEL pemain (requiredLevel di game-config).
+   * Naik level lewat XP dari pertarungan mana pun membuka kerajaan berikutnya.
    */
   #isKingdomUnlocked(operation) {
-    const idx = KINGDOMS.findIndex((k) => k.id === operation);
-    if (idx <= 0) return true;
     if (!this.enabledOperations.includes(operation)) return false;
-
-    const prev = KINGDOMS[idx - 1].id;
-    const allPrev = getAllFactsFor(prev);
-    let mastered = 0;
-    for (const base of allPrev) {
-      const r = this.factMap.get(base.factId);
-      if (r && isMastered(r)) mastered += 1;
-    }
-    return allPrev.length > 0 && (mastered / allPrev.length) >= 0.30;
+    const k = KINGDOMS.find((x) => x.id === operation);
+    const need = (k && k.requiredLevel) || 1;
+    return this.playerLevel >= need;
   }
 
   /** Semua progres kerajaan + menara. */
@@ -142,8 +147,7 @@ export class GameEngine {
       .filter((k) => this.enabledOperations.includes(k.id))
       .map((k) => ({ ...k, ...this.getKingdomProgress(k.id) }));
 
-    const allMastered = kingdoms.length > 0 &&
-      kingdoms.every((k) => k.ratio >= KINGDOM_PROGRESS.masteredAt);
+    const towerOpen = this.playerLevel >= (MIXED_TOWER.requiredLevel || 10);
 
     const towerRatio = kingdoms.length > 0
       ? kingdoms.reduce((sum, k) => sum + k.ratio, 0) / kingdoms.length
@@ -153,10 +157,10 @@ export class GameEngine {
       kingdoms,
       tower: {
         ...MIXED_TOWER,
-        unlocked: allMastered,
+        unlocked: towerOpen,
         percent: Math.round(towerRatio * 100),
         ratio: towerRatio,
-        status: allMastered ? 'terbuka' : 'terkunci'
+        status: towerOpen ? 'terbuka' : `Terbuka di Level ${MIXED_TOWER.requiredLevel || 10}`
       }
     };
   }

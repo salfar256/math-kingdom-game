@@ -542,3 +542,34 @@ textarea:focus {
 .badge-item.is-locked .icon-img {
   filter: grayscale(1) opacity(0.45);
 }
+
+/* ========================= TAB MODE (login siswa) ========================= */
+
+.mode-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.mode-tab {
+  min-height: 44px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--text-sm);
+  color: var(--color-muted);
+  background: rgba(10, 16, 31, 0.6);
+  border: 2px solid var(--color-edge);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: filter var(--t-fast);
+}
+
+.mode-tab:hover { filter: brightness(1.15); }
+
+.mode-tab[aria-selected="true"] {
+  color: var(--color-primary-text);
+  background: linear-gradient(180deg, #ffd965, var(--color-primary));
+  border-color: var(--color-panel-border);
+  box-shadow: 0 3px 0 var(--color-panel-border);
+}

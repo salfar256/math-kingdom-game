@@ -5,7 +5,7 @@
 
 import {
   getTeacherClasses, createClass, getClassStudents, updateClassName,
-  updateClassSettings, deleteClass, getStudentDetail
+  updateClassSettings, deleteClass, getStudentDetail, removeStudentFromClass
 } from '../firebase/class-service.js';
 import { resetStudentProgress } from '../firebase/firestore-service.js';
 import { summarizeMastery, factAccuracy } from '../game/mastery-engine.js';
@@ -521,12 +521,38 @@ async function openStudentDetail(student) {
     title: `${student.displayName}`,
     content,
     buttons: [
-      { id: 'reset', text: 'Reset Progres', variant: 'danger' },
+      { id: 'remove', text: 'Hapus Siswa', variant: 'danger' },
+      { id: 'reset', text: 'Reset Progres', variant: 'ghost' },
       { id: 'close', text: 'Tutup', variant: 'primary' }
     ]
   });
 
   if (choice === 'reset') await handleResetStudent(student);
+  if (choice === 'remove') await handleRemoveStudent(student);
+}
+
+async function handleRemoveStudent(student) {
+  const confirmed = await confirmWithTyping(
+    `Hapus ${student.displayName} dari kelas ini?`,
+    [
+      'Siswa akan dikeluarkan dari kelas dan hilang dari daftar serta papan peringkat.',
+      'Akun dan progres belajarnya TIDAK dihapus; ia dapat bergabung kembali dengan kode kelas.',
+    ],
+    'HAPUS'
+  );
+  if (!confirmed) { toast.info('Penghapusan dibatalkan.'); return; }
+
+  showLoading('Menghapus siswa dari kelas\u2026');
+  try {
+    await removeStudentFromClass(dash.activeClassId, student.uid);
+    toast.success(`${student.displayName} dihapus dari kelas.`);
+    await selectClass(dash.activeClassId);
+  } catch (e) {
+    devError('Hapus siswa gagal:', e);
+    toast.error(firebaseErrorMessage(e));
+  } finally {
+    hideLoading();
+  }
 }
 
 async function handleResetStudent(student) {

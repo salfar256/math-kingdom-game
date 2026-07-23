@@ -71,6 +71,15 @@
       </section>
 
       <!-- ========== LAYAR: ARENA ========== -->
+      <!-- ========== LAYAR: KISAH (sekali, setelah akun dibuat) ========== -->
+      <section id="screen-story" class="story-screen" hidden>
+        <img class="story-screen__art" src="./assets/ui/story.png" alt="Kisah: kerajaan manusia terancam kerajaan monster, hanya ahli matematika yang bisa mengalahkan mereka." />
+        <button type="button" class="btn btn--primary btn--lg story-screen__btn" id="btn-story-continue">
+          Lanjutkan Perjalanan
+        </button>
+      </section>
+
+      <!-- ========== LAYAR: ARENA ========== -->
       <section id="screen-arena" class="arena" hidden>
         <div class="timer-bar" id="timer-bar" hidden>
           <div class="timer-bar__fill" id="timer-fill"></div>
@@ -89,20 +98,33 @@
           </div>
         </div>
 
+        <!-- Status HP di bagian ATAS -->
+        <div class="arena__status">
+          <div class="hp-card hp-card--player">
+            <div class="hp-card__top">
+              <span class="fighter__name" id="player-name">Kamu</span>
+              <span class="fighter__hp-text" id="player-hp-text">100 / 100</span>
+            </div>
+            <div class="progress"><div class="progress__fill" id="player-hp-bar"></div></div>
+            <div id="combo-wrap"></div>
+          </div>
+          <div class="hp-card hp-card--enemy">
+            <div class="hp-card__top">
+              <span class="fighter__name" id="enemy-name">Slime</span>
+              <span class="fighter__hp-text" id="enemy-hp-text">60 / 60</span>
+            </div>
+            <div class="progress progress--danger"><div class="progress__fill" id="enemy-hp-bar"></div></div>
+          </div>
+        </div>
+
+        <!-- Karakter bertarung di TENGAH -->
         <div class="arena__stage" id="arena-stage">
           <div class="fighter" id="fighter-player">
             <span class="fighter__sprite" id="player-sprite" aria-hidden="true"></span>
-            <div class="fighter__name" id="player-name">Kamu</div>
-            <div class="progress"><div class="progress__fill" id="player-hp-bar"></div></div>
-            <div class="fighter__hp-text" id="player-hp-text">100 / 100</div>
-            <div id="combo-wrap"></div>
           </div>
-
+          <div class="arena__clash" aria-hidden="true"></div>
           <div class="fighter" id="fighter-enemy">
             <span class="fighter__sprite" id="enemy-sprite" aria-hidden="true"></span>
-            <div class="fighter__name" id="enemy-name">Slime</div>
-            <div class="progress progress--danger"><div class="progress__fill" id="enemy-hp-bar"></div></div>
-            <div class="fighter__hp-text" id="enemy-hp-text">60 / 60</div>
           </div>
         </div>
 

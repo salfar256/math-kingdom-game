@@ -29,6 +29,16 @@
 
       <div id="global-error" class="form-error" hidden role="alert"></div>
 
+      <div class="panel panel--tight" id="resume-box" hidden>
+        <p class="text-sm" style="margin:0 0 8px;">Kamu masih masuk sebagai <strong id="resume-name">-</strong>.</p>
+        <button type="button" class="btn btn--success btn--block" id="btn-resume">Lanjutkan Petualangan</button>
+      </div>
+
+      <div class="mode-tabs" role="tablist" aria-label="Mode masuk">
+        <button type="button" class="mode-tab" id="tab-register" role="tab" aria-selected="true">Akun Baru</button>
+        <button type="button" class="mode-tab" id="tab-login" role="tab" aria-selected="false">Sudah Punya Akun</button>
+      </div>
+
       <form id="student-form" class="panel stack" novalidate>
 
         <div class="field">
@@ -51,7 +61,18 @@
           <span class="field-error" id="classcode-error" hidden></span>
         </div>
 
-        <fieldset class="field" style="border: none; padding: 0; margin: 0;">
+        <div class="field">
+          <label class="label" for="pin">PIN rahasia (6 angka)</label>
+          <input
+            class="input input--code" type="password" id="pin" name="pin"
+            placeholder="******" maxlength="6" inputmode="numeric" pattern="[0-9]*"
+            autocomplete="off" required
+            aria-describedby="pin-error pin-hint" />
+          <span class="text-xs text-dim" id="pin-hint">Ingat PIN ini untuk masuk kembali ke akunmu.</span>
+          <span class="field-error" id="pin-error" hidden></span>
+        </div>
+
+        <fieldset class="field" id="character-fieldset" style="border: none; padding: 0; margin: 0;">
           <legend class="label">Pilih karakter</legend>
           <div class="character-grid" id="character-grid" role="group" aria-label="Pilihan karakter"></div>
           <span class="field-error" id="character-error" hidden></span>
@@ -64,8 +85,8 @@
       </form>
 
       <p class="text-sm text-dim text-center">
-        Progresmu tersimpan pada perangkat ini. Gunakan perangkat yang sama
-        agar petualanganmu berlanjut.
+        Progresmu tersimpan di akunmu. Masuk dengan nama, kode kelas, dan PIN
+        yang sama dari perangkat mana pun.
       </p>
 
     </main>

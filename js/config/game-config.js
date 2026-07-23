@@ -39,7 +39,8 @@ export const KINGDOMS = [
     symbol: '+',
     background: 'addition-kingdom',
     icon: 'addition',
-    order: 1
+    order: 1,
+    requiredLevel: 1
   },
   {
     id: OPERATIONS.SUBTRACTION,
@@ -48,7 +49,8 @@ export const KINGDOMS = [
     symbol: '−',
     background: 'subtraction-kingdom',
     icon: 'subtraction',
-    order: 2
+    order: 2,
+    requiredLevel: 3
   },
   {
     id: OPERATIONS.MULTIPLICATION,
@@ -57,7 +59,8 @@ export const KINGDOMS = [
     symbol: '×',
     background: 'multiplication-kingdom',
     icon: 'multiplication',
-    order: 3
+    order: 3,
+    requiredLevel: 5
   },
   {
     id: OPERATIONS.DIVISION,
@@ -66,7 +69,8 @@ export const KINGDOMS = [
     symbol: '÷',
     background: 'division-kingdom',
     icon: 'division',
-    order: 4
+    order: 4,
+    requiredLevel: 8
   }
 ];
 
@@ -76,7 +80,8 @@ export const MIXED_TOWER = {
   shortName: 'Menara Campuran',
   background: 'mixed-tower',
   icon: 'star',
-  order: 5
+  order: 5,
+  requiredLevel: 10
 };
 
 export const MASTERY_STATUS = {
@@ -218,10 +223,10 @@ export const MODE_LABEL = {
 };
 
 export const SESSION_CONFIG = {
-  practiceQuestions: 20,
-  battleQuestions: 20,
-  bossQuestions: 25,
-  mixedQuestions: 20,
+  practiceQuestions: 15,
+  battleQuestions: 10,
+  bossQuestions: 15,
+  mixedQuestions: 10,
   placementQuestions: 40,
   speedDurationsMs: [30000, 45000, 60000, 90000],
   defaultSpeedMs: 30000,

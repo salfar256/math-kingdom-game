@@ -40,6 +40,15 @@ export function validateNickname(raw) {
 }
 
 /** Validasi kode kelas: 4–10 karakter alfanumerik, disimpan huruf besar. */
+/** PIN siswa: tepat 6 digit angka. */
+export function validatePin(raw) {
+  const value = String(raw || '').trim();
+  if (!/^[0-9]{6}$/.test(value)) {
+    return { valid: false, value, error: 'PIN harus tepat 6 angka.' };
+  }
+  return { valid: true, value, error: null };
+}
+
 export function validateClassCode(raw) {
   const value = sanitizeText(raw, 12).toUpperCase().replace(/\s/g, '');
   if (value.length === 0) {
