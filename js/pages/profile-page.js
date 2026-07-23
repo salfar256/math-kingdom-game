@@ -134,7 +134,7 @@ function renderOperationProgress() {
         el('span', { className: 'op-progress__name', text: OPERATION_LABEL[op] }),
         el('span', {
           className: 'text-muted',
-          text: `${progress.mastered}/${progress.total} (${progress.percent}%)`
+          text: `${progress.points}/${progress.total} (${progress.percent}%)`
         })
       ]),
       el('div', { className: 'progress' }, [

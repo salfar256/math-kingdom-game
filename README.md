@@ -12,6 +12,30 @@ mengukur kecepatan dan ketepatan, serta menyimpan perkembangan setiap siswa.
 
 ---
 
+## Pembaruan Kesebelas (Juli 2026) — 3 Perbaikan
+
+1. **Kerajaan tidak lagi terbuka semua** — bug ditemukan di `game-page.js`:
+   deteksi kartu terkunci hanya mencocokkan teks status `"Terbuka di Level"`,
+   padahal status terkunci sekarang juga bisa berbunyi `"Kalahkan Boss ... dulu"`
+   (ditambahkan pada pembaruan sebelumnya). Status kedua ini tidak terdeteksi,
+   sehingga SEMUA kerajaan tampak terbuka. Perbaikan: deteksi kini berdasarkan
+   daftar status TERBUKA yang valid (bukan menebak awalan teks terkunci) —
+   lebih tahan terhadap perubahan pesan di masa depan. Terverifikasi: hanya
+   Penjumlahan yang terbuka di level 1 sebelum boss mana pun dikalahkan.
+2. **Animasi menyerang/kena damage/kalah** — mekanismenya sudah benar secara
+   teknis (diverifikasi lewat perbandingan piksel), tapi ditemukan bug nyata:
+   animasi 'tumbang' (900ms) selalu TERPOTONG karena musuh berikutnya muncul
+   atau layar pindah ke hasil hanya 700ms setelah pukulan terakhir. Jeda kini
+   otomatis diperpanjang saat musuh/boss kalah atau pemain tumbang, agar
+   animasinya sempat terlihat penuh sebelum berpindah.
+3. **Progres 4 operasi di profil & warna "Otomatis":**
+   - Angka progres (mis. "0/90") sebelumnya membaca field `mastered` yang
+     sudah tidak dipakai sejak skema poin 2x-benar diperkenalkan — sekarang
+     membaca `points` yang benar dan akan naik seiring latihan.
+   - Warna status "Otomatis" pada peta hitungan diubah menjadi putih.
+
+---
+
 ## Pembaruan Kesepuluh (Juli 2026) — 6 Perbaikan Gameplay
 
 1. **HP kembali memakai BAR** (bukan deretan hati) dengan ketentuan tetap:

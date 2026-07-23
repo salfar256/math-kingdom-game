@@ -21,7 +21,7 @@ import {
 import { getDb } from '../firebase/firebase-app.js';
 import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js';
 import {
-  applySafeBackground, createSafeSprite, mountIdleSprite, createIcon, playActionSprite
+  applySafeBackground, createSafeSprite, mountIdleSprite, createIcon, playActionSprite, ACTION_DURATION_MS
 } from '../asset-manifest.js';
 import { showModal, confirmDialog } from '../ui/modal.js';
 import { toast } from '../ui/toast.js';
@@ -255,7 +255,11 @@ function renderKingdoms() {
   const { kingdoms, tower } = state.engine.getAllProgress();
 
   for (const k of kingdoms) {
-    const locked = k.status.startsWith('Terbuka di Level');
+    // Status terkunci ada 2 bentuk: "Terbuka di Level N" atau
+    // "Kalahkan Boss X dulu". Cara paling andal: bandingkan dengan status
+    // TERBUKA yang mungkin (bukan menebak awalan teks terkunci).
+    const OPEN_STATUSES = ['terbuka', 'sedang dipelajari', 'dikuasai', 'mahir'];
+    const locked = !OPEN_STATUSES.includes(k.status);
     const card = el('button', {
       className: 'kingdom-card',
       attrs: {
@@ -715,9 +719,13 @@ function submitAnswer() {
   updateHud();
   updateBattleBars();
 
+  const isBattleMode = [MODES.BATTLE, MODES.BOSS, MODES.MIXED].includes(state.session.mode);
+  const needsDeathPause = isBattleMode
+    && (battleResult.battleWon || (battleResult.enemyDefeated && !state.battle.isBoss) || battleResult.playerDown);
+
   const delay = outcome.correct
-    ? SESSION_CONFIG.autoAdvanceCorrectMs
-    : SESSION_CONFIG.autoAdvanceWrongMs;
+    ? (needsDeathPause ? ACTION_DURATION_MS.death + 80 : SESSION_CONFIG.autoAdvanceCorrectMs)
+    : (needsDeathPause ? ACTION_DURATION_MS.hurt + SESSION_CONFIG.autoAdvanceWrongMs : SESSION_CONFIG.autoAdvanceWrongMs);
 
   state.advanceTimeout = setTimeout(() => {
     const inBattle = [MODES.BATTLE, MODES.BOSS, MODES.MIXED].includes(state.session.mode);

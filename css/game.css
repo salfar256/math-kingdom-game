@@ -418,7 +418,9 @@
 .fact-map__cell--learning    { background: var(--color-danger); }
 .fact-map__cell--developing  { background: var(--color-warning); }
 .fact-map__cell--mastered    { background: var(--color-success); }
-.fact-map__cell--automatic   { background: var(--color-primary); }
+.fact-map__cell--automatic   { background: #ffffff; border-color: #c8cede; }
+.fact-map__cell--automatic:hover,
+.fact-map__cell--automatic:focus-visible { outline-color: var(--color-primary); }
 .fact-map__cell--needs_review{ background: var(--color-danger-dark); }
 /* ================= ANIMASI IDLE (strip 4 frame) ================= */
 

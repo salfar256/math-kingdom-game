@@ -307,7 +307,7 @@ export function createIcon(category, key, { size = 20, className = '', alt = '' 
  * sprite idle, lalu otomatis kembali ke idle. Aman bila berkas tidak ada.
  */
 
-const ACTION_DURATION_MS = { attack: 550, hurt: 500, death: 900 };
+export const ACTION_DURATION_MS = { attack: 550, hurt: 500, death: 900 };
 
 export function playActionSprite(wrapNode, action) {
   if (!wrapNode) return;
