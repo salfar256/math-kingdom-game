@@ -12,6 +12,48 @@ mengukur kecepatan dan ketepatan, serta menyimpan perkembangan setiap siswa.
 
 ---
 
+## Pembaruan Kesembilan (Juli 2026) — 16 Perbaikan & Fitur Gameplay
+
+1. **Arena muat penuh di layar HP** — semua ukuran dikompakkan (topbar, status,
+   panggung, keypad memakai satuan dvh); terverifikasi headless: tinggi konten
+   arena = tinggi layar, tanpa terpotong.
+2. **Kata "fakta" diganti "hitungan"** di seluruh antarmuka; mode "Keluarga
+   Fakta" menjadi "Keluarga Angka".
+3. **Angka progres kerajaan kini ikut naik** — menampilkan jumlah hitungan
+   TERLATIH (yang dikuasai + yang sudah pernah dilatih), bukan hanya yang
+   berstatus dikuasai penuh.
+4. **Animasi aksi** — 51 strip baru (17 karakter/musuh/boss x menyerang,
+   terkena damage, tumbang) diekstrak dari sheet; dimainkan otomatis: benar =
+   pemain menyerang & musuh kesakitan, salah/kehabisan waktu = musuh menyerang
+   & pemain kesakitan, musuh kalah = animasi tumbang.
+5. **Bantuan & Lihat Pembahasan dihapus** — saat salah, jawaban benar langsung
+   ditampilkan ("Salah. Jawaban benar: N").
+6. **Arena terbuka** — latar battlefield cerah memenuhi panggung (tanpa overlay
+   gelap), pemain & musuh saling berhadapan di kiri-kanan, plakat soal tepat
+   DI ANTARA keduanya.
+7. **Riwayat 30 hari di profil** kini dimulai dari hari latihan PERTAMA
+   (kotak hijau dari awal deret), bukan berakhir di hari ini.
+8. **Peta Hitungan menampilkan keempat operasi** — pengurangan & pembagian
+   ditambahkan (sel = pasangan keluarga: (a+b)-a dan (a×b):a).
+9. **Sistem HATI** — pemain 3, musuh 5, boss 15; setiap damage = 1 hati;
+   menang setelah 2 musuh kalah (atau 1 boss), kalah bila hati pemain habis.
+   Battle-engine ditulis ulang + 14 unit test baru.
+10. **Boss muncul** saat progres kerajaan 100% DAN level pemain memenuhi
+    syarat kerajaan berikutnya.
+11. **Cara mendapat lencana** kini tertulis di bawah tiap lencana di profil.
+12. **Pengurangan hingga 18** — bilangan dua digit (maks 18) dikurangi satu
+    digit, selaras dengan penjumlahan maksimum 9+9.
+13. **Keluarga Angka = pilihan ganda** — 4 tombol jawaban, tanpa keypad.
+14. **Timer 10 detik per soal** di mode pertarungan/boss/campuran; kehabisan
+    waktu = terkena damage 1 hati + jawaban benar ditampilkan.
+15. **Kerajaan Campuran** tetap panggung tersendiri dengan soal semua operasi
+    (battlefield campuran asli).
+16. **Mode Expert** menggantikan "Perbaiki Jawaban" — soal 2 digit
+    (+, −, ×, ÷ selalu bulat, jawaban maks 3 digit), 60 detik jawab
+    sebanyak-banyaknya, XP DUA KALI LIPAT.
+
+---
+
 ## Pembaruan Kedelapan (Juli 2026) — Halaman Kisah Kosong
 
 **Bug ditemukan:** saat menambahkan layar kisah pada pembaruan sebelumnya,

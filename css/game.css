@@ -610,3 +610,123 @@
 
 .question-text { letter-spacing: 2px; }
 .class-code-box__code { letter-spacing: 5px; }
+
+/* ================= AKSI SEKALI-MAIN + HATI + PILIHAN GANDA ============= */
+
+.idle-sprite--oneshot {
+  animation-name: idle-play;
+  animation-timing-function: steps(4);
+  animation-iteration-count: 1;
+  animation-fill-mode: forwards;
+}
+
+.hearts-row {
+  display: flex;
+  gap: 3px;
+  flex-wrap: wrap;
+  align-items: center;
+  min-height: 20px;
+}
+
+.heart--empty { filter: grayscale(1) opacity(0.35); }
+
+.choice-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.choice-btn {
+  min-height: 56px;
+  font-family: var(--font-body);
+  font-weight: 800;
+  font-size: var(--text-xl);
+  font-variant-numeric: tabular-nums;
+  color: #fff;
+  background: linear-gradient(180deg, #56a3e8 0%, var(--color-info) 55%, #1d63a8 100%);
+  border: 3px solid var(--color-info-dark);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  box-shadow: 0 4px 0 var(--color-info-dark), inset 0 3px 0 rgba(255, 255, 255, 0.3);
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.35);
+  transition: transform var(--t-fast), box-shadow var(--t-fast), filter var(--t-fast);
+}
+
+.choice-btn:hover { filter: brightness(1.08); }
+.choice-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--color-info-dark); }
+
+/* ================= ARENA TERBUKA (latar cerah, soal di tengah) ========= */
+
+/* Latar dipindah ke panggung, cerah tanpa overlay gelap. */
+#arena-stage.has-bg-image {
+  background-size: cover;
+  background-position: center 72%;
+  image-rendering: pixelated;
+  filter: none;
+  border-top: 3px solid var(--color-panel-border);
+  border-bottom: 3px solid var(--color-panel-border);
+  box-shadow: inset 0 0 0 100vmax rgba(255, 244, 214, 0.06);
+}
+
+#screen-arena.has-bg-image { background-image: none !important; }
+
+/* Panggung lebih lapang: petarung di sisi, soal DI ANTARA mereka. */
+.arena__stage {
+  position: relative;
+  min-height: clamp(150px, 26dvh, 240px);
+  justify-content: space-between;
+  padding: var(--space-2) clamp(8px, 5vw, 40px) var(--space-3);
+  gap: 0;
+}
+
+.arena__clash { display: none; }
+
+.arena .question-panel {
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  transform: translate(-50%, -50%);
+  width: min(52vw, 260px);
+  padding: var(--space-2) var(--space-2) var(--space-3);
+  margin: 0;
+  z-index: 2;
+}
+
+.arena .question-panel .question-text {
+  font-size: clamp(20px, 6.4vw, 30px);
+  letter-spacing: 1px;
+  margin-bottom: var(--space-2);
+}
+
+.arena .question-panel .question-progress { letter-spacing: 1px; margin-bottom: 2px; }
+
+/* Jawaban + pilihan + umpan balik pindah ke bawah panggung */
+.arena__io {
+  padding: var(--space-2) var(--space-3) 0;
+  text-align: center;
+}
+
+/* ====== Muat pas di layar HP: ukuran ringkas menyeluruh (item 1) ====== */
+
+.arena__topbar { padding: var(--space-1) var(--space-2); gap: var(--space-1); }
+.arena__status { padding: var(--space-1) var(--space-2); }
+.hp-card { padding: var(--space-1) var(--space-2); }
+
+.arena .answer-display {
+  min-height: clamp(44px, 7dvh, 58px);
+  font-size: clamp(20px, 5.5vw, 30px);
+  margin: 0 auto var(--space-2);
+  max-width: 300px;
+}
+
+.arena .keypad { margin-top: auto; }
+.keypad__key { min-height: clamp(44px, 7.2dvh, 58px); }
+
+@media (max-height: 720px) {
+  .arena__stage { min-height: clamp(130px, 22dvh, 180px); }
+  .fighter__sprite .idle-sprite { --idle-size: 64px !important; }
+  #fighter-enemy .idle-sprite   { --idle-size: 72px !important; }
+  .keypad { gap: 6px; max-width: 340px; }
+  .arena__actions .btn { min-height: 40px; }
+}

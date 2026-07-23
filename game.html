@@ -122,28 +122,27 @@
           <div class="fighter" id="fighter-player">
             <span class="fighter__sprite" id="player-sprite" aria-hidden="true"></span>
           </div>
-          <div class="arena__clash" aria-hidden="true"></div>
+
+          <!-- Plakat soal di ANTARA kedua petarung -->
+          <div class="question-panel">
+            <div class="question-progress" id="question-progress"></div>
+            <div class="question-text" id="question-text" aria-live="off">— — —</div>
+          </div>
+
           <div class="fighter" id="fighter-enemy">
             <span class="fighter__sprite" id="enemy-sprite" aria-hidden="true"></span>
           </div>
         </div>
 
-        <div class="question-panel">
-          <div class="question-progress" id="question-progress"></div>
-          <div class="question-text" id="question-text" aria-live="off">— — —</div>
+        <div class="arena__io">
           <div class="answer-display" id="answer-display" aria-label="Jawaban kamu">_</div>
+          <div class="choice-grid" id="choice-grid" hidden></div>
           <div class="feedback-line" id="feedback-line" role="status" aria-live="assertive"></div>
-        </div>
-
-        <div class="hint-box" id="hint-box" hidden>
-          <div class="hint-box__title" id="hint-title"></div>
-          <div id="hint-lines"></div>
         </div>
 
         <div class="keypad" id="keypad"></div>
 
         <div class="arena__actions">
-          <button type="button" class="btn btn--info btn--sm" id="btn-help"><img class="icon-img" src="./assets/icons/book.png" width="16" height="16" alt="" aria-hidden="true"> Bantuan</button>
           <button type="button" class="btn btn--ghost btn--sm" id="btn-skip" hidden>Lewati</button>
           <button type="button" class="btn btn--danger btn--sm" id="btn-quit">Selesai</button>
         </div>
@@ -164,7 +163,6 @@
         <div class="stack">
           <button type="button" class="btn btn--primary btn--block btn--lg" id="btn-result-map">Kembali ke Peta</button>
           <button type="button" class="btn btn--block" id="btn-result-again">Ulangi Latihan</button>
-          <button type="button" class="btn btn--ghost btn--block" id="btn-result-review"><img class="icon-img" src="./assets/icons/book.png" width="16" height="16" alt="" aria-hidden="true"> Lihat Pembahasan</button>
         </div>
       </section>
 

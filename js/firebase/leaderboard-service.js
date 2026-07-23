@@ -38,7 +38,7 @@ export const LEADERBOARD_CATEGORIES = [
   },
   {
     id: 'mastery',
-    name: 'Papan Fakta Dikuasai',
+    name: 'Papan Hitungan Dikuasai',
     description: 'Siapa yang paling banyak menguasai fakta.',
     metricLabel: 'Fakta',
     sortKey: 'factsMastered',

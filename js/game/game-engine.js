@@ -110,8 +110,22 @@ export class GameEngine {
       weakCount,
       accuracy: attempts > 0 ? correct / attempts : 0,
       status: this.#kingdomStatus(operation, ratio),
-      bossUnlocked: ratio >= BOSS_CONFIG.unlockMasteryPercent
+      practiced,
+      bossUnlocked: this.#isBossUnlocked(operation, ratio)
     };
+  }
+
+  /**
+   * Boss muncul bila progres kerajaan 100% DAN level pemain sudah cukup
+   * untuk membuka kerajaan berikutnya (kerajaan terakhir: level Menara).
+   */
+  #isBossUnlocked(operation, ratio) {
+    if (ratio < 1) return false;
+    const idx = KINGDOMS.findIndex((k) => k.id === operation);
+    const nextNeed = (idx >= 0 && idx < KINGDOMS.length - 1)
+      ? (KINGDOMS[idx + 1].requiredLevel || 1)
+      : (MIXED_TOWER.requiredLevel || 10);
+    return this.playerLevel >= nextNeed;
   }
 
   #kingdomStatus(operation, ratio) {
@@ -229,10 +243,11 @@ export class GameEngine {
   #questionCountFor(mode) {
     switch (mode) {
       case MODES.PLACEMENT: return SESSION_CONFIG.placementQuestions;
-      case MODES.BOSS:      return SESSION_CONFIG.bossQuestions;
-      case MODES.MIXED:     return SESSION_CONFIG.mixedQuestions;
-      case MODES.BATTLE:    return SESSION_CONFIG.battleQuestions;
+      case MODES.BOSS:      return 40; // berakhir lewat sistem hati
+      case MODES.MIXED:     return 40; // berakhir lewat sistem hati
+      case MODES.BATTLE:    return 40; // berakhir lewat sistem hati
       case MODES.SPEED:     return 200; // dibatasi oleh waktu, bukan jumlah
+      case MODES.EXPERT:    return 200; // dibatasi 60 detik
       default:              return SESSION_CONFIG.practiceQuestions;
     }
   }

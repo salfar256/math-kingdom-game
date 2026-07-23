@@ -9,7 +9,7 @@ import { waitForAuth, signOut, getCurrentUid } from '../firebase/auth-service.js
 import { GameEngine } from '../game/game-engine.js';
 import { flushSyncQueue } from '../game/session-manager.js';
 import {
-  MODES, MODE_LABEL, KINGDOMS, OPERATION_LABEL, CHARACTERS, ENEMIES,
+  MODES, BATTLE_CONFIG, MODE_LABEL, KINGDOMS, OPERATION_LABEL, CHARACTERS, ENEMIES,
   SESSION_CONFIG, BOSSES, MASTERY_LABEL, MASTERY_STATUS
 } from '../config/game-config.js';
 import { BattleEngine } from '../game/battle-engine.js';
@@ -20,7 +20,9 @@ import {
 } from '../firebase/leaderboard-service.js';
 import { getDb } from '../firebase/firebase-app.js';
 import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js';
-import { applySafeBackground, createSafeSprite, mountIdleSprite, createIcon } from '../asset-manifest.js';
+import {
+  applySafeBackground, createSafeSprite, mountIdleSprite, createIcon, playActionSprite
+} from '../asset-manifest.js';
 import { showModal, confirmDialog } from '../ui/modal.js';
 import { toast } from '../ui/toast.js';
 import { showLoading, hideLoading, setSyncStatus, watchConnection } from '../ui/loading.js';
@@ -156,14 +158,12 @@ function bindGlobalEvents() {
   $('#btn-lb-back').addEventListener('click', () => { soundManager.click(); showScreen('screen-map'); });
   $('#btn-lb-privacy').addEventListener('click', toggleLeaderboardPrivacy);
 
-  $('#btn-help').addEventListener('click', handleHelp);
   $('#btn-skip').addEventListener('click', handleSkip);
   $('#btn-quit').addEventListener('click', handleQuit);
   $('#btn-pause').addEventListener('click', handlePause);
 
   $('#btn-result-map').addEventListener('click', () => { soundManager.click(); renderMap(); showScreen('screen-map'); });
   $('#btn-result-again').addEventListener('click', repeatSession);
-  $('#btn-result-review').addEventListener('click', openReview);
 
   for (const id of ['#btn-sound-map', '#btn-sound-arena']) {
     $(id).addEventListener('click', () => {
@@ -237,7 +237,7 @@ function renderMapStats() {
     { label: 'Level', value: p.level || 1 },
     { label: 'XP', value: (p.xp || 0).toLocaleString('id-ID') },
     { label: 'Streak', value: `${p.streak || 0} hari` },
-    { label: 'Fakta dikuasai', value: mastery.totalMastered }
+    { label: 'Hitungan dikuasai', value: mastery.totalMastered }
   ];
 
   for (const s of stats) {
@@ -276,7 +276,7 @@ function renderKingdoms() {
         el('div', { className: 'progress' }, [
           el('div', { className: 'progress__fill', style: { width: `${k.percent}%` } })
         ]),
-        el('div', { className: 'text-xs text-muted', text: `${k.mastered} / ${k.total} fakta (${k.percent}%)` })
+        el('div', { className: 'text-xs text-muted', text: `${(k.mastered + (k.practiced || 0))} / ${k.total} hitungan terlatih (${k.percent}%)` })
       ])
     ]);
 
@@ -338,7 +338,7 @@ function renderRecommendations() {
     const card = el('div', { className: 'card row row--between' }, [
       el('div', {}, [
         el('strong', { text: OPERATION_LABEL[r.operation] || r.operation }),
-        el('p', { className: 'text-sm text-muted mb-0', text: `${r.count} fakta perlu latihan. ${r.reason}` })
+        el('p', { className: 'text-sm text-muted mb-0', text: `${r.count} hitungan perlu latihan. ${r.reason}` })
       ]),
       el('button', {
         className: 'btn btn--sm btn--primary',
@@ -365,7 +365,7 @@ function renderRecommendations() {
 function openModeScreen(kingdom) {
   $('#mode-title').textContent = kingdom.name;
   $('#mode-progress').textContent =
-    `${kingdom.mastered} dari ${kingdom.total} fakta dikuasai (${kingdom.percent}%)`;
+    `${(kingdom.mastered + (kingdom.practiced || 0))} dari ${kingdom.total} hitungan sudah kamu latih (${kingdom.percent}%)`;
 
   const list = $('#mode-list');
   clearNode(list);
@@ -374,8 +374,8 @@ function openModeScreen(kingdom) {
     { mode: MODES.PRACTICE, icon: 'book', name: 'Latihan', desc: 'Tanpa batas waktu. Bantuan tersedia.' },
     { mode: MODES.BATTLE,   icon: 'sword', name: 'Pertarungan', desc: 'Kalahkan musuh dengan jawaban benar.' },
     { mode: MODES.SPEED,    icon: 'star', name: `Kecepatan ${Math.round(state.engine.speedDurationMs / 1000)} detik`, desc: 'Jawab sebanyak mungkin dengan tepat.' },
-    { mode: MODES.FACT_FAMILY, icon: 'heart', name: 'Keluarga Fakta', desc: 'Lengkapi empat fakta yang bersaudara.' },
-    { mode: MODES.FIX_ANSWER,  icon: 'settings', name: 'Perbaiki Jawaban', desc: 'Temukan jawaban yang salah, lalu betulkan.' }
+    { mode: MODES.FACT_FAMILY, icon: 'heart', name: 'Keluarga Angka', desc: 'Pilihan ganda: pilih jawaban yang tepat.' },
+    { mode: MODES.EXPERT,      icon: 'gem', name: 'Mode Expert', desc: 'Soal 2 digit, 60 detik, XP dua kali lipat!' }
   ];
 
   for (const m of modes) {
@@ -397,7 +397,7 @@ function openModeScreen(kingdom) {
         className: 'text-sm text-muted mb-0',
         text: kingdom.bossUnlocked
           ? 'Butuh akurasi minimal 85%. Kalahkan penjaga kerajaan.'
-          : 'Terbuka setelah 50% fakta kerajaan ini dikuasai.'
+          : 'Terbuka setelah 50% hitungan kerajaan ini dikuasai.'
       })
     ]),
     el('span', { text: '›', attrs: { 'aria-hidden': 'true' } })
@@ -420,7 +420,7 @@ function openModeScreen(kingdom) {
 }
 
 function pickBossFor(kingdom) {
-  // Boss mewakili fakta sulit: pilih berdasarkan angka terlemah siswa.
+  // Boss mewakili hitungan sulit: pilih berdasarkan angka terlemah siswa.
   const weakNumbers = [6, 7, 8, 9];
   let worst = 7;
   let worstScore = Infinity;
@@ -542,6 +542,7 @@ function startSession(options) {
   soundManager.playBackground();
 
   if (mode === MODES.SPEED) startTimer(state.engine.speedDurationMs);
+  if (mode === MODES.EXPERT) startTimer(60000);
   advanceQuestion();
 }
 
@@ -572,15 +573,14 @@ function setupArenaChrome(title, mode, operation) {
   $('#enemy-name').textContent = enemy.name;
 
   const isPlacement = mode === MODES.PLACEMENT;
-  show($('#btn-skip'), isPlacement);
-  show($('#btn-help'), !isPlacement && mode !== MODES.SPEED);
+  show($('#btn-skip'), false);
   show($('#fighter-enemy'), !isPlacement);
   show($('#fighter-player'), !isPlacement);
 
   const bgKey = operation
     ? (KINGDOMS.find((k) => k.id === operation) || {}).background
     : 'mixed-tower';
-  if (bgKey) applySafeBackground($('#screen-arena'), bgKey);
+  if (bgKey) applySafeBackground($('#arena-stage'), bgKey);
 
   updateHud();
   updateBattleBars();
@@ -591,13 +591,25 @@ function setupArenaChrome(title, mode, operation) {
 
 function advanceQuestion() {
   clearTimeout(state.advanceTimeout);
-  hideHint();
+  stopQuestionTimer();
 
   const q = state.session.nextQuestion();
   if (!q) { endSession(); return; }
 
   state.answer = '';
   state.isSubmitting = false;
+
+  // Keluarga Angka = pilihan ganda; mode lain = keypad.
+  const isChoice = state.session.mode === MODES.FACT_FAMILY;
+  show($('#choice-grid'), isChoice);
+  show($('#keypad'), !isChoice);
+  show($('#answer-display'), !isChoice);
+  if (isChoice) renderChoices(q);
+
+  // Timer 10 detik per soal untuk mode pertarungan.
+  if ([MODES.BATTLE, MODES.BOSS, MODES.MIXED].includes(state.session.mode)) {
+    startQuestionTimer();
+  }
 
   const display = $('#question-text');
   display.textContent = `${q.displayedQuestion} = ?`;
@@ -689,6 +701,7 @@ function submitAnswer() {
   }
 
   state.isSubmitting = true;
+  stopQuestionTimer();
   const outcome = state.session.submitAnswer(state.answer);
   if (!outcome) { state.isSubmitting = false; return; }
 
@@ -707,13 +720,19 @@ function submitAnswer() {
     : SESSION_CONFIG.autoAdvanceWrongMs;
 
   state.advanceTimeout = setTimeout(() => {
+    const inBattle = [MODES.BATTLE, MODES.BOSS, MODES.MIXED].includes(state.session.mode);
+
+    if (inBattle && (battleResult.battleWon || battleResult.playerDown)) {
+      endSession();
+      return;
+    }
+
     if (battleResult.enemyDefeated && !state.battle.isBoss) {
       const next = state.battle.spawnNextEnemy();
       mountIdleSprite($('#enemy-sprite'), 'enemies', next.asset || next.id, { size: 96, alt: next.name });
       $('#enemy-name').textContent = next.name;
       updateBattleBars();
     }
-    if (state.battle.isBoss && battleResult.enemyDefeated) { endSession(); return; }
     advanceQuestion();
   }, delay);
 }
@@ -730,7 +749,8 @@ function renderOutcome(outcome, battleResult) {
 
     soundManager.correct();
     soundManager.attack();
-    animationManager.attack($('#fighter-player'));
+    playFighterAction('player', 'attack');
+    playFighterAction('enemy', battleResult.enemyDefeated ? 'death' : 'hurt');
     animationManager.shake($('#fighter-enemy'));
     animationManager.flash(stage, 'correct');
     animationManager.floatText($('#fighter-enemy'), `-${battleResult.damageToEnemy}`, 'damage');
@@ -739,64 +759,25 @@ function renderOutcome(outcome, battleResult) {
       animationManager.floatText($('#fighter-player'), `+${battleResult.healed}`, 'heal');
     }
     if (outcome.mastery && outcome.mastery.newlyMastered) {
-      toast.success('Fakta baru dikuasai!');
+      toast.success('Hitungan baru kamu kuasai!');
     }
   } else {
     answerNode.className = 'answer-display is-wrong';
     feedback.className = 'feedback-line is-wrong';
-    feedback.textContent = quickFeedback(false);
+    feedback.textContent = `Salah. Jawaban benar: ${outcome.question.answer}`;
 
     soundManager.wrong();
+    playFighterAction('enemy', 'attack');
+    playFighterAction('player', 'hurt');
     animationManager.shake($('#fighter-player'));
     animationManager.flash(stage, 'wrong');
     if (battleResult.damageToPlayer > 0) {
       animationManager.floatText($('#fighter-player'), `-${battleResult.damageToPlayer}`, 'damage');
     }
 
-    showExplanation(outcome);
-
-    if (battleResult.enteredRecovery) {
-      toast.info('HP habis. Sesi pemulihan dimulai: soal akan lebih mudah.');
-    }
   }
 
   renderCombo();
-}
-
-function showExplanation(outcome) {
-  const info = explainMistake(outcome.question, outcome.given);
-  const box = $('#hint-box');
-  $('#hint-title').textContent = info.title;
-
-  const lines = $('#hint-lines');
-  clearNode(lines);
-  for (const line of info.lines) {
-    lines.appendChild(el('p', { className: 'hint-box__line', text: line }));
-  }
-  box.hidden = false;
-}
-
-function handleHelp() {
-  if (!state.session || !state.session.isAwaitingAnswer) return;
-  soundManager.click();
-
-  const level = state.session.useHelp();
-  const hint = getHint(state.session.currentQuestion, level);
-
-  $('#hint-title').textContent = `${hint.title} (bantuan ${level}/4)`;
-  const lines = $('#hint-lines');
-  clearNode(lines);
-  for (const line of hint.lines) {
-    lines.appendChild(el('p', { className: 'hint-box__line', text: line }));
-  }
-  $('#hint-box').hidden = false;
-
-  if (level >= 4) $('#btn-help').disabled = true;
-}
-
-function hideHint() {
-  $('#hint-box').hidden = true;
-  $('#btn-help').disabled = false;
 }
 
 function handleSkip() {
@@ -860,13 +841,113 @@ function updateHud() {
   $('#hud-correct').textContent = String(state.session.stats.correct);
 }
 
+/** Deretan hati: penuh berwarna, yang hilang menjadi abu-abu. */
+/** Mainkan animasi aksi (attack/hurt/death) lalu kembali ke idle. */
+function playFighterAction(who, action) {
+  const node = $(who === 'player' ? '#player-sprite' : '#enemy-sprite');
+  try { playActionSprite(node, action); } catch { /* aman tanpa animasi */ }
+}
+
+function renderHearts(node, hp, maxHp) {
+  if (!node) return;
+  clearNode(node);
+  node.classList.add('hearts-row');
+  const shown = Math.min(maxHp, 15);
+  for (let i = 0; i < shown; i++) {
+    const img = createIcon('icons', 'heart', { size: maxHp > 5 ? 14 : 20 });
+    if (i >= hp) img.classList.add('heart--empty');
+    node.appendChild(img);
+  }
+}
+
+/* ---------- Timer 10 detik per soal (mode pertarungan) ---------- */
+
+let questionTimerId = null;
+let questionTimerEndsAt = 0;
+
+function startQuestionTimer() {
+  stopQuestionTimer();
+  const limit = BATTLE_CONFIG.questionTimeLimitMs;
+  questionTimerEndsAt = Date.now() + limit;
+  show($('#timer-bar'), true);
+
+  questionTimerId = setInterval(() => {
+    const remaining = Math.max(0, questionTimerEndsAt - Date.now());
+    const fill = document.querySelector('#timer-bar .timer-bar__fill');
+    if (fill) fill.style.width = `${(remaining / limit) * 100}%`;
+    if (remaining <= 0) {
+      stopQuestionTimer();
+      handleQuestionTimeout();
+    }
+  }, 120);
+}
+
+function stopQuestionTimer() {
+  if (questionTimerId) { clearInterval(questionTimerId); questionTimerId = null; }
+}
+
+/** Waktu habis: dihitung salah -- pemain terkena damage 1 hati. */
+function handleQuestionTimeout() {
+  if (!state.session || !state.session.isAwaitingAnswer) return;
+  const q = state.session.currentQuestion;
+  state.answer = '';
+  const outcome = state.session.submitAnswer('');
+  if (!outcome) return;
+
+  const battleResult = state.battle.applyAnswer({ correct: false });
+  $('#feedback-line').className = 'feedback-line is-wrong';
+  $('#feedback-line').textContent = `Waktu habis! Jawaban benar: ${q.answer}`;
+  soundManager.wrong();
+  playFighterAction('player', 'hurt');
+  playFighterAction('enemy', 'attack');
+  updateHud();
+  updateBattleBars();
+
+  state.advanceTimeout = setTimeout(() => {
+    if (battleResult.playerDown) { endSession(); return; }
+    advanceQuestion();
+  }, SESSION_CONFIG.autoAdvanceWrongMs);
+}
+
+/* ---------- Pilihan ganda (mode Keluarga Angka) ---------- */
+
+function renderChoices(question) {
+  const grid = $('#choice-grid');
+  if (!grid) return;
+  clearNode(grid);
+
+  const correct = question.answer;
+  const opts = new Set([correct]);
+  while (opts.size < 4) {
+    const delta = Math.floor(Math.random() * 5) + 1;
+    const cand = Math.random() < 0.5 ? correct + delta : correct - delta;
+    if (cand >= 0 && cand !== correct) opts.add(cand);
+  }
+  const shuffled = [...opts].sort(() => Math.random() - 0.5);
+
+  for (const val of shuffled) {
+    const btn = el('button', {
+      className: 'choice-btn',
+      text: String(val),
+      attrs: { type: 'button' }
+    });
+    btn.addEventListener('click', () => {
+      if (state.isSubmitting) return;
+      soundManager.click();
+      state.answer = String(val);
+      submitAnswer();
+    });
+    grid.appendChild(btn);
+  }
+}
+
 function updateBattleBars() {
   if (!state.battle) return;
   const s = state.battle.getState();
 
-  $('#player-hp-bar').style.width = `${Math.round(state.battle.playerHpPercent * 100)}%`;
-  $('#player-hp-text').textContent = `${s.playerHp} / ${s.playerMaxHp}`;
-  $('#enemy-hp-bar').style.width = `${Math.round(state.battle.enemyHpPercent * 100)}%`;
+  renderHearts($('#player-hp-bar'), s.playerHp, s.playerMaxHp);
+  $('#player-hp-text').textContent = s.isBoss ? '' : `Musuh ${Math.min(s.defeatedCount + 1, s.enemiesToDefeat)}/${s.enemiesToDefeat}`;
+  renderHearts($('#enemy-hp-bar'), s.enemyHp, s.enemyMaxHp);
   $('#enemy-hp-text').textContent = `${s.enemyHp} / ${s.enemyMaxHp}`;
 }
 
@@ -923,10 +1004,11 @@ async function endSession() {
 
   const bossId = state.battle && state.battle.isBoss ? state.battle.enemy.id : null;
   const enemyHp = state.battle ? state.battle.enemyHp : null;
+  const playerHp = state.battle ? state.battle.playerHp : 1;
 
   let result;
   try {
-    result = await state.engine.finishSession({ bossId, enemyHp });
+    result = await state.engine.finishSession({ bossId, enemyHp, playerHp });
   } catch (e) {
     devError('finishSession gagal:', e);
     hideLoading();
@@ -1022,7 +1104,7 @@ function renderResult(r) {
   }
 
   if (r.factsMastered > 0) {
-    detail.appendChild(el('h3', { text: `Fakta baru dikuasai (${r.factsMastered})` }));
+    detail.appendChild(el('h3', { text: `Hitungan baru dikuasai (${r.factsMastered})` }));
     detail.appendChild(factPills(r.newlyMasteredIds, 'mastered'));
   }
 
@@ -1069,47 +1151,6 @@ function repeatSession() {
   soundManager.click();
   if (!state.lastSessionOptions) { renderMap(); showScreen('screen-map'); return; }
   startSession(state.lastSessionOptions);
-}
-
-function openReview() {
-  soundManager.click();
-  const r = state.lastResult;
-  if (!r) return;
-
-  const content = el('div', { className: 'stack' });
-  const weak = (r.weakFactIds || []).slice(0, 8);
-
-  if (weak.length === 0) {
-    content.appendChild(el('p', { text: 'Tidak ada soal yang salah pada sesi ini. Luar biasa!' }));
-  } else {
-    for (const id of weak) {
-      const fact = state.engine.factMap.get(id);
-      if (!fact) continue;
-      const q = {
-        operation: fact.operation,
-        operandA: fact.operandA,
-        operandB: fact.operandB,
-        displayA: fact.operandA,
-        displayB: fact.operandB,
-        expectedAnswer: fact.answer
-      };
-      const hint = getHint(q, 3);
-      const box = el('div', { className: 'card' }, [
-        el('strong', { text: `${fact.operandA} ${{ addition: '+', subtraction: '−', multiplication: '×', division: '÷' }[fact.operation]} ${fact.operandB} = ${fact.answer}` }),
-        el('div', { className: 'text-sm text-muted', text: hint.title })
-      ]);
-      for (const line of hint.lines) {
-        box.appendChild(el('p', { className: 'hint-box__line text-sm', text: line }));
-      }
-      content.appendChild(box);
-    }
-  }
-
-  showModal({
-    title: 'Pembahasan',
-    content,
-    buttons: [{ id: 'ok', text: 'Tutup', variant: 'primary' }]
-  });
 }
 
 /* ============ LEADERBOARD ============ */

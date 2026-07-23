@@ -178,10 +178,12 @@ export function generateAllFacts(operation) {
 
   if (operation === OPERATIONS.SUBTRACTION) {
     // Diturunkan dari keluarga penjumlahan: (a+b) - a = b, hasil selalu >= 0.
+    // Karena penjumlahan maksimum 9+9=18, pengurangan mengizinkan bilangan
+    // yang dikurangi hingga DUA DIGIT (maks 18) dikurangi satu digit (1-9).
     const seen = new Set();
     for (let a = 1; a <= 9; a++) {
       for (let b = 1; b <= 9; b++) {
-        const sum = a + b;
+        const sum = a + b; // 2..18 -- termasuk dua digit sampai 18
         for (const sub of [buildFact(OPERATIONS.SUBTRACTION, sum, a),
                            buildFact(OPERATIONS.SUBTRACTION, sum, b)]) {
           if (seen.has(sub.factId)) continue;
@@ -360,4 +362,46 @@ export function deriveFamilyNumbers(q) {
   if (operation === OPERATIONS.MULTIPLICATION) return [operandA, operandB, expectedAnswer];
   if (operation === OPERATIONS.SUBTRACTION) return [operandB, expectedAnswer, operandA];
   return [operandB, expectedAnswer, operandA]; // pembagian
+}
+
+/* ===================== MODE EXPERT (soal 2 digit) ===================== */
+
+/**
+ * Soal Mode Expert: operasi dengan angka dua digit.
+ * - Penjumlahan : 10-99 + 10-99
+ * - Pengurangan : hasil selalu >= 0 (a >= b), keduanya 10-99
+ * - Perkalian   : 10-99 x 2-9
+ * - Pembagian   : kebalikan perkalian di atas (selalu bulat)
+ * Jawaban dijaga maksimal 3 digit.
+ */
+export function generateExpertQuestion() {
+  const op = pickRandom([
+    OPERATIONS.ADDITION, OPERATIONS.SUBTRACTION,
+    OPERATIONS.MULTIPLICATION, OPERATIONS.DIVISION
+  ]);
+
+  let a, b, answer;
+  if (op === OPERATIONS.ADDITION) {
+    a = randInt(10, 99); b = randInt(10, 99); answer = a + b;
+  } else if (op === OPERATIONS.SUBTRACTION) {
+    a = randInt(10, 99); b = randInt(10, a); answer = a - b;
+  } else if (op === OPERATIONS.MULTIPLICATION) {
+    a = randInt(10, 99); b = randInt(2, 9); answer = a * b;
+    if (answer > 999) { a = randInt(10, 99); b = 2; answer = a * b; }
+  } else {
+    const q = randInt(10, 99); const d = randInt(2, 9);
+    a = q * d; b = d; answer = q;
+    if (a > 999) { a = 20 * d; answer = 20; }
+  }
+
+  return {
+    factId: `exp_${op}_${a}_${b}`,
+    familyId: 'fam_expert',
+    operation: op,
+    operandA: a,
+    operandB: b,
+    answer,
+    display: `${a} ${OPERATION_SYMBOL[op]} ${b}`,
+    isExpert: true
+  };
 }

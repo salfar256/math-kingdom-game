@@ -271,6 +271,8 @@ export function createIdleSprite(staticCategory, key, { size = 96, alt = '', cla
 export function mountIdleSprite(node, staticCategory, key, { size = 96, alt = '' } = {}) {
   if (!node) return;
   node.textContent = '';
+  node.dataset.spriteKey = key;
+  node.dataset.spriteSize = String(size);
   node.appendChild(createIdleSprite(staticCategory, key, { size, alt }));
 }
 
@@ -297,4 +299,38 @@ export function createIcon(category, key, { size = 20, className = '', alt = '' 
   img.addEventListener('error', () => { img.hidden = true; }, { once: true });
   img.src = path;
   return img;
+}
+
+
+/* ===================== ANIMASI AKSI (attack/hurt/death) =====================
+ * Strip 4 frame di assets/anim/{aksi}/{key}.png. Dimainkan sekali di atas
+ * sprite idle, lalu otomatis kembali ke idle. Aman bila berkas tidak ada.
+ */
+
+const ACTION_DURATION_MS = { attack: 550, hurt: 500, death: 900 };
+
+export function playActionSprite(wrapNode, action) {
+  if (!wrapNode) return;
+  const key = wrapNode.dataset.spriteKey;
+  const sprite = wrapNode.querySelector('.idle-sprite');
+  if (!key || !sprite) return;
+
+  const path = `${ASSET_BASE}/anim/${action}/${key}.png`;
+  const probe = new Image();
+  probe.onload = () => {
+    const prevBg = sprite.style.backgroundImage;
+    sprite.style.backgroundImage = `url("${path}")`;
+    sprite.classList.add('idle-sprite--oneshot');
+    const dur = ACTION_DURATION_MS[action] || 550;
+    sprite.style.animationDuration = `${dur}ms`;
+    setTimeout(() => {
+      // 'death' menetap di frame terakhir sampai sprite diganti/di-mount ulang.
+      if (action !== 'death') {
+        sprite.style.backgroundImage = prevBg;
+        sprite.style.animationDuration = '';
+        sprite.classList.remove('idle-sprite--oneshot');
+      }
+    }, dur);
+  };
+  probe.src = path;
 }

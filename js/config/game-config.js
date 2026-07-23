@@ -188,21 +188,20 @@ export const XP_CONFIG = {
 };
 
 export const BATTLE_CONFIG = {
-  playerMaxHp: 100,
-  enemyBaseHp: 60,
-  bossBaseHp: 160,
-  playerDamageOnWrong: 8,
-  healOnCorrection: 5,
-  baseDamage: 12,
-  fastDamageBonus: 8,
-  fastDamageThresholdMs: 3000,
-  comboDamageBonus: 2,
-  recoveryQuestionCount: 5
+  // Sistem HATI: setiap damage = 1 hati.
+  playerHearts: 3,
+  enemyHearts: 5,
+  bossHearts: 15,
+  enemiesPerBattle: 2,       // pertarungan selesai setelah 2 musuh kalah
+  questionTimeLimitMs: 10000, // 10 detik per soal di mode pertarungan
+  fastDamageThresholdMs: 4000,
+  safetyQuestionCap: 40      // pengaman: sesi tak pernah melebihi ini
 };
 
 export const MODES = {
   PRACTICE: 'practice',
   BATTLE: 'battle',
+  EXPERT: 'expert',
   SPEED: 'speed',
   BOSS: 'boss',
   FACT_FAMILY: 'fact_family',
@@ -216,7 +215,7 @@ export const MODE_LABEL = {
   battle: 'Pertarungan',
   speed: 'Kecepatan',
   boss: 'Boss',
-  fact_family: 'Keluarga Fakta',
+  fact_family: 'Keluarga Angka',
   fix_answer: 'Perbaiki Jawaban',
   mixed: 'Operasi Campuran',
   placement: 'Tes Awal'
@@ -305,7 +304,7 @@ export const BADGES = [
 export const MOTIVATION_MESSAGES = {
   excellent: [
     'Luar biasa! Kamu makin cepat dan tepat.',
-    'Hebat! Banyak fakta baru yang kamu kuasai hari ini.',
+    'Hebat! Banyak hitungan baru yang kamu kuasai hari ini.',
     'Kerja bagus! Terus pertahankan ritme ini.'
   ],
   good: [
@@ -315,7 +314,7 @@ export const MOTIVATION_MESSAGES = {
   ],
   needsWork: [
     'Tidak apa-apa. Setiap kesalahan adalah latihan.',
-    'Fokus pada beberapa fakta dulu, nanti pasti bisa.',
+    'Fokus pada beberapa hitungan dulu, nanti pasti bisa.',
     'Pelan-pelan saja. Yang penting kamu terus berlatih.'
   ]
 };
@@ -328,13 +327,13 @@ export const THIRTY_DAY_PLAN = [
   { day: 4,  title: 'Penjumlahan Lanjut', focus: 'addition', ops: [OPERATIONS.ADDITION], targets: [7,8,9] },
   { day: 5,  title: 'Pengurangan Dasar', focus: 'subtraction', ops: [OPERATIONS.SUBTRACTION], targets: [1,2,3] },
   { day: 6,  title: 'Pengurangan Lanjut', focus: 'subtraction', ops: [OPERATIONS.SUBTRACTION], targets: [4,5,6,7] },
-  { day: 7,  title: 'Keluarga Fakta + / −', focus: 'family', ops: [OPERATIONS.ADDITION, OPERATIONS.SUBTRACTION] },
+  { day: 7,  title: 'Keluarga Angka + / −', focus: 'family', ops: [OPERATIONS.ADDITION, OPERATIONS.SUBTRACTION] },
   { day: 8,  title: 'Perkalian 1 dan 2', focus: 'multiplication', ops: [OPERATIONS.MULTIPLICATION], targets: [1,2] },
   { day: 9,  title: 'Perkalian 5', focus: 'multiplication', ops: [OPERATIONS.MULTIPLICATION], targets: [5] },
   { day: 10, title: 'Perkalian 9', focus: 'multiplication', ops: [OPERATIONS.MULTIPLICATION], targets: [9] },
   { day: 11, title: 'Pembagian oleh 1, 2, 5', focus: 'division', ops: [OPERATIONS.DIVISION], targets: [1,2,5] },
   { day: 12, title: 'Pembagian oleh 9', focus: 'division', ops: [OPERATIONS.DIVISION], targets: [9] },
-  { day: 13, title: 'Keluarga Fakta × / ÷', focus: 'family', ops: [OPERATIONS.MULTIPLICATION, OPERATIONS.DIVISION] },
+  { day: 13, title: 'Keluarga Angka × / ÷', focus: 'family', ops: [OPERATIONS.MULTIPLICATION, OPERATIONS.DIVISION] },
   { day: 14, title: 'Ulangan Minggu 2', focus: 'review', ops: OPERATION_LIST },
   { day: 15, title: 'Perkalian 3', focus: 'multiplication', ops: [OPERATIONS.MULTIPLICATION], targets: [3] },
   { day: 16, title: 'Perkalian 4', focus: 'multiplication', ops: [OPERATIONS.MULTIPLICATION], targets: [4] },
@@ -344,7 +343,7 @@ export const THIRTY_DAY_PLAN = [
   { day: 20, title: 'Pembagian Sulit', focus: 'division', ops: [OPERATIONS.DIVISION], targets: [6,7,8] },
   { day: 21, title: 'Ulangan Minggu 3', focus: 'review', ops: OPERATION_LIST },
   { day: 22, title: 'Operasi Campuran', focus: 'mixed', ops: OPERATION_LIST },
-  { day: 23, title: 'Keluarga Fakta Campuran', focus: 'family', ops: OPERATION_LIST },
+  { day: 23, title: 'Keluarga Angka Campuran', focus: 'family', ops: OPERATION_LIST },
   { day: 24, title: 'Fakta Sulit', focus: 'hard', ops: OPERATION_LIST },
   { day: 25, title: 'Tes Kecepatan', focus: 'speed', ops: OPERATION_LIST },
   { day: 26, title: 'Pengulangan Adaptif', focus: 'review', ops: OPERATION_LIST },

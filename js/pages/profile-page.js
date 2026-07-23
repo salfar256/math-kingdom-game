@@ -1,4 +1,4 @@
-/** Halaman profil siswa: statistik, peta fakta, lencana, riwayat 30 hari. */
+/** Halaman profil siswa: statistik, peta hitungan, lencana, riwayat 30 hari. */
 
 import { isFirebaseReady, devError } from '../firebase/firebase-app.js';
 import { waitForAuth } from '../firebase/auth-service.js';
@@ -109,7 +109,7 @@ function renderStats() {
     { label: 'Total soal', value: totalQ.toLocaleString('id-ID') },
     { label: 'Akurasi', value: `${percent(totalC, totalQ, 1)}%` },
     { label: 'Kecepatan rata-rata', value: formatMs(avgMs) },
-    { label: 'Fakta dikuasai', value: mastery.totalMastered },
+    { label: 'Hitungan dikuasai', value: mastery.totalMastered },
     { label: 'Fakta otomatis', value: mastery.counts.automatic }
   ];
 
@@ -181,8 +181,19 @@ function renderComparison() {
 
 function renderHistory() {
   const p = engine.profile;
-  const practiceDays = Array.isArray(p.practiceDays) ? new Set(p.practiceDays) : new Set();
-  const keys = lastNDayKeys(30);
+  const practiceList = Array.isArray(p.practiceDays) ? [...p.practiceDays].sort() : [];
+  const practiceDays = new Set(practiceList);
+
+  // 30 hari DIMULAI dari hari latihan pertamamu (bukan berakhir hari ini),
+  // sehingga kotak hijau tampil dari awal deret ke kanan.
+  const keys = [];
+  const start = practiceList.length > 0
+    ? new Date(`${practiceList[0]}T00:00:00`)
+    : new Date();
+  for (let i = 0; i < 30; i++) {
+    const d = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i);
+    keys.push(dayKey(d));
+  }
 
   const strip = $('#history-strip');
   clearNode(strip);
@@ -198,7 +209,7 @@ function renderHistory() {
   }
 
   $('#history-note').textContent =
-    `${activeCount} dari 30 hari terakhir kamu berlatih. Kotak hijau berarti kamu hadir hari itu.`;
+    `${activeCount} hari latihan sejak hari pertamamu. Kotak hijau berarti kamu hadir hari itu.`;
 }
 
 function renderFactMap() {
@@ -226,8 +237,8 @@ function renderFactMap() {
   }
   box.appendChild(legend);
 
-  // Satu peta per operasi komutatif (perkalian & penjumlahan).
-  for (const op of [OPERATION_LIST[0], OPERATION_LIST[2]]) {
+  // Satu peta untuk SETIAP operasi.
+  for (const op of OPERATION_LIST) {
     box.appendChild(el('h3', { text: `${OPERATION_LABEL[op]} (${OPERATION_SYMBOL[op]})` }));
     box.appendChild(buildFactGrid(op));
   }
@@ -243,7 +254,19 @@ function buildFactGrid(operation) {
   }
 
   const facts = getAllFactsFor(operation);
-  const byKey = new Map(facts.map((f) => [`${Math.min(f.operandA, f.operandB)}_${Math.max(f.operandA, f.operandB)}`, f]));
+  const isCommutative = operation === OPERATION_LIST[0] || operation === OPERATION_LIST[2];
+
+  // Kunci sel (baris a, kolom b):
+  // - + dan x : pasangan operand langsung.
+  // - -       : (a+b) - a  -> dua "addend"-nya a dan b.
+  // - :       : (a*b) : a  -> dua faktornya a dan b.
+  const byKey = new Map();
+  for (const f of facts) {
+    let x, y;
+    if (isCommutative) { x = f.operandA; y = f.operandB; }
+    else { x = f.operandB; y = f.answer; }
+    byKey.set(`${Math.min(x, y)}_${Math.max(x, y)}`, f);
+  }
 
   for (let a = 1; a <= 9; a++) {
     grid.appendChild(el('span', { className: 'fact-map__cell fact-map__cell--header', text: String(a) }));
@@ -252,12 +275,13 @@ function buildFactGrid(operation) {
       const base = byKey.get(key);
       const record = base ? engine.factMap.get(base.factId) : null;
       const status = record ? record.status : MASTERY_STATUS.UNSEEN;
+      const label = base ? base.display : `${a} ${OPERATION_SYMBOL[operation]} ${b}`;
 
       grid.appendChild(el('span', {
         className: `fact-map__cell fact-map__cell--${status}`,
         attrs: {
-          title: `${a} ${OPERATION_SYMBOL[operation]} ${b} — ${MASTERY_LABEL[status] || status}`,
-          'aria-label': `${a} ${OPERATION_SYMBOL[operation]} ${b}, ${MASTERY_LABEL[status] || status}`
+          title: `${label} — ${MASTERY_LABEL[status] || status}`,
+          'aria-label': `${label}, ${MASTERY_LABEL[status] || status}`
         }
       }));
     }
@@ -279,6 +303,7 @@ function renderBadges() {
     }, [
       el('span', { className: 'badge-item__emoji', attrs: { 'aria-hidden': 'true' } },
         [createIcon(...badgeIcon(badge.id), { size: 28 })]),
+      el('span', { className: 'badge-item__how text-xs text-dim', text: badge.desc }),
       el('span', { className: 'badge-item__name', text: badge.name })
     ]));
   }

@@ -12,7 +12,7 @@ import {
 } from '../config/game-config.js';
 import { selectAdaptiveQuestions, CorrectionQueue } from './adaptive-engine.js';
 import { updateFactMastery, createEmptyFactRecord, summarizeMastery } from './mastery-engine.js';
-import { checkAnswer, toQuestion, getFactPool } from './question-generator.js';
+import { checkAnswer, toQuestion, getFactPool, generateExpertQuestion } from './question-generator.js';
 import { calculatePoints, calculateSessionBonus, calculateSessionXp } from './reward-engine.js';
 import { saveSession, saveFactsBatch } from '../firebase/firestore-service.js';
 import { makeId, safeStorage, shuffle, percent } from '../utils/helpers.js';
@@ -85,6 +85,12 @@ export class SessionManager {
   #buildQuestions(count, targets, assignedFactIds) {
     if (this.mode === MODES.PLACEMENT) {
       return this.#buildPlacementQuestions(count);
+    }
+    if (this.mode === MODES.EXPERT) {
+      // Mode Expert: soal 2 digit, jawab sebanyak-banyaknya dalam 60 detik.
+      const out = [];
+      for (let i = 0; i < 200; i++) out.push(generateExpertQuestion());
+      return out;
     }
     return selectAdaptiveQuestions({
       factMap: this.factMap,
@@ -353,13 +359,15 @@ export class SessionManager {
     const { bonus, breakdown } = calculateSessionBonus({ accuracy, completedDaily });
     const totalScore = this.stats.score + bonus;
 
-    const xpEarned = calculateSessionXp({
+    let xpEarned = calculateSessionXp({
       correct: this.stats.correct,
       corrections: this.stats.corrections,
       newMastered: this.newlyMastered.length,
       newAutomatic: this.newlyAutomatic.length,
       completed: true
     });
+    // Mode Expert: XP dua kali lipat.
+    if (this.mode === MODES.EXPERT) xpEarned *= 2;
 
     return {
       sessionId: this.sessionId,
@@ -388,15 +396,10 @@ export class SessionManager {
   }
 
   /** Evaluasi kemenangan boss. */
-  evaluateBoss(enemyHp) {
+  evaluateBoss(enemyHp, playerHp = 1) {
     const reasons = [];
-    if (enemyHp > 0) reasons.push('HP boss belum habis.');
-    if (this.accuracy < BOSS_CONFIG.minAccuracy) {
-      reasons.push(`Akurasi minimal ${Math.round(BOSS_CONFIG.minAccuracy * 100)}%. Akurasimu ${Math.round(this.accuracy * 100)}%.`);
-    }
-    if (this.stats.wrong > BOSS_CONFIG.maxWrong) {
-      reasons.push(`Kesalahan maksimal ${BOSS_CONFIG.maxWrong}. Kesalahanmu ${this.stats.wrong}.`);
-    }
+    if (enemyHp > 0) reasons.push('Hati boss belum habis. Jawab benar untuk menyerang!');
+    if (playerHp <= 0) reasons.push('Hatimu habis lebih dulu. Coba lagi!');
     return { victory: reasons.length === 0, reasons };
   }
 

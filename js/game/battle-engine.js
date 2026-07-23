@@ -1,36 +1,27 @@
 /**
- * Mesin pertarungan: HP, damage, combo, dan sesi pemulihan.
+ * Mesin pertarungan — SISTEM HATI.
  *
- * Prinsip: game mendukung belajar, bukan menghukum.
- * - Siswa tidak langsung kalah karena beberapa kesalahan.
- * - HP habis -> sesi pemulihan berisi soal mudah, lalu lanjut.
+ * - Pemain 3 hati, musuh 5 hati, boss 15 hati.
+ * - Setiap damage mengurangi tepat 1 hati.
+ * - Jawaban benar: musuh -1 hati. Salah / kehabisan waktu: pemain -1 hati.
+ * - Pertarungan biasa selesai setelah 2 musuh dikalahkan (menang)
+ *   atau hati pemain habis (kalah). Boss: 1 boss dengan 15 hati.
  */
 
 import {
-  BATTLE_CONFIG, CHARACTER_BONUS, ENEMIES, BOSSES, MODES
+  BATTLE_CONFIG, ENEMIES, BOSSES, MODES
 } from '../config/game-config.js';
 import { clamp, pickRandom } from '../utils/helpers.js';
 
 export class BattleEngine {
-  /**
-   * @param {object} options { characterId, mode, enemyId, bossId, questionCount }
-   */
+  /** @param {object} options { characterId, mode, enemyId, bossId } */
   constructor(options = {}) {
-    const {
-      characterId = 'adventurer',
-      mode = MODES.BATTLE,
-      enemyId = null,
-      bossId = null,
-      questionCount = 20
-    } = options;
-
-    const bonus = CHARACTER_BONUS[characterId] || CHARACTER_BONUS.adventurer;
+    const { characterId = 'adventurer', mode = MODES.BATTLE, enemyId = null, bossId = null } = options;
 
     this.characterId = characterId;
     this.mode = mode;
-    this.bonus = bonus;
 
-    this.playerMaxHp = Math.max(40, BATTLE_CONFIG.playerMaxHp + bonus.hp);
+    this.playerMaxHp = BATTLE_CONFIG.playerHearts;
     this.playerHp = this.playerMaxHp;
 
     this.isBoss = mode === MODES.BOSS || Boolean(bossId);
@@ -38,125 +29,78 @@ export class BattleEngine {
       ? (BOSSES.find((b) => b.id === bossId) || pickRandom(BOSSES))
       : (ENEMIES.find((e) => e.id === enemyId) || pickRandom(ENEMIES));
 
-    const baseHp = this.isBoss ? BATTLE_CONFIG.bossBaseHp : BATTLE_CONFIG.enemyBaseHp;
-    // Skala HP musuh agar habis mendekati akhir sesi bila siswa menjawab benar.
-    this.enemyMaxHp = Math.max(
-      baseHp,
-      Math.round(questionCount * BATTLE_CONFIG.baseDamage * 0.85)
-    );
+    this.enemyMaxHp = this.isBoss ? BATTLE_CONFIG.bossHearts : BATTLE_CONFIG.enemyHearts;
     this.enemyHp = this.enemyMaxHp;
+
+    this.enemiesToDefeat = this.isBoss ? 1 : BATTLE_CONFIG.enemiesPerBattle;
+    this.defeatedCount = 0;
 
     this.combo = 0;
     this.maxCombo = 0;
-    this.inRecovery = false;
-    this.recoveryRemaining = 0;
-    this.defeatedCount = 0;
   }
 
   /**
-   * Proses satu jawaban.
-   * @returns {object} ringkasan efek pertarungan
+   * Proses satu jawaban (atau kehabisan waktu: correct=false).
+   * @returns {object} efek pertarungan
    */
-  applyAnswer({ correct, responseMs = 0, isCorrection = false }) {
+  applyAnswer({ correct, responseMs = 0 }) {
     const result = {
       damageToEnemy: 0,
       damageToPlayer: 0,
-      healed: 0,
       combo: this.combo,
       enemyDefeated: false,
       playerDown: false,
-      enteredRecovery: false,
+      battleWon: false,
       critical: false
     };
-
-    if (this.inRecovery) {
-      return this.applyRecoveryAnswer(correct, result);
-    }
 
     if (correct) {
       this.combo += 1;
       this.maxCombo = Math.max(this.maxCombo, this.combo);
-
-      let damage = BATTLE_CONFIG.baseDamage + this.bonus.damage;
-
       if (responseMs > 0 && responseMs < BATTLE_CONFIG.fastDamageThresholdMs) {
-        damage += BATTLE_CONFIG.fastDamageBonus;
         result.critical = true;
       }
-      damage += Math.min(this.combo, 10) * BATTLE_CONFIG.comboDamageBonus;
 
-      if (isCorrection) {
-        const heal = BATTLE_CONFIG.healOnCorrection + this.bonus.heal;
-        const before = this.playerHp;
-        this.playerHp = clamp(this.playerHp + heal, 0, this.playerMaxHp);
-        result.healed = this.playerHp - before;
-      }
-
-      damage = Math.max(1, Math.round(damage));
-      this.enemyHp = clamp(this.enemyHp - damage, 0, this.enemyMaxHp);
-      result.damageToEnemy = damage;
+      this.enemyHp = clamp(this.enemyHp - 1, 0, this.enemyMaxHp);
+      result.damageToEnemy = 1;
 
       if (this.enemyHp <= 0) {
         result.enemyDefeated = true;
         this.defeatedCount += 1;
+        if (this.defeatedCount >= this.enemiesToDefeat) result.battleWon = true;
       }
     } else {
       this.combo = 0;
-      const damage = BATTLE_CONFIG.playerDamageOnWrong;
-      this.playerHp = clamp(this.playerHp - damage, 0, this.playerMaxHp);
-      result.damageToPlayer = damage;
-
-      if (this.playerHp <= 0) {
-        this.enterRecovery();
-        result.playerDown = true;
-        result.enteredRecovery = true;
-      }
+      this.playerHp = clamp(this.playerHp - 1, 0, this.playerMaxHp);
+      result.damageToPlayer = 1;
+      if (this.playerHp <= 0) result.playerDown = true;
     }
 
     result.combo = this.combo;
     return result;
   }
 
-  /** Masuk mode pemulihan: soal mudah, tanpa hukuman. */
-  enterRecovery() {
-    this.inRecovery = true;
-    this.recoveryRemaining = BATTLE_CONFIG.recoveryQuestionCount;
-    this.combo = 0;
-  }
-
-  applyRecoveryAnswer(correct, result) {
-    if (correct) {
-      this.recoveryRemaining -= 1;
-      const heal = Math.ceil(this.playerMaxHp / BATTLE_CONFIG.recoveryQuestionCount);
-      const before = this.playerHp;
-      this.playerHp = clamp(this.playerHp + heal, 0, this.playerMaxHp);
-      result.healed = this.playerHp - before;
-    }
-    if (this.recoveryRemaining <= 0) {
-      this.inRecovery = false;
-      this.playerHp = Math.max(this.playerHp, Math.round(this.playerMaxHp * 0.5));
-      result.recoveryComplete = true;
-    }
-    result.recoveryRemaining = this.recoveryRemaining;
-    return result;
-  }
-
-  /** Munculkan musuh baru setelah musuh sebelumnya kalah. */
+  /** Munculkan musuh berikutnya (pertarungan biasa). */
   spawnNextEnemy() {
     if (this.isBoss) return this.enemy;
-    this.enemy = pickRandom(ENEMIES);
-    this.enemyMaxHp = Math.round(this.enemyMaxHp * 1.1);
+    const others = ENEMIES.filter((e) => e.id !== this.enemy.id);
+    this.enemy = pickRandom(others.length ? others : ENEMIES);
+    this.enemyMaxHp = BATTLE_CONFIG.enemyHearts;
     this.enemyHp = this.enemyMaxHp;
     return this.enemy;
   }
 
-  get playerHpPercent() {
-    return clamp(this.playerHp / this.playerMaxHp, 0, 1);
+  /** Pertarungan sudah selesai? */
+  get isOver() {
+    return this.playerHp <= 0 || this.defeatedCount >= this.enemiesToDefeat;
   }
 
-  get enemyHpPercent() {
-    return clamp(this.enemyHp / this.enemyMaxHp, 0, 1);
+  get isVictory() {
+    return this.defeatedCount >= this.enemiesToDefeat && this.playerHp > 0;
   }
+
+  get playerHpPercent() { return clamp(this.playerHp / this.playerMaxHp, 0, 1); }
+  get enemyHpPercent()  { return clamp(this.enemyHp / this.enemyMaxHp, 0, 1); }
 
   getState() {
     return {
@@ -167,26 +111,19 @@ export class BattleEngine {
       enemy: this.enemy,
       combo: this.combo,
       maxCombo: this.maxCombo,
-      inRecovery: this.inRecovery,
-      recoveryRemaining: this.recoveryRemaining,
       defeatedCount: this.defeatedCount,
-      isBoss: this.isBoss
+      enemiesToDefeat: this.enemiesToDefeat,
+      isBoss: this.isBoss,
+      isOver: this.isOver,
+      isVictory: this.isVictory
     };
   }
 }
 
-/**
- * Evaluasi kemenangan boss.
- * Syarat: HP boss habis, akurasi >= 85%, kesalahan tidak melebihi batas.
- */
-export function evaluateBossVictory({ enemyHp, accuracy, wrong }, config) {
+/** Kemenangan boss: cukup kalahkan boss (hati pemain masih tersisa). */
+export function evaluateBossVictory({ enemyHp, playerHp = 1 }) {
   const reasons = [];
-  if (enemyHp > 0) reasons.push('HP boss belum habis.');
-  if (accuracy < config.minAccuracy) {
-    reasons.push(`Akurasi minimal ${Math.round(config.minAccuracy * 100)}%.`);
-  }
-  if (wrong > config.maxWrong) {
-    reasons.push(`Kesalahan tidak boleh lebih dari ${config.maxWrong}.`);
-  }
+  if (enemyHp > 0) reasons.push('Hati boss belum habis.');
+  if (playerHp <= 0) reasons.push('Hatimu habis lebih dulu.');
   return { victory: reasons.length === 0, reasons };
 }
