@@ -88,13 +88,13 @@ export const ASSETS = {
     star:     `${ASSET_BASE}/icons/star.png`
   },
   audio: {
-    correct:    `${ASSET_BASE}/audio/correct.mp3`,
-    wrong:      `${ASSET_BASE}/audio/wrong.mp3`,
-    attack:     `${ASSET_BASE}/audio/attack.mp3`,
-    victory:    `${ASSET_BASE}/audio/victory.mp3`,
-    defeat:     `${ASSET_BASE}/audio/defeat.mp3`,
-    click:      `${ASSET_BASE}/audio/click.mp3`,
-    background: `${ASSET_BASE}/audio/background.mp3`
+    correct:    `${ASSET_BASE}/audio/correct.wav`,
+    wrong:      `${ASSET_BASE}/audio/wrong.wav`,
+    attack:     `${ASSET_BASE}/audio/attack.wav`,
+    victory:    `${ASSET_BASE}/audio/victory.wav`,
+    defeat:     `${ASSET_BASE}/audio/defeat.wav`,
+    click:      `${ASSET_BASE}/audio/click.wav`,
+    background: `${ASSET_BASE}/audio/background.wav`
   }
 };
 

@@ -12,6 +12,57 @@ mengukur kecepatan dan ketepatan, serta menyimpan perkembangan setiap siswa.
 
 ---
 
+## Pembaruan Keempat (Juli 2026) — Perombakan Tampilan
+
+Akar masalah tampilan "belum jadi" ditemukan: berkas `css/components.css` pada
+proyek asli ternyata duplikat `global.css`, sehingga tombol, panel, modal, toast,
+input, statistik, dan puluhan komponen lain tampil polos tanpa gaya sama sekali.
+
+Sistem desain baru "RPG pixel modern" (referensi: kotak dialog JRPG klasik dan
+panel kayu Stardew Valley, diselaraskan dengan aset pixel milik game ini):
+
+1. `components.css` ditulis ulang penuh — tombol arcade bergradien dengan
+   bayangan keras tanpa blur dan efek tekan fisik, panel berpaku emas di sudut,
+   modal, toast, bar progres bertakik ala bar HP, tabel, chip, formulir.
+2. Plakat soal bergaya perkamen (persis lembar aset "SOAL"), keypad hijau pixel
+   sesuai lembar aset, papan nama petarung perkamen mini, bayangan tanah elips
+   di bawah sprite agar karakter terasa berpijak.
+3. Tipografi game: Pixelify Sans (judul, angka, tombol) + Nunito (teks) —
+   **di-host sendiri** di `assets/fonts/` sehingga tetap tampil benar walau
+   internet sekolah lambat, tanpa ketergantungan layanan pihak ketiga.
+4. Latar langit malam berlapis dengan pola dither pixel halus; judul emas
+   berbayangan keras.
+5. Diverifikasi otomatis dengan browser headless: semua halaman bebas error
+   JavaScript, font termuat, dan warna kunci (perkamen, hijau keypad, emas)
+   ter-render sesuai desain. Satu bug runtime lama di `profile-page.js`
+   (fungsi `init` kehilangan kata kunci `async`) ikut ditemukan dan diperbaiki
+   dalam proses verifikasi ini.
+
+---
+
+## Pembaruan Ketiga (Juli 2026) — Perbaikan Manifest & Audio
+
+1. **Error manifest ikon diperbaiki** — `manifest.webmanifest` sebelumnya menunjuk
+   ke `assets/icons/star.png` (96x96 asli) tapi dideklarasikan sebagai 192x192 dan
+   512x512, menyebabkan error "Resource size is not correct" di console browser.
+   Sekarang memakai `assets/icons/app-icon-192.png` dan `app-icon-512.png`,
+   dibuat khusus (karakter Pemimpin di atas latar warna tema) dengan ukuran file
+   yang benar-benar cocok dengan deklarasinya. Favicon juga ditambahkan di semua
+   halaman (`assets/icons/favicon-32.png`).
+2. **404 audio diperbaiki** — 7 file efek suara sebelumnya belum ada sama sekali
+   (`assets/audio/*.mp3`), menyebabkan 404 tiap kali pemain berinteraksi (game
+   tetap berjalan normal karena `sound-manager.js` menangkap error dengan aman,
+   tapi tetap tampil di console). Sekarang sudah ada 7 berkas `.wav` chiptune asli
+   (klik, benar, salah, serang, menang, kalah, musik latar) yang disintesis
+   langsung — tanpa dependensi eksternal.
+
+Audit otomatis: dari 66 path aset yang dipakai kode, kini hanya 1 yang sengaja
+tidak ada (`characters/healer.png` — karakter Tabib belum punya gambar). Ini
+aman karena `getAssetPath()` dicek dulu sebelum elemen `<img>` dibuat, sehingga
+tidak pernah memicu request jaringan atau 404.
+
+---
+
 ## Pembaruan Kedua (Juli 2026)
 
 1. **Ramah mobile** — target sentuh minimal 44px, keypad diperbesar, tanpa zoom

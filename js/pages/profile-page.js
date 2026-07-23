@@ -17,7 +17,7 @@ import { lastNDayKeys, dayKey, formatDateId } from '../utils/date-utils.js';
 
 let engine = null;
 
-async /** Peta lencana ke ikon aset (selaras dengan game-page). */
+/** Peta lencana ke ikon aset (selaras dengan game-page). */
 function badgeIcon(id) {
   if (id.startsWith('streak_')) return ['effects', 'fire'];
   if (id.startsWith('facts_') || id === 'graduate') return ['icons', 'book'];
@@ -26,7 +26,7 @@ function badgeIcon(id) {
   return ['icons', 'star'];
 }
 
-function init() {
+async function init() {
   watchConnection();
 
   if (!isFirebaseReady()) {
