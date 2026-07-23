@@ -12,6 +12,36 @@ mengukur kecepatan dan ketepatan, serta menyimpan perkembangan setiap siswa.
 
 ---
 
+## Pembaruan Kesepuluh (Juli 2026) — 6 Perbaikan Gameplay
+
+1. **HP kembali memakai BAR** (bukan deretan hati) dengan ketentuan tetap:
+   pemain 3, musuh 5, boss 15 poin; 1 damage = 1 poin. Bug "salah 3x tapi belum
+   kalah" terjadi karena kode menulis deretan ikon ke DALAM elemen `.progress__fill`,
+   sehingga lebar bar tetap 100% dan sisa HP tak pernah terlihat berkurang.
+   Kini bar menyempit sesuai sisa HP, ada teks angka "2 / 3", dan bar berkedip
+   merah saat kritis. Terverifikasi: 3 kesalahan = kalah.
+2. **Karakter tidak lagi menghilang** — animasi 'tumbang' (death) sebelumnya
+   sengaja dibiarkan berhenti di frame terakhir; frame itu nyaris kosong,
+   sehingga sprite tampak lenyap saat musuh berikutnya muncul. Sekarang semua
+   animasi aksi SELALU kembali ke idle setelah selesai.
+3. **Syarat boss & kerajaan dirombak:**
+   - Boss muncul saat progres kerajaan >= 50% ATAU level pemain sudah cukup.
+   - Kerajaan berikutnya WAJIB mengalahkan boss kerajaan sebelumnya (plus
+     syarat level). Kemenangan boss dicatat di profil (`bossesDefeated`).
+   - Menara Campuran butuh SEMUA boss kerajaan dikalahkan.
+   - Boss dengan sisa HP <= 2 mengamuk: soal berubah menjadi hitungan 2 digit.
+4. **"undefined" di Mode Expert diperbaiki** — soal Expert dibuat tanpa field
+   `displayedQuestion`/`expectedAnswer` yang dipakai arena. Bentuk objeknya kini
+   identik dengan soal biasa.
+5. **Progres 100% = seluruh hitungan 1-9 pernah benar 2 kali.** Setiap hitungan
+   bernilai 2 poin, jadi penjumlahan & perkalian menjadi **90/90 poin**
+   (45 hitungan x 2). Kartu kerajaan menampilkan poin dan jumlah hitungan tuntas.
+6. **Daftar "Perlu dilatih lagi" diperbaiki** — kini mencakup soal yang dijawab
+   BENAR tetapi dipikirkan lama (>= 8 detik), bukan hanya yang salah. Kelancaran
+   adalah tujuan latihan, jadi jawaban lambat pun perlu diulang.
+
+---
+
 ## Pembaruan Kesembilan (Juli 2026) — 16 Perbaikan & Fitur Gameplay
 
 1. **Arena muat penuh di layar HP** — semua ukuran dikompakkan (topbar, status,

@@ -620,16 +620,6 @@
   animation-fill-mode: forwards;
 }
 
-.hearts-row {
-  display: flex;
-  gap: 3px;
-  flex-wrap: wrap;
-  align-items: center;
-  min-height: 20px;
-}
-
-.heart--empty { filter: grayscale(1) opacity(0.35); }
-
 .choice-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -730,3 +720,27 @@
   .keypad { gap: 6px; max-width: 340px; }
   .arena__actions .btn { min-height: 40px; }
 }
+
+
+/* ================= BAR HP: nilai & keadaan kritis ================= */
+
+.fighter__hp-value {
+  font-family: var(--font-body);
+  font-weight: 800;
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text);
+}
+
+/* Sisa HP menipis: bar berkedip merah agar bahaya terasa. */
+.progress__fill--critical {
+  background: linear-gradient(180deg, #ff8a72 0%, var(--color-danger) 55%, #a8241a 100%) !important;
+  animation: hp-critical 900ms ease-in-out infinite;
+}
+
+@keyframes hp-critical {
+  0%, 100% { filter: brightness(1); }
+  50%      { filter: brightness(1.45); }
+}
+
+.reduce-motion .progress__fill--critical { animation: none; }

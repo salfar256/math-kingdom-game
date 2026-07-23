@@ -8,7 +8,7 @@
  */
 
 import {
-  MODES, SESSION_CONFIG, BOSS_CONFIG, STORAGE_KEYS, MASTERY_STATUS
+  MODES, SESSION_CONFIG, BOSS_CONFIG, STORAGE_KEYS, MASTERY_STATUS, SLOW_RESPONSE_MS
 } from '../config/game-config.js';
 import { selectAdaptiveQuestions, CorrectionQueue } from './adaptive-engine.js';
 import { updateFactMastery, createEmptyFactRecord, summarizeMastery } from './mastery-engine.js';
@@ -80,6 +80,7 @@ export class SessionManager {
 
     this.startedAt = new Date();
     this.endOfSessionDrained = false;
+    this.bossHp = null;   // diperbarui arena; memicu fase 2 digit boss
   }
 
   #buildQuestions(count, targets, assignedFactIds) {
@@ -125,8 +126,20 @@ export class SessionManager {
   /* ============ ALUR SOAL ============ */
 
   /** Ambil soal berikutnya. @returns {object|null} null jika sesi selesai */
+  /** Arena melaporkan sisa hati boss agar fase 2 digit bisa dipicu. */
+  setBossHp(hp) {
+    this.bossHp = typeof hp === 'number' ? hp : null;
+  }
+
   nextQuestion() {
     if (this.finished) return null;
+
+    // FASE AKHIR BOSS: saat hati boss tinggal sedikit, ia mengamuk dan
+    // melemparkan hitungan dua digit. Dipicu lewat setBossHp() dari arena.
+    if (this.mode === MODES.BOSS && this.bossHp !== null
+        && this.bossHp <= BOSS_CONFIG.twoDigitAtHp) {
+      return this.#serve(generateExpertQuestion());
+    }
 
     // Prioritas 1: antrean koreksi yang sudah waktunya.
     const correction = this.correctionQueue.take(this.stats.total);
@@ -198,6 +211,10 @@ export class SessionManager {
       this.stats.combo += 1;
       this.stats.maxCombo = Math.max(this.stats.maxCombo, this.stats.combo);
       if (isCorrection) this.stats.corrections += 1;
+
+      // Benar TAPI lama dipikirkan -> tetap perlu dilatih. Kelancaran adalah
+      // tujuannya: jawaban yang butuh waktu lama berarti belum otomatis.
+      if (responseMs >= SLOW_RESPONSE_MS) this.weakFactIds.add(q.factId);
     } else {
       this.stats.wrong += 1;
       this.stats.combo = 0;

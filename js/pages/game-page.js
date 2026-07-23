@@ -276,7 +276,7 @@ function renderKingdoms() {
         el('div', { className: 'progress' }, [
           el('div', { className: 'progress__fill', style: { width: `${k.percent}%` } })
         ]),
-        el('div', { className: 'text-xs text-muted', text: `${(k.mastered + (k.practiced || 0))} / ${k.total} hitungan terlatih (${k.percent}%)` })
+        el('div', { className: 'text-xs text-muted', text: `${k.points} / ${k.total} poin latihan (${k.percent}%)` })
       ])
     ]);
 
@@ -365,7 +365,7 @@ function renderRecommendations() {
 function openModeScreen(kingdom) {
   $('#mode-title').textContent = kingdom.name;
   $('#mode-progress').textContent =
-    `${(kingdom.mastered + (kingdom.practiced || 0))} dari ${kingdom.total} hitungan sudah kamu latih (${kingdom.percent}%)`;
+    `${kingdom.points} dari ${kingdom.total} poin (${kingdom.mastered}/${kingdom.factCount} hitungan tuntas 2x benar) — ${kingdom.percent}%`;
 
   const list = $('#mode-list');
   clearNode(list);
@@ -848,16 +848,16 @@ function playFighterAction(who, action) {
   try { playActionSprite(node, action); } catch { /* aman tanpa animasi */ }
 }
 
-function renderHearts(node, hp, maxHp) {
-  if (!node) return;
-  clearNode(node);
-  node.classList.add('hearts-row');
-  const shown = Math.min(maxHp, 15);
-  for (let i = 0; i < shown; i++) {
-    const img = createIcon('icons', 'heart', { size: maxHp > 5 ? 14 : 20 });
-    if (i >= hp) img.classList.add('heart--empty');
-    node.appendChild(img);
-  }
+/**
+ * Bar HP: lebar sebanding sisa HP.
+ * Sistem tetap 3 / 5 / 15 poin (1 damage = 1 poin), hanya tampilannya bar.
+ */
+function renderHpBar(fillNode, hp, maxHp) {
+  if (!fillNode) return;
+  const ratio = maxHp > 0 ? Math.max(0, hp) / maxHp : 0;
+  fillNode.style.width = `${Math.round(ratio * 100)}%`;
+  // Warna berubah saat kritis (<= 1/3) supaya bahaya terlihat jelas.
+  fillNode.classList.toggle('progress__fill--critical', ratio > 0 && ratio <= 0.34);
 }
 
 /* ---------- Timer 10 detik per soal (mode pertarungan) ---------- */
@@ -945,9 +945,14 @@ function updateBattleBars() {
   if (!state.battle) return;
   const s = state.battle.getState();
 
-  renderHearts($('#player-hp-bar'), s.playerHp, s.playerMaxHp);
+  renderHpBar($('#player-hp-bar'), s.playerHp, s.playerMaxHp);
+  $('#player-hp-value').textContent = `${s.playerHp} / ${s.playerMaxHp}`;
   $('#player-hp-text').textContent = s.isBoss ? '' : `Musuh ${Math.min(s.defeatedCount + 1, s.enemiesToDefeat)}/${s.enemiesToDefeat}`;
-  renderHearts($('#enemy-hp-bar'), s.enemyHp, s.enemyMaxHp);
+  renderHpBar($('#enemy-hp-bar'), s.enemyHp, s.enemyMaxHp);
+  $('#enemy-hp-value').textContent = `${s.enemyHp} / ${s.enemyMaxHp}`;
+
+  // Boss terdesak -> sesi mulai menyajikan hitungan dua digit.
+  if (s.isBoss && state.session) state.session.setBossHp(s.enemyHp);
   $('#enemy-hp-text').textContent = `${s.enemyHp} / ${s.enemyMaxHp}`;
 }
 

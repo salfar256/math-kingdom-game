@@ -103,6 +103,13 @@ export const MASTERY_LABEL = {
 };
 
 /** Ambang batas penguasaan. Semua dapat diubah. */
+/**
+ * Jawaban benar yang memakan waktu >= ambang ini dianggap "dipikir lama",
+ * sehingga tetap masuk daftar "Perlu dilatih lagi" pada layar hasil.
+ * Selaras dengan masteredMaxAvgMs (8 detik) di MASTERY_CONFIG.
+ */
+export const SLOW_RESPONSE_MS = 8000;
+
 export const MASTERY_CONFIG = {
   // -> mastered
   masteredMinCorrect: 3,
@@ -235,7 +242,12 @@ export const SESSION_CONFIG = {
 };
 
 /** Syarat menang boss. */
+/** Setiap hitungan harus dijawab benar sebanyak ini untuk dianggap tuntas. */
+export const CORRECT_PER_FACT = 2;
+
 export const BOSS_CONFIG = {
+  unlockProgressPercent: 0.5,   // boss muncul mulai progres 50%
+  twoDigitAtHp: 2,              // boss memakai soal 2 digit saat sisa HP <= 2
   minAccuracy: 0.85,
   maxWrong: 6,
   unlockMasteryPercent: 0.5   // kerajaan harus 50% dikuasai

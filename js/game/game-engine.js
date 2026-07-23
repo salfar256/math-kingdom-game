@@ -5,7 +5,7 @@
 
 import {
   MODES, SESSION_CONFIG, KINGDOMS, KINGDOM_PROGRESS, BOSS_CONFIG,
-  OPERATION_LIST, MASTERY_STATUS, THIRTY_DAY_PLAN, MIXED_TOWER
+  OPERATION_LIST, MASTERY_STATUS, THIRTY_DAY_PLAN, MIXED_TOWER, CORRECT_PER_FACT
 } from '../config/game-config.js';
 import { SessionManager, buildMasterySummary } from './session-manager.js';
 import { getAllFactsFor } from './question-generator.js';
@@ -81,46 +81,62 @@ export class GameEngine {
    */
   getKingdomProgress(operation) {
     const allFacts = getAllFactsFor(operation);
-    const total = allFacts.length;
-    let mastered = 0;
+    const factCount = allFacts.length;
+
+    // PROGRES: setiap hitungan harus dijawab BENAR sebanyak CORRECT_PER_FACT
+    // kali. Total poin = jumlah hitungan x 2 (mis. penjumlahan 45 x 2 = 90),
+    // sehingga 100% berarti seluruh hitungan 1-9 pernah benar dua kali.
+    const total = factCount * CORRECT_PER_FACT;
+
+    let points = 0;     // poin terkumpul, maksimal 2 per hitungan
+    let mastered = 0;   // hitungan yang sudah lengkap 2x benar
     let weakCount = 0;
     let attempts = 0;
     let correct = 0;
 
-    let practiced = 0;
     for (const base of allFacts) {
       const record = this.factMap.get(base.factId);
       if (!record) { weakCount += 1; continue; }
-      if (isMastered(record)) mastered += 1;
-      else if ((record.totalAttempts || 0) > 0) practiced += 1;
-      if (!isMastered(record) && isWeak({ ...record, id: base.factId })) weakCount += 1;
+
+      const benar = Math.min(record.correctAttempts || 0, CORRECT_PER_FACT);
+      points += benar;
+      if (benar >= CORRECT_PER_FACT) mastered += 1;
+      else if (isWeak({ ...record, id: base.factId })) weakCount += 1;
+
       attempts += record.totalAttempts || 0;
       correct += record.correctAttempts || 0;
     }
 
-    // Persentase responsif: fakta dikuasai bernilai penuh, fakta yang sudah
-    // pernah dilatih bernilai 40% -- setiap pertarungan langsung menaikkan bar.
-    const ratio = total > 0 ? (mastered + practiced * 0.4) / total : 0;
+    const ratio = total > 0 ? points / total : 0;
     return {
       operation,
       total,
+      points,
+      factCount,
       mastered,
       percent: Math.round(ratio * 100),
       ratio,
       weakCount,
       accuracy: attempts > 0 ? correct / attempts : 0,
       status: this.#kingdomStatus(operation, ratio),
-      practiced,
-      bossUnlocked: this.#isBossUnlocked(operation, ratio)
+      bossUnlocked: this.#isBossUnlocked(operation, ratio),
+      bossDefeated: this.isBossDefeated(operation)
     };
   }
 
+  /** Apakah boss kerajaan ini sudah pernah dikalahkan? */
+  isBossDefeated(operation) {
+    const list = (this.profile && this.profile.bossesDefeated) || [];
+    return Array.isArray(list) && list.includes(operation);
+  }
+
   /**
-   * Boss muncul bila progres kerajaan 100% DAN level pemain sudah cukup
-   * untuk membuka kerajaan berikutnya (kerajaan terakhir: level Menara).
+   * Boss muncul bila progres kerajaan sudah >= 50%, ATAU level pemain sudah
+   * mencapai syarat kerajaan berikutnya. Dua jalur ini memberi pilihan:
+   * tekun melatih satu kerajaan, atau naik level dari kerajaan lain.
    */
   #isBossUnlocked(operation, ratio) {
-    if (ratio < 1) return false;
+    if (ratio >= BOSS_CONFIG.unlockProgressPercent) return true;
     const idx = KINGDOMS.findIndex((k) => k.id === operation);
     const nextNeed = (idx >= 0 && idx < KINGDOMS.length - 1)
       ? (KINGDOMS[idx + 1].requiredLevel || 1)
@@ -130,8 +146,12 @@ export class GameEngine {
 
   #kingdomStatus(operation, ratio) {
     if (!this.#isKingdomUnlocked(operation)) {
-      const k = KINGDOMS.find((x) => x.id === operation);
-      return `Terbuka di Level ${(k && k.requiredLevel) || 1}`;
+      const idx = KINGDOMS.findIndex((x) => x.id === operation);
+      const prev = idx > 0 ? KINGDOMS[idx - 1] : null;
+      if (prev && !this.isBossDefeated(prev.id)) {
+        return `Kalahkan Boss ${prev.shortName} dulu`;
+      }
+      return `Terbuka di Level ${(KINGDOMS[idx] && KINGDOMS[idx].requiredLevel) || 1}`;
     }
     if (ratio >= KINGDOM_PROGRESS.expertAt) return 'mahir';
     if (ratio >= KINGDOM_PROGRESS.masteredAt) return 'dikuasai';
@@ -145,14 +165,21 @@ export class GameEngine {
   }
 
   /**
-   * Kerajaan terbuka berdasarkan LEVEL pemain (requiredLevel di game-config).
-   * Naik level lewat XP dari pertarungan mana pun membuka kerajaan berikutnya.
+   * Kerajaan berikutnya terbuka bila DUA syarat terpenuhi:
+   *   1. Boss kerajaan sebelumnya sudah dikalahkan, DAN
+   *   2. Level pemain memenuhi requiredLevel kerajaan itu.
+   * Kerajaan pertama selalu terbuka.
    */
   #isKingdomUnlocked(operation) {
     if (!this.enabledOperations.includes(operation)) return false;
-    const k = KINGDOMS.find((x) => x.id === operation);
-    const need = (k && k.requiredLevel) || 1;
-    return this.playerLevel >= need;
+
+    const idx = KINGDOMS.findIndex((k) => k.id === operation);
+    if (idx <= 0) return true;
+
+    const prev = KINGDOMS[idx - 1];
+    if (!this.isBossDefeated(prev.id)) return false;
+
+    return this.playerLevel >= (KINGDOMS[idx].requiredLevel || 1);
   }
 
   /** Semua progres kerajaan + menara. */
@@ -161,7 +188,8 @@ export class GameEngine {
       .filter((k) => this.enabledOperations.includes(k.id))
       .map((k) => ({ ...k, ...this.getKingdomProgress(k.id) }));
 
-    const towerOpen = this.playerLevel >= (MIXED_TOWER.requiredLevel || 10);
+    const allBossesDown = KINGDOMS.every((k) => this.isBossDefeated(k.id));
+    const towerOpen = allBossesDown && this.playerLevel >= (MIXED_TOWER.requiredLevel || 10);
 
     const towerRatio = kingdoms.length > 0
       ? kingdoms.reduce((sum, k) => sum + k.ratio, 0) / kingdoms.length
@@ -174,7 +202,11 @@ export class GameEngine {
         unlocked: towerOpen,
         percent: Math.round(towerRatio * 100),
         ratio: towerRatio,
-        status: towerOpen ? 'terbuka' : `Terbuka di Level ${MIXED_TOWER.requiredLevel || 10}`
+        status: towerOpen
+          ? 'terbuka'
+          : (allBossesDown
+              ? `Terbuka di Level ${MIXED_TOWER.requiredLevel || 10}`
+              : 'Kalahkan semua Boss kerajaan dulu')
       }
     };
   }
@@ -256,7 +288,7 @@ export class GameEngine {
    * Selesaikan sesi: simpan ke Firestore, perbarui profil, hitung lencana.
    * @returns {Promise<object>} ringkasan lengkap untuk halaman hasil
    */
-  async finishSession({ bossId = null, enemyHp = null } = {}) {
+  async finishSession({ bossId = null, enemyHp = null, playerHp = 1 } = {}) {
     if (!this.session) return null;
 
     const dailyTarget = (this.classSettings && this.classSettings.dailyTargetQuestions) || 40;
@@ -266,7 +298,19 @@ export class GameEngine {
     // Boss.
     let bossResult = null;
     if (this.session.mode === MODES.BOSS && enemyHp !== null) {
-      bossResult = this.session.evaluateBoss(enemyHp);
+      bossResult = this.session.evaluateBoss(enemyHp, playerHp);
+
+      // Catat kemenangan boss: inilah kunci pembuka kerajaan berikutnya.
+      if (bossResult.victory) {
+        const operation = this.session.operations[0];
+        const defeated = Array.isArray(this.profile.bossesDefeated)
+          ? this.profile.bossesDefeated : [];
+        if (operation && !defeated.includes(operation)) {
+          this.profile.bossesDefeated = [...defeated, operation];
+          await upsertStudentProfile(this.uid, { bossesDefeated: this.profile.bossesDefeated })
+            .catch(() => { /* tidak fatal; akan dicoba lagi sesi berikutnya */ });
+        }
+      }
     }
 
     // Simpan sesi + fakta.

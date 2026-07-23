@@ -394,14 +394,20 @@ export function generateExpertQuestion() {
     if (a > 999) { a = 20 * d; answer = 20; }
   }
 
+  // Bentuk objek HARUS sama dengan toQuestion() -- kalau tidak, tampilan soal
+  // menjadi "undefined" karena advanceQuestion() membaca displayedQuestion.
   return {
     factId: `exp_${op}_${a}_${b}`,
     familyId: 'fam_expert',
     operation: op,
     operandA: a,
     operandB: b,
+    displayA: a,
+    displayB: b,
+    symbol: OPERATION_SYMBOL[op],
+    displayedQuestion: `${a} ${OPERATION_SYMBOL[op]} ${b}`,
+    expectedAnswer: answer,
     answer,
-    display: `${a} ${OPERATION_SYMBOL[op]} ${b}`,
     isExpert: true
   };
 }

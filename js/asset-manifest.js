@@ -324,12 +324,12 @@ export function playActionSprite(wrapNode, action) {
     const dur = ACTION_DURATION_MS[action] || 550;
     sprite.style.animationDuration = `${dur}ms`;
     setTimeout(() => {
-      // 'death' menetap di frame terakhir sampai sprite diganti/di-mount ulang.
-      if (action !== 'death') {
-        sprite.style.backgroundImage = prevBg;
-        sprite.style.animationDuration = '';
-        sprite.classList.remove('idle-sprite--oneshot');
-      }
+      // SELALU kembali ke idle -- termasuk setelah 'death'. Sebelumnya sprite
+      // dibiarkan di frame terakhir, sehingga saat musuh berikutnya muncul
+      // karakter tampak menghilang (frame tumbang = hampir kosong).
+      sprite.style.backgroundImage = prevBg;
+      sprite.style.animationDuration = '';
+      sprite.classList.remove('idle-sprite--oneshot');
     }, dur);
   };
   probe.src = path;
