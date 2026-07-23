@@ -12,6 +12,40 @@ mengukur kecepatan dan ketepatan, serta menyimpan perkembangan setiap siswa.
 
 ---
 
+## Pembaruan Kedua Belas (Juli 2026) — 5 Perbaikan & Fitur
+
+1. **Data dashboard guru tidak selaras dengan progres siswa — bug ditemukan.**
+   Dashboard guru memakai `summarizeMastery()` yang menghitung total dari
+   fakta yang PERNAH DICOBA saja (mis. "Penjumlahan 0/11"), sementara sisi
+   siswa memakai skema poin tetap (mis. "0/90"). Dua sumber data berbeda.
+   Fungsi baru `summarizeProgressByOperation()` (di `mastery-engine.js`)
+   kini dipakai kedua sisi, memakai total pool tetap yang sama persis
+   (`getAllFactsFor()` x `CORRECT_PER_FACT`). Font pada modal detail siswa
+   juga diberi deklarasi eksplisit untuk memastikan tampil benar meski ada
+   cache lama.
+2. **Animasi diperlambat** — attack 550→700ms, hurt 500→650ms,
+   death 900→1400ms, siklus idle 0.9s→1.3s. Jeda sebelum soal berikutnya
+   turut disesuaikan (700→850ms) agar animasi tidak terpotong.
+3. **Tombol "Download Game" di halaman Profil** — memakai ikon aplikasi yang
+   sudah dipasang di `manifest.webmanifest`. Event `beforeinstallprompt`
+   ditangkap lewat `<script>` inline di `profile.html`, SENGAJA dipisah dari
+   modul Firebase supaya tombol tetap berfungsi meski Firebase gagal dimuat
+   (jaringan bermasalah). Diverifikasi: tombol tetap muncul walau seluruh
+   domain Firebase diblokir dalam pengujian.
+4. **Kalah setelah 3x salah** kini berlaku di SEMUA mode (Battle, Boss,
+   Mixed, Speed, Keluarga Angka, Expert) KECUALI Latihan, yang mendapat HP
+   tak terbatas (ditangani aman tanpa nilai `NaN`, ditampilkan simbol ∞).
+5. **Expert/Boss bocor ke operasi lain — bug ditemukan & diperbaiki.**
+   `generateExpertQuestion()` sebelumnya SELALU memilih acak dari keempat
+   operasi, sehingga boss Penjumlahan bisa menampilkan soal perkalian/
+   pembagian saat HP rendah, dan Mode Expert di kerajaan mana pun bisa
+   menampilkan operasi kerajaan lain. Fungsi ini sekarang menerima daftar
+   operasi yang diizinkan; boss dan Mode Expert per-kerajaan hanya memakai
+   operasi kerajaan itu sendiri (Menara Campuran tetap bebas semua operasi).
+   Diverifikasi: 40x soal boss Penjumlahan -> 0 kebocoran ke operasi lain.
+
+---
+
 ## Pembaruan Kesebelas (Juli 2026) — 3 Perbaikan
 
 1. **Kerajaan tidak lagi terbuka semua** — bug ditemukan di `game-page.js`:

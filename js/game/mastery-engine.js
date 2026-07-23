@@ -9,9 +9,9 @@
  */
 
 import {
-  MASTERY_STATUS, MASTERY_CONFIG, SPACED_INTERVALS_MS
+  MASTERY_STATUS, MASTERY_CONFIG, SPACED_INTERVALS_MS, CORRECT_PER_FACT
 } from '../config/game-config.js';
-import { buildFact } from './question-generator.js';
+import { buildFact, getAllFactsFor } from './question-generator.js';
 import { dayKey, toMillis } from '../utils/date-utils.js';
 
 /** Buat rekaman fakta baru (belum pernah dikerjakan). */
@@ -259,4 +259,51 @@ export function summarizeMastery(factMap) {
 
   const totalMastered = counts.mastered + counts.automatic;
   return { counts, byOperation, totalMastered, totalTracked: factMap.size };
+}
+
+/**
+ * Progres per operasi dengan TOTAL POOL TETAP (mis. penjumlahan = 90 poin),
+ * memakai skema yang SAMA PERSIS dengan getKingdomProgress() di sisi siswa
+ * (js/game/game-engine.js). Dipakai dashboard guru agar angka yang dilihat
+ * guru selalu sinkron dengan progres yang dilihat siswa sendiri -- sebelumnya
+ * dashboard guru memakai summarizeMastery() yang hanya menghitung fakta yang
+ * PERNAH DICOBA sebagai penyebut (bukan total pool sesungguhnya), sehingga
+ * mis. "Penjumlahan 0/11" padahal total sebenarnya 90 poin (45 hitungan x2).
+ */
+export function summarizeProgressByOperation(factMap, operations) {
+  const out = {};
+  for (const op of operations) {
+    const allFacts = getAllFactsFor(op);
+    const factCount = allFacts.length;
+    const total = factCount * CORRECT_PER_FACT;
+
+    let points = 0;
+    let mastered = 0;
+    let attempts = 0;
+    let correct = 0;
+    let sumMs = 0;
+    let msCount = 0;
+
+    for (const base of allFacts) {
+      const record = factMap.get(base.factId);
+      if (!record) continue;
+
+      const benar = Math.min(record.correctAttempts || 0, CORRECT_PER_FACT);
+      points += benar;
+      if (benar >= CORRECT_PER_FACT) mastered += 1;
+      attempts += record.totalAttempts || 0;
+      correct += record.correctAttempts || 0;
+      if (record.averageResponseMs > 0) { sumMs += record.averageResponseMs; msCount += 1; }
+    }
+
+    out[op] = {
+      total,
+      points,
+      factCount,
+      mastered,
+      accuracy: attempts > 0 ? correct / attempts : 0,
+      averageResponseMs: msCount > 0 ? Math.round(sumMs / msCount) : 0
+    };
+  }
+  return out;
 }

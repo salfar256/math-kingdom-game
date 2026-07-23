@@ -719,7 +719,7 @@ function submitAnswer() {
   updateHud();
   updateBattleBars();
 
-  const isBattleMode = [MODES.BATTLE, MODES.BOSS, MODES.MIXED].includes(state.session.mode);
+  const isBattleMode = state.session.mode !== MODES.PRACTICE;
   const needsDeathPause = isBattleMode
     && (battleResult.battleWon || (battleResult.enemyDefeated && !state.battle.isBoss) || battleResult.playerDown);
 
@@ -728,7 +728,7 @@ function submitAnswer() {
     : (needsDeathPause ? ACTION_DURATION_MS.hurt + SESSION_CONFIG.autoAdvanceWrongMs : SESSION_CONFIG.autoAdvanceWrongMs);
 
   state.advanceTimeout = setTimeout(() => {
-    const inBattle = [MODES.BATTLE, MODES.BOSS, MODES.MIXED].includes(state.session.mode);
+    const inBattle = state.session.mode !== MODES.PRACTICE;
 
     if (inBattle && (battleResult.battleWon || battleResult.playerDown)) {
       endSession();
@@ -862,7 +862,7 @@ function playFighterAction(who, action) {
  */
 function renderHpBar(fillNode, hp, maxHp) {
   if (!fillNode) return;
-  const ratio = maxHp > 0 ? Math.max(0, hp) / maxHp : 0;
+  const ratio = Number.isFinite(maxHp) && maxHp > 0 ? Math.max(0, hp) / maxHp : 1;
   fillNode.style.width = `${Math.round(ratio * 100)}%`;
   // Warna berubah saat kritis (<= 1/3) supaya bahaya terlihat jelas.
   fillNode.classList.toggle('progress__fill--critical', ratio > 0 && ratio <= 0.34);
@@ -954,7 +954,9 @@ function updateBattleBars() {
   const s = state.battle.getState();
 
   renderHpBar($('#player-hp-bar'), s.playerHp, s.playerMaxHp);
-  $('#player-hp-value').textContent = `${s.playerHp} / ${s.playerMaxHp}`;
+  $('#player-hp-value').textContent = Number.isFinite(s.playerMaxHp)
+    ? `${s.playerHp} / ${s.playerMaxHp}`
+    : '\u221e'; // Mode Latihan: HP tak terbatas
   $('#player-hp-text').textContent = s.isBoss ? '' : `Musuh ${Math.min(s.defeatedCount + 1, s.enemiesToDefeat)}/${s.enemiesToDefeat}`;
   renderHpBar($('#enemy-hp-bar'), s.enemyHp, s.enemyMaxHp);
   $('#enemy-hp-value').textContent = `${s.enemyHp} / ${s.enemyMaxHp}`;

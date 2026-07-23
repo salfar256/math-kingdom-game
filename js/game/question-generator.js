@@ -373,12 +373,18 @@ export function deriveFamilyNumbers(q) {
  * - Perkalian   : 10-99 x 2-9
  * - Pembagian   : kebalikan perkalian di atas (selalu bulat)
  * Jawaban dijaga maksimal 3 digit.
+ *
+ * @param {string[]|null} allowedOps operasi yang diizinkan. Kosong/null =
+ *   semua operasi (dipakai Menara Campuran). Di kerajaan biasa, HARUS diisi
+ *   dengan operasi kerajaan itu saja -- sebelumnya fungsi ini selalu memilih
+ *   acak dari keempat operasi, sehingga boss Penjumlahan bisa memunculkan
+ *   soal perkalian/pembagian saat HP rendah. Sudah diperbaiki di sini.
  */
-export function generateExpertQuestion() {
-  const op = pickRandom([
-    OPERATIONS.ADDITION, OPERATIONS.SUBTRACTION,
-    OPERATIONS.MULTIPLICATION, OPERATIONS.DIVISION
-  ]);
+export function generateExpertQuestion(allowedOps = null) {
+  const pool = Array.isArray(allowedOps) && allowedOps.length > 0
+    ? allowedOps
+    : [OPERATIONS.ADDITION, OPERATIONS.SUBTRACTION, OPERATIONS.MULTIPLICATION, OPERATIONS.DIVISION];
+  const op = pickRandom(pool);
 
   let a, b, answer;
   if (op === OPERATIONS.ADDITION) {

@@ -439,7 +439,7 @@
   background-size: calc(var(--idle-size) * 4) var(--idle-size);
   background-position: 0 0;
   image-rendering: pixelated;
-  animation: idle-play 0.9s steps(4) infinite;
+  animation: idle-play 1.3s steps(4) infinite;
 }
 
 @keyframes idle-play {

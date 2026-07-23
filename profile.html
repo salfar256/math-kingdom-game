@@ -15,6 +15,31 @@
   <link rel="stylesheet" href="./css/game.css" />
   <link rel="stylesheet" href="./css/dashboard.css" />
   <link rel="stylesheet" href="./css/responsive.css" />
+  <!--
+    Penangkapan 'beforeinstallprompt' TERPISAH dari js/pages/profile-page.js
+    yang bergantung pada Firebase. Kalau Firebase gagal dimuat (mis. jaringan
+    sekolah tersendat), tombol download tetap berfungsi. Ditaruh inline di
+    <head> agar terpasang sedini mungkin -- event ini bisa terjadi kapan saja
+    setelah halaman mulai dimuat, dan yang terlewat tidak bisa ditangkap lagi.
+  -->
+  <script>
+    window.__deferredInstallPrompt = null;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      window.__deferredInstallPrompt = e;
+      document.addEventListener('DOMContentLoaded', () => {
+        const s = document.querySelector('#install-section');
+        if (s) s.hidden = false;
+      });
+      const s = document.querySelector('#install-section');
+      if (s) s.hidden = false;
+    });
+    window.addEventListener('appinstalled', () => {
+      window.__deferredInstallPrompt = null;
+      const s = document.querySelector('#install-section');
+      if (s) s.hidden = true;
+    });
+  </script>
 </head>
 <body>
   <a class="skip-link" href="#main">Lompat ke konten utama</a>
@@ -60,6 +85,20 @@
       <section aria-labelledby="badges-title">
         <h2 id="badges-title">Lencana</h2>
         <div class="badge-grid" id="badge-grid"></div>
+      </section>
+
+      <section aria-labelledby="install-title" id="install-section" hidden>
+        <h2 id="install-title">Download Game</h2>
+        <div class="panel install-card">
+          <img class="install-card__icon" src="./assets/icons/app-icon-192.png" alt="" width="56" height="56" />
+          <div class="install-card__text">
+            <strong>Pasang di perangkatmu</strong>
+            <p class="text-sm text-muted" style="margin:4px 0 0;">
+              Main tanpa buka browser -- ikon game muncul di layar utama/desktop.
+            </p>
+          </div>
+          <button type="button" class="btn btn--primary" id="btn-install">Download Game</button>
+        </div>
       </section>
 
     </main>

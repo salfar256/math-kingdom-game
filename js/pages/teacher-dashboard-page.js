@@ -8,7 +8,7 @@ import {
   updateClassSettings, deleteClass, getStudentDetail, removeStudentFromClass
 } from '../firebase/class-service.js';
 import { resetStudentProgress } from '../firebase/firestore-service.js';
-import { summarizeMastery, factAccuracy } from '../game/mastery-engine.js';
+import { summarizeMastery, summarizeProgressByOperation, factAccuracy } from '../game/mastery-engine.js';
 import {
   OPERATION_LIST, OPERATION_LABEL, SESSION_CONFIG, MASTERY_LABEL
 } from '../config/game-config.js';
@@ -443,6 +443,10 @@ async function openStudentDetail(student) {
 
   const factMap = new Map(detail.facts.map((f) => [f.id, f]));
   const mastery = summarizeMastery(factMap);
+  // Progres per operasi memakai skema TOTAL POOL TETAP -- identik dengan
+  // yang dilihat siswa di layar peta/profilnya sendiri (mis. "12/90"),
+  // bukan hanya menghitung fakta yang pernah dicoba sebagai penyebut.
+  const opProgress = summarizeProgressByOperation(factMap, OPERATION_LIST);
   const content = el('div', { className: 'stack' });
 
   // Ringkasan.
@@ -465,15 +469,15 @@ async function openStudentDetail(student) {
   content.appendChild(el('h3', { text: 'Progres per Operasi' }));
   for (const op of OPERATION_LIST) {
     if (dash.filters.operation !== 'all' && dash.filters.operation !== op) continue;
-    const b = mastery.byOperation[op] || { total: 0, mastered: 0, accuracy: 0, averageResponseMs: 0 };
-    const pct = b.total > 0 ? Math.round((b.mastered / b.total) * 100) : 0;
+    const b = opProgress[op] || { total: 0, points: 0, mastered: 0, factCount: 0, accuracy: 0, averageResponseMs: 0 };
+    const pct = b.total > 0 ? Math.round((b.points / b.total) * 100) : 0;
 
     content.appendChild(el('div', { className: 'op-progress' }, [
       el('div', { className: 'op-progress__head' }, [
         el('span', { className: 'op-progress__name', text: OPERATION_LABEL[op] }),
         el('span', {
           className: 'text-muted',
-          text: `${b.mastered}/${b.total} · akurasi ${Math.round(b.accuracy * 100)}%`
+          text: `${b.points}/${b.total} poin (${b.mastered}/${b.factCount} hitungan) · akurasi ${Math.round(b.accuracy * 100)}%`
         })
       ]),
       el('div', { className: 'progress' }, [

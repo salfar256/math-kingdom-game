@@ -21,7 +21,9 @@ export class BattleEngine {
     this.characterId = characterId;
     this.mode = mode;
 
-    this.playerMaxHp = BATTLE_CONFIG.playerHearts;
+    // Mode Latihan: HP tak terbatas -- kesalahan tidak pernah membuat kalah,
+    // hanya mode ini yang bebas jelajah tanpa tekanan (sesuai permintaan).
+    this.playerMaxHp = mode === MODES.PRACTICE ? Infinity : BATTLE_CONFIG.playerHearts;
     this.playerHp = this.playerMaxHp;
 
     this.isBoss = mode === MODES.BOSS || Boolean(bossId);
@@ -99,7 +101,10 @@ export class BattleEngine {
     return this.defeatedCount >= this.enemiesToDefeat && this.playerHp > 0;
   }
 
-  get playerHpPercent() { return clamp(this.playerHp / this.playerMaxHp, 0, 1); }
+  get playerHpPercent() {
+    if (!Number.isFinite(this.playerMaxHp)) return 1; // Latihan: selalu penuh
+    return clamp(this.playerHp / this.playerMaxHp, 0, 1);
+  }
   get enemyHpPercent()  { return clamp(this.enemyHp / this.enemyMaxHp, 0, 1); }
 
   getState() {

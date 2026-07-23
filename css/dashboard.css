@@ -129,3 +129,36 @@
 
 .history-cell.is-active { background: var(--color-success); border-color: var(--color-success-dark); }
 .badge-item__how { display: block; line-height: 1.3; margin-top: 2px; }
+
+/* Font eksplisit pada konten modal detail siswa (dibuat dinamis via JS) --
+   memastikan tampil dengan font game meski ada cache lama atau urutan
+   pemuatan CSS yang tidak ideal. */
+.modal__dialog h3 { font-family: var(--font-display); }
+.modal__dialog .op-progress__name,
+.modal__dialog .stat__value,
+.modal__dialog .stat__label { font-family: var(--font-display); }
+
+/* ================= KARTU INSTAL (Download Game) ================= */
+
+.install-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.install-card__icon {
+  border-radius: var(--radius-md);
+  image-rendering: pixelated;
+  flex-shrink: 0;
+}
+
+.install-card__text { flex: 1 1 200px; min-width: 0; }
+
+.install-card #btn-install,
+.install-card .btn { flex-shrink: 0; }
+
+@media (max-width: 480px) {
+  .install-card { flex-direction: column; align-items: stretch; text-align: center; }
+  .install-card__icon { align-self: center; }
+}

@@ -236,7 +236,7 @@ export const SESSION_CONFIG = {
   placementQuestions: 40,
   speedDurationsMs: [30000, 45000, 60000, 90000],
   defaultSpeedMs: 30000,
-  autoAdvanceCorrectMs: 700,
+  autoAdvanceCorrectMs: 850,
   autoAdvanceWrongMs: 2600,
   maxAnswerLength: 3
 };

@@ -89,8 +89,10 @@ export class SessionManager {
     }
     if (this.mode === MODES.EXPERT) {
       // Mode Expert: soal 2 digit, jawab sebanyak-banyaknya dalam 60 detik.
+      // Dibatasi pada operasi kerajaan yang sedang dimainkan (this.operations);
+      // Menara Campuran punya lebih dari satu operasi -> boleh semua acak.
       const out = [];
-      for (let i = 0; i < 200; i++) out.push(generateExpertQuestion());
+      for (let i = 0; i < 200; i++) out.push(generateExpertQuestion(this.operations));
       return out;
     }
     return selectAdaptiveQuestions({
@@ -135,10 +137,12 @@ export class SessionManager {
     if (this.finished) return null;
 
     // FASE AKHIR BOSS: saat hati boss tinggal sedikit, ia mengamuk dan
-    // melemparkan hitungan dua digit. Dipicu lewat setBossHp() dari arena.
+    // melemparkan hitungan dua digit -- HANYA dari operasi kerajaan boss ini
+    // (mis. boss Penjumlahan tetap memberi soal penjumlahan, bukan acak dari
+    // keempat operasi seperti sebelumnya). Dipicu lewat setBossHp() dari arena.
     if (this.mode === MODES.BOSS && this.bossHp !== null
         && this.bossHp <= BOSS_CONFIG.twoDigitAtHp) {
-      return this.#serve(generateExpertQuestion());
+      return this.#serve(generateExpertQuestion(this.operations));
     }
 
     // Prioritas 1: antrean koreksi yang sudah waktunya.

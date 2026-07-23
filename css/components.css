@@ -255,6 +255,7 @@ textarea:focus {
   position: relative;
   width: min(92vw, 460px);
   max-height: 86dvh;
+  font-family: var(--font-body);
   overflow-y: auto;
   padding: var(--space-5);
   background: linear-gradient(180deg, var(--color-panel-light) 0%, var(--color-panel) 16%);

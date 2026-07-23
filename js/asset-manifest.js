@@ -307,7 +307,9 @@ export function createIcon(category, key, { size = 20, className = '', alt = '' 
  * sprite idle, lalu otomatis kembali ke idle. Aman bila berkas tidak ada.
  */
 
-export const ACTION_DURATION_MS = { attack: 550, hurt: 500, death: 900 };
+// Diperlambat (item 2) supaya animasi 4-frame benar-benar sempat terlihat,
+// bukan sekadar berkedip sekilas.
+export const ACTION_DURATION_MS = { attack: 700, hurt: 650, death: 1400 };
 
 export function playActionSprite(wrapNode, action) {
   if (!wrapNode) return;
