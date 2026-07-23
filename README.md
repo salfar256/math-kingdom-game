@@ -12,6 +12,21 @@ mengukur kecepatan dan ketepatan, serta menyimpan perkembangan setiap siswa.
 
 ---
 
+## Pembaruan Kedelapan (Juli 2026) — Halaman Kisah Kosong
+
+**Bug ditemukan:** saat menambahkan layar kisah pada pembaruan sebelumnya,
+daftar `SCREENS` di `game-page.js` (yang dipakai fungsi `showScreen()` untuk
+menentukan elemen mana yang ditampilkan/disembunyikan) lupa diperbarui --
+`'screen-story'` tidak ada di daftar itu. Akibatnya `showScreen('screen-story')`
+tidak menampilkan elemen apa pun sama sekali, sehingga halaman terlihat
+kosong total setelah akun baru dibuat.
+
+**Perbaikan:** `screen-story` ditambahkan ke daftar `SCREENS`. Diverifikasi
+lewat browser headless -- layar kisah kini benar-benar tampil beserta
+gambar dan tombol "Lanjutkan Perjalanan".
+
+---
+
 ## Pembaruan Ketujuh (Juli 2026) — Bug Urutan Login Siswa
 
 **Akar masalah "Missing or insufficient permissions" saat daftar akun siswa

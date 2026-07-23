@@ -48,7 +48,7 @@ const state = {
   isSubmitting: false
 };
 
-const SCREENS = ['screen-map', 'screen-mode', 'screen-arena', 'screen-result', 'screen-leaderboard'];
+const SCREENS = ['screen-story', 'screen-map', 'screen-mode', 'screen-arena', 'screen-result', 'screen-leaderboard'];
 
 function showScreen(id) {
   for (const s of SCREENS) show($(`#${s}`), s === id);
