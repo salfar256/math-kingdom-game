@@ -1,0 +1,65 @@
+name: Deploy ke GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Izin minimum yang dibutuhkan untuk deployment Pages.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Hanya satu deployment berjalan pada satu waktu.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Ambil kode
+        uses: actions/checkout@v4
+
+      - name: Siapkan GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Periksa konfigurasi Firebase
+        run: |
+          if [ ! -f "js/config/firebase-config.js" ]; then
+            echo "PERINGATAN: js/config/firebase-config.js tidak ditemukan."
+            echo "Salin firebase-config.example.js dan isi konfigurasi Anda."
+            exit 1
+          fi
+          if grep -q "GANTI_DENGAN_API_KEY_ANDA" js/config/firebase-config.js; then
+            echo "PERINGATAN: firebase-config.js masih berisi nilai contoh."
+            exit 1
+          fi
+          echo "Konfigurasi Firebase ditemukan."
+
+      - name: Cegah kebocoran kredensial rahasia
+        run: |
+          if git ls-files | grep -Ei 'serviceAccount.*\.json|service-account.*\.json'; then
+            echo "GAGAL: file service account terdeteksi di repository."
+            exit 1
+          fi
+          if grep -rl "BEGIN PRIVATE KEY" --include="*.js" --include="*.json" . 2>/dev/null; then
+            echo "GAGAL: private key terdeteksi di repository."
+            exit 1
+          fi
+          echo "Tidak ada kredensial rahasia yang terdeteksi."
+
+      - name: Unggah artefak situs
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+
+      - name: Deploy ke GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
