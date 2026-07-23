@@ -12,6 +12,23 @@ mengukur kecepatan dan ketepatan, serta menyimpan perkembangan setiap siswa.
 
 ---
 
+## Pembaruan Kedua (Juli 2026)
+
+1. **Ramah mobile** — target sentuh minimal 44px, keypad diperbesar, tanpa zoom
+   otomatis saat mengetik di iOS, dukungan safe-area untuk ponsel berponi,
+   tab kelas/papan peringkat dapat digulir menyamping, tabel guru dapat digeser,
+   dan ukuran sprite menyesuaikan layar sempit maupun mode lanskap.
+2. **Perbaikan "tidak bisa menambah kelas"** — query daftar kelas guru tidak lagi
+   memerlukan composite index Firestore (penyebab umum kegagalan bila
+   `firestore.indexes.json` belum dipasang). Pengurutan kini di sisi klien.
+   Pesan error izin/index juga dibuat lebih jelas dan menunjuk ke solusinya.
+3. **Tanpa emoji** — seluruh antarmuka kini memakai aset gambar dari folder
+   `assets/icons/` dan `assets/effects/` (dipotong dari lembar referensi UI):
+   hati, permata, koin, pedang, buku, gir, bintang, api, kilau, dan lainnya.
+   Bila sebuah gambar gagal dimuat, penggantinya adalah teks polos — bukan emoji.
+
+---
+
 ## Pembaruan Aset (Juli 2026)
 
 Seluruh aset gambar pixel sudah terpasang di folder `assets/` dan langsung dipakai game:

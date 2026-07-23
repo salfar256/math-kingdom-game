@@ -37,7 +37,6 @@ export const KINGDOMS = [
     name: 'Kerajaan Penjumlahan',
     shortName: 'Penjumlahan',
     symbol: '+',
-    emoji: '➕',
     background: 'addition-kingdom',
     icon: 'addition',
     order: 1
@@ -47,7 +46,6 @@ export const KINGDOMS = [
     name: 'Kerajaan Pengurangan',
     shortName: 'Pengurangan',
     symbol: '−',
-    emoji: '➖',
     background: 'subtraction-kingdom',
     icon: 'subtraction',
     order: 2
@@ -57,7 +55,6 @@ export const KINGDOMS = [
     name: 'Kerajaan Perkalian',
     shortName: 'Perkalian',
     symbol: '×',
-    emoji: '✖️',
     background: 'multiplication-kingdom',
     icon: 'multiplication',
     order: 3
@@ -67,7 +64,6 @@ export const KINGDOMS = [
     name: 'Kerajaan Pembagian',
     shortName: 'Pembagian',
     symbol: '÷',
-    emoji: '➗',
     background: 'division-kingdom',
     icon: 'division',
     order: 4
@@ -78,7 +74,6 @@ export const MIXED_TOWER = {
   id: 'mixed',
   name: 'Menara Operasi Campuran',
   shortName: 'Menara Campuran',
-  emoji: '🗼',
   background: 'mixed-tower',
   icon: 'star',
   order: 5
@@ -250,12 +245,12 @@ export const KINGDOM_PROGRESS = {
 };
 
 export const CHARACTERS = [
-  { id: 'adventurer', name: 'Petualang', emoji: '🧑‍🌾', asset: 'adventurer', desc: 'Seimbang dan tangguh.' },
-  { id: 'knight',     name: 'Ksatria',   emoji: '🛡️',   asset: 'knight',     desc: 'HP lebih besar.' },
-  { id: 'mage',       name: 'Penyihir',  emoji: '🧙',    asset: 'mage',       desc: 'Serangan kuat.' },
-  { id: 'archer',     name: 'Pemanah',   emoji: '🏹',    asset: 'archer',     desc: 'Cepat dan akurat.' },
-  { id: 'healer',     name: 'Tabib',     emoji: '💚',    asset: 'healer',     desc: 'Pemulihan lebih baik.' },
-  { id: 'leader',     name: 'Pemimpin',  emoji: '👑',    asset: 'leader',     desc: 'Bonus combo.' }
+  { id: 'adventurer', name: 'Petualang', asset: 'adventurer', desc: 'Seimbang dan tangguh.' },
+  { id: 'knight',     name: 'Ksatria',   asset: 'knight',     desc: 'HP lebih besar.' },
+  { id: 'mage',       name: 'Penyihir',  asset: 'mage',       desc: 'Serangan kuat.' },
+  { id: 'archer',     name: 'Pemanah',   asset: 'archer',     desc: 'Cepat dan akurat.' },
+  { id: 'healer',     name: 'Tabib',     asset: 'healer',     desc: 'Pemulihan lebih baik.' },
+  { id: 'leader',     name: 'Pemimpin',  asset: 'leader',     desc: 'Bonus combo.' }
 ];
 
 export const CHARACTER_BONUS = {
@@ -268,38 +263,38 @@ export const CHARACTER_BONUS = {
 };
 
 export const ENEMIES = [
-  { id: 'slime',        name: 'Slime',        emoji: '🟢', asset: 'slime' },
-  { id: 'goblin',       name: 'Goblin',       emoji: '👺', asset: 'goblin' },
-  { id: 'skeleton',     name: 'Kerangka',     emoji: '💀', asset: 'skeleton' },
-  { id: 'orc',          name: 'Orc',          emoji: '👹', asset: 'orc' },
-  { id: 'dark-mage',    name: 'Penyihir Hitam', emoji: '🧟', asset: 'dark-mage' },
-  { id: 'shadow-ninja', name: 'Ninja Bayangan', emoji: '🥷', asset: 'shadow-ninja' }
+  { id: 'slime',        name: 'Slime',        asset: 'slime' },
+  { id: 'goblin',       name: 'Goblin',       asset: 'goblin' },
+  { id: 'skeleton',     name: 'Kerangka',     asset: 'skeleton' },
+  { id: 'orc',          name: 'Orc',          asset: 'orc' },
+  { id: 'dark-mage',    name: 'Penyihir Hitam', asset: 'dark-mage' },
+  { id: 'shadow-ninja', name: 'Ninja Bayangan', asset: 'shadow-ninja' }
 ];
 
 export const BOSSES = [
-  { id: 'boss-6', name: 'Raja Enam',   emoji: '👑', asset: 'boss-6', focus: 6 },
-  { id: 'boss-7', name: 'Raja Tujuh',  emoji: '👑', asset: 'boss-7', focus: 7 },
-  { id: 'boss-8', name: 'Raja Delapan',emoji: '👑', asset: 'boss-8', focus: 8 },
-  { id: 'boss-9', name: 'Raja Sembilan',emoji: '👑', asset: 'boss-9', focus: 9 },
-  { id: 'mixed-boss', name: 'Penguasa Menara', emoji: '🗿', asset: 'mixed-boss', focus: null }
+  { id: 'boss-6', name: 'Raja Enam',   asset: 'boss-6', focus: 6 },
+  { id: 'boss-7', name: 'Raja Tujuh',  asset: 'boss-7', focus: 7 },
+  { id: 'boss-8', name: 'Raja Delapan',asset: 'boss-8', focus: 8 },
+  { id: 'boss-9', name: 'Raja Sembilan',asset: 'boss-9', focus: 9 },
+  { id: 'mixed-boss', name: 'Penguasa Menara', asset: 'mixed-boss', focus: null }
 ];
 
 export const BADGES = [
-  { id: 'first_session',  name: 'Langkah Pertama',   emoji: '🌱', desc: 'Menyelesaikan sesi pertama.' },
-  { id: 'streak_3',       name: 'Api Kecil',         emoji: '🔥', desc: 'Latihan 3 hari berturut-turut.' },
-  { id: 'streak_7',       name: 'Api Besar',         emoji: '🔥', desc: 'Latihan 7 hari berturut-turut.' },
-  { id: 'streak_30',      name: 'Api Abadi',         emoji: '🏆', desc: 'Latihan 30 hari berturut-turut.' },
-  { id: 'accuracy_90',    name: 'Mata Tajam',        emoji: '🎯', desc: 'Akurasi sesi 90% atau lebih.' },
-  { id: 'perfect_session',name: 'Sempurna',          emoji: '⭐', desc: 'Satu sesi tanpa kesalahan.' },
-  { id: 'facts_25',       name: 'Pengumpul Fakta',   emoji: '📗', desc: 'Menguasai 25 fakta.' },
-  { id: 'facts_100',      name: 'Ahli Fakta',        emoji: '📘', desc: 'Menguasai 100 fakta.' },
-  { id: 'facts_250',      name: 'Master Fakta',      emoji: '📙', desc: 'Menguasai 250 fakta.' },
-  { id: 'boss_6',         name: 'Penakluk Enam',     emoji: '⚔️', desc: 'Mengalahkan Raja Enam.' },
-  { id: 'boss_7',         name: 'Penakluk Tujuh',    emoji: '⚔️', desc: 'Mengalahkan Raja Tujuh.' },
-  { id: 'boss_8',         name: 'Penakluk Delapan',  emoji: '⚔️', desc: 'Mengalahkan Raja Delapan.' },
-  { id: 'boss_9',         name: 'Penakluk Sembilan', emoji: '⚔️', desc: 'Mengalahkan Raja Sembilan.' },
-  { id: 'speed_demon',    name: 'Secepat Kilat',     emoji: '⚡', desc: '20 benar dalam mode kecepatan.' },
-  { id: 'graduate',       name: 'Lulusan Kerajaan',  emoji: '🎓', desc: 'Menyelesaikan tes akhir.' }
+  { id: 'first_session',  name: 'Langkah Pertama',   desc: 'Menyelesaikan sesi pertama.' },
+  { id: 'streak_3',       name: 'Api Kecil',         desc: 'Latihan 3 hari berturut-turut.' },
+  { id: 'streak_7',       name: 'Api Besar',         desc: 'Latihan 7 hari berturut-turut.' },
+  { id: 'streak_30',      name: 'Api Abadi',         desc: 'Latihan 30 hari berturut-turut.' },
+  { id: 'accuracy_90',    name: 'Mata Tajam',        desc: 'Akurasi sesi 90% atau lebih.' },
+  { id: 'perfect_session',name: 'Sempurna',          desc: 'Satu sesi tanpa kesalahan.' },
+  { id: 'facts_25',       name: 'Pengumpul Fakta',   desc: 'Menguasai 25 fakta.' },
+  { id: 'facts_100',      name: 'Ahli Fakta',        desc: 'Menguasai 100 fakta.' },
+  { id: 'facts_250',      name: 'Master Fakta',      desc: 'Menguasai 250 fakta.' },
+  { id: 'boss_6',         name: 'Penakluk Enam',     desc: 'Mengalahkan Raja Enam.' },
+  { id: 'boss_7',         name: 'Penakluk Tujuh',    desc: 'Mengalahkan Raja Tujuh.' },
+  { id: 'boss_8',         name: 'Penakluk Delapan',  desc: 'Mengalahkan Raja Delapan.' },
+  { id: 'boss_9',         name: 'Penakluk Sembilan', desc: 'Mengalahkan Raja Sembilan.' },
+  { id: 'speed_demon',    name: 'Secepat Kilat',     desc: '20 benar dalam mode kecepatan.' },
+  { id: 'graduate',       name: 'Lulusan Kerajaan',  desc: 'Menyelesaikan tes akhir.' }
 ];
 
 export const MOTIVATION_MESSAGES = {

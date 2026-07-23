@@ -20,7 +20,6 @@ export const LEADERBOARD_CATEGORIES = [
   {
     id: 'effort',
     name: 'Papan Usaha',
-    emoji: '🔥',
     description: 'Siapa yang paling rajin berlatih.',
     metricLabel: 'Hari aktif',
     sortKey: 'daysActive',
@@ -30,7 +29,6 @@ export const LEADERBOARD_CATEGORIES = [
   {
     id: 'accuracy',
     name: 'Papan Ketepatan',
-    emoji: '🎯',
     description: 'Siapa yang paling teliti menjawab.',
     metricLabel: 'Akurasi',
     sortKey: 'accuracy',
@@ -41,7 +39,6 @@ export const LEADERBOARD_CATEGORIES = [
   {
     id: 'mastery',
     name: 'Papan Fakta Dikuasai',
-    emoji: '📗',
     description: 'Siapa yang paling banyak menguasai fakta.',
     metricLabel: 'Fakta',
     sortKey: 'factsMastered',
@@ -51,7 +48,6 @@ export const LEADERBOARD_CATEGORIES = [
   {
     id: 'xp',
     name: 'Papan Petualang',
-    emoji: '⭐',
     description: 'Total pengalaman yang terkumpul.',
     metricLabel: 'XP',
     sortKey: 'xp',

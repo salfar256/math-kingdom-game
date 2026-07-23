@@ -44,7 +44,7 @@
                      autocomplete="current-password" required
                      aria-describedby="password-error" />
               <button type="button" class="btn btn--ghost" id="btn-toggle-password"
-                      aria-label="Tampilkan kata sandi" aria-pressed="false">👁️</button>
+                      aria-label="Tampilkan kata sandi" aria-pressed="false">Lihat</button>
             </div>
             <span class="field-error" id="password-error" hidden></span>
           </div>
@@ -63,11 +63,11 @@
       <section id="screen-dashboard" hidden>
         <header class="dash-header">
           <div>
-            <h1 class="dash-header__title">🧑‍🏫 Dashboard Guru</h1>
+            <h1 class="dash-header__title">Dashboard Guru</h1>
             <p class="dash-header__meta mb-0" id="teacher-name"></p>
           </div>
           <div class="row">
-            <button type="button" class="btn btn--sm btn--primary" id="btn-new-class">➕ Kelas Baru</button>
+            <button type="button" class="btn btn--sm btn--primary" id="btn-new-class">+ Kelas Baru</button>
             <button type="button" class="btn btn--sm btn--ghost" id="btn-teacher-logout">Keluar</button>
           </div>
         </header>
@@ -77,9 +77,9 @@
           <div class="class-tabs" id="class-tabs" role="tablist" aria-label="Daftar kelas"></div>
 
           <div id="no-class" class="empty-state" hidden>
-            <span class="empty-state__icon" aria-hidden="true">🏫</span>
+            <span class="empty-state__icon" aria-hidden="true"><img class="icon-img" src="./assets/icons/book.png" width="40" height="40" alt="" aria-hidden="true"></span>
             <p>Anda belum memiliki kelas. Buat kelas pertama Anda untuk mulai.</p>
-            <button type="button" class="btn btn--primary" id="btn-first-class">➕ Buat Kelas</button>
+            <button type="button" class="btn btn--primary" id="btn-first-class">+ Buat Kelas</button>
           </div>
 
           <div id="class-content" hidden class="stack-lg">
@@ -89,10 +89,10 @@
                 <div class="text-xs text-muted">Kode kelas untuk siswa</div>
                 <div class="class-code-box__code" id="class-code">------</div>
               </div>
-              <button type="button" class="btn btn--sm" id="btn-copy-code">📋 Salin</button>
-              <button type="button" class="btn btn--sm btn--ghost" id="btn-class-settings">⚙️ Pengaturan</button>
-              <button type="button" class="btn btn--sm btn--ghost" id="btn-rename-class">✏️ Ubah Nama</button>
-              <button type="button" class="btn btn--sm btn--danger" id="btn-delete-class">🗑️ Hapus</button>
+              <button type="button" class="btn btn--sm" id="btn-copy-code">Salin</button>
+              <button type="button" class="btn btn--sm btn--ghost" id="btn-class-settings"><img class="icon-img" src="./assets/icons/settings.png" width="16" height="16" alt="" aria-hidden="true"> Pengaturan</button>
+              <button type="button" class="btn btn--sm btn--ghost" id="btn-rename-class">Ubah Nama</button>
+              <button type="button" class="btn btn--sm btn--danger" id="btn-delete-class">Hapus</button>
             </div>
 
             <div class="stat-grid" id="class-stats"></div>
@@ -117,7 +117,7 @@
                   <option value="daysActive">Hari aktif</option>
                   <option value="lastPracticeAt">Terakhir latihan</option>
                 </select>
-                <button type="button" class="btn btn--sm btn--success" id="btn-export">⬇️ Ekspor CSV</button>
+                <button type="button" class="btn btn--sm btn--success" id="btn-export">Ekspor CSV</button>
               </div>
 
               <div class="table-wrap">
@@ -139,7 +139,7 @@
               </div>
 
               <div id="students-empty" class="empty-state" hidden>
-                <span class="empty-state__icon" aria-hidden="true">👥</span>
+                <span class="empty-state__icon" aria-hidden="true"><img class="icon-img" src="./assets/icons/heart.png" width="40" height="40" alt="" aria-hidden="true"></span>
                 <p class="mb-0">Belum ada siswa yang bergabung. Bagikan kode kelas di atas.</p>
               </div>
             </section>

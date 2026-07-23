@@ -12,11 +12,21 @@ import { getAllFactsFor } from '../game/question-generator.js';
 import { showLoading, hideLoading, watchConnection } from '../ui/loading.js';
 import { toast } from '../ui/toast.js';
 import { el, $, clearNode, show, formatMs, percent } from '../utils/helpers.js';
+import { createIcon, createIdleSprite } from '../asset-manifest.js';
 import { lastNDayKeys, dayKey, formatDateId } from '../utils/date-utils.js';
 
 let engine = null;
 
-async function init() {
+async /** Peta lencana ke ikon aset (selaras dengan game-page). */
+function badgeIcon(id) {
+  if (id.startsWith('streak_')) return ['effects', 'fire'];
+  if (id.startsWith('facts_') || id === 'graduate') return ['icons', 'book'];
+  if (id.startsWith('boss_')) return ['icons', 'sword'];
+  if (id === 'speed_demon') return ['icons', 'gem'];
+  return ['icons', 'star'];
+}
+
+function init() {
   watchConnection();
 
   if (!isFirebaseReady()) {
@@ -64,7 +74,7 @@ function renderHeader() {
   clearNode(box);
 
   box.appendChild(el('div', { className: 'row', style: { gap: '16px' } }, [
-    el('span', { text: char.emoji, attrs: { 'aria-hidden': 'true' }, style: { fontSize: '56px' } }),
+    createIdleSprite('characters', char.asset || char.id, { size: 72, alt: char.name }),
     el('div', { style: { flex: '1' } }, [
       el('h2', { text: p.displayName || 'Petualang', style: { marginBottom: '4px' } }),
       el('p', { className: 'text-sm text-muted', text: `${char.name} · Level ${levelInfo.level}` }),
@@ -143,7 +153,7 @@ function renderComparison() {
   clearNode(box);
 
   const delta = cmp.accuracyDelta;
-  const arrow = delta > 0 ? '📈' : delta < 0 ? '📉' : '➡️';
+  const arrow = delta > 0 ? '+' : delta < 0 ? '\u2212' : '\u00b1';
 
   box.appendChild(el('div', { className: 'stat-grid' }, [
     el('div', { className: 'stat' }, [
@@ -155,7 +165,7 @@ function renderComparison() {
       el('span', { className: 'stat__label', text: 'Sekarang' })
     ]),
     el('div', { className: 'stat' }, [
-      el('span', { className: 'stat__value', text: `${arrow} ${delta > 0 ? '+' : ''}${delta}` }),
+      el('span', { className: 'stat__value', text: `${arrow}${Math.abs(delta)}` }),
       el('span', { className: 'stat__label', text: 'Perubahan' })
     ])
   ]));
@@ -267,7 +277,8 @@ function renderBadges() {
       className: `badge-item ${has ? '' : 'is-locked'}`,
       attrs: { title: badge.desc, 'aria-label': `${badge.name}: ${has ? 'diperoleh' : 'belum diperoleh'}` }
     }, [
-      el('span', { className: 'badge-item__emoji', text: has ? badge.emoji : '🔒', attrs: { 'aria-hidden': 'true' } }),
+      el('span', { className: 'badge-item__emoji', attrs: { 'aria-hidden': 'true' } },
+        [createIcon(...badgeIcon(badge.id), { size: 28 })]),
       el('span', { className: 'badge-item__name', text: badge.name })
     ]));
   }

@@ -28,7 +28,7 @@ function init() {
   if (shopBtn) shopBtn.addEventListener('click', () => {
     soundManager.click();
     showModal({
-      title: '📦 Toko',
+      title: 'Toko',
       lines: [
         'Toko masih dibangun oleh para kurcaci kerajaan.',
         'Kumpulkan koin dan lencana dulu — fitur ini akan hadir pada pembaruan berikutnya.'
@@ -101,12 +101,12 @@ function openSoundSettings() {
   // Bisu
   const muteBtn = el('button', {
     className: 'btn btn--block',
-    text: soundManager.isMuted() ? '🔇 Suara: Mati' : '🔊 Suara: Hidup',
+    text: soundManager.isMuted() ? 'Suara: Mati' : 'Suara: Hidup',
     attrs: { type: 'button', 'aria-pressed': String(soundManager.isMuted()) }
   });
   muteBtn.addEventListener('click', () => {
     const muted = soundManager.toggleMuted();
-    muteBtn.textContent = muted ? '🔇 Suara: Mati' : '🔊 Suara: Hidup';
+    muteBtn.textContent = muted ? 'Suara: Mati' : 'Suara: Hidup';
     muteBtn.setAttribute('aria-pressed', String(muted));
     if (!muted) soundManager.click();
   });
@@ -114,13 +114,13 @@ function openSoundSettings() {
   // Kurangi animasi
   const motionBtn = el('button', {
     className: 'btn btn--block',
-    text: animationManager.userReduced ? '🐢 Animasi: Dikurangi' : '✨ Animasi: Normal',
+    text: animationManager.userReduced ? 'Animasi: Dikurangi' : 'Animasi: Normal',
     attrs: { type: 'button', 'aria-pressed': String(animationManager.userReduced) }
   });
   motionBtn.addEventListener('click', () => {
     const next = !animationManager.userReduced;
     animationManager.setReduced(next);
-    motionBtn.textContent = next ? '🐢 Animasi: Dikurangi' : '✨ Animasi: Normal';
+    motionBtn.textContent = next ? 'Animasi: Dikurangi' : 'Animasi: Normal';
     motionBtn.setAttribute('aria-pressed', String(next));
   });
 

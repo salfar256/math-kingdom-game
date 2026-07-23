@@ -8,7 +8,7 @@
 
 import {
   doc, getDoc, setDoc, updateDoc, deleteDoc,
-  collection, getDocs, query, where, orderBy,
+  collection, getDocs, query, where,
   serverTimestamp, writeBatch
 } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js';
 
@@ -70,13 +70,18 @@ export async function enrollStudent(uid, classId, { displayName, characterId }) 
 
 /** Ambil semua kelas milik seorang guru. */
 export async function getTeacherClasses(teacherUid) {
+  // Sengaja TANPA orderBy: kombinasi where + orderBy membutuhkan composite
+  // index yang sering belum terpasang, sehingga memuat/menambah kelas gagal
+  // dengan error "failed-precondition". Pengurutan dilakukan di sisi klien.
   const q = query(
     collection(getDb(), 'classes'),
-    where('teacherUid', '==', teacherUid),
-    orderBy('createdAt', 'desc')
+    where('teacherUid', '==', teacherUid)
   );
   const snap = await getDocs(q);
-  return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  const toMs = (t) => (t && typeof t.toMillis === 'function') ? t.toMillis() : 0;
+  return snap.docs
+    .map((d) => ({ id: d.id, ...d.data() }))
+    .sort((a, b) => toMs(b.createdAt) - toMs(a.createdAt));
 }
 
 /** Buat kelas baru beserta index kode kelasnya. */

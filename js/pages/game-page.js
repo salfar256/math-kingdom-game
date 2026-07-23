@@ -20,7 +20,7 @@ import {
 } from '../firebase/leaderboard-service.js';
 import { getDb } from '../firebase/firebase-app.js';
 import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js';
-import { applySafeBackground, createSafeSprite, mountIdleSprite } from '../asset-manifest.js';
+import { applySafeBackground, createSafeSprite, mountIdleSprite, createIcon } from '../asset-manifest.js';
 import { showModal, confirmDialog } from '../ui/modal.js';
 import { toast } from '../ui/toast.js';
 import { showLoading, hideLoading, setSyncStatus, watchConnection } from '../ui/loading.js';
@@ -185,7 +185,7 @@ function updateSoundButtons() {
   for (const id of ['#btn-sound-map', '#btn-sound-arena']) {
     const btn = $(id);
     if (!btn) continue;
-    btn.textContent = muted ? '🔇' : '🔊';
+    btn.textContent = muted ? 'Bisu' : 'Suara';
     btn.setAttribute('aria-pressed', String(muted));
     btn.setAttribute('aria-label', muted ? 'Suara mati' : 'Suara hidup');
   }
@@ -264,9 +264,7 @@ function renderKingdoms() {
       }
     }, [
       el('div', { className: 'kingdom-card__head' }, [
-        locked
-          ? el('span', { className: 'kingdom-card__emoji', text: '🔒', attrs: { 'aria-hidden': 'true' } })
-          : kingdomEmblem(k),
+        kingdomEmblem(k, locked),
         el('div', {}, [
           el('div', { className: 'kingdom-card__title', text: k.shortName }),
           el('div', { className: 'kingdom-card__status text-muted', text: k.status })
@@ -295,7 +293,10 @@ function renderKingdoms() {
     }
   }, [
     el('div', { className: 'kingdom-card__head' }, [
-      el('span', { className: 'kingdom-card__emoji', text: tower.unlocked ? '🗼' : '🔒', attrs: { 'aria-hidden': 'true' } }),
+      el('span', {
+        className: `kingdom-card__emoji${tower.unlocked ? '' : ' is-locked'}`,
+        attrs: { 'aria-hidden': 'true' }
+      }, [createIcon('icons', 'star', { size: 40 })]),
       el('div', {}, [
         el('div', { className: 'kingdom-card__title', text: tower.shortName }),
         el('div', {
@@ -368,11 +369,11 @@ function openModeScreen(kingdom) {
   clearNode(list);
 
   const modes = [
-    { mode: MODES.PRACTICE, emoji: '📖', name: 'Latihan', desc: 'Tanpa batas waktu. Bantuan tersedia.' },
-    { mode: MODES.BATTLE,   emoji: '⚔️', name: 'Pertarungan', desc: 'Kalahkan musuh dengan jawaban benar.' },
-    { mode: MODES.SPEED,    emoji: '⚡', name: `Kecepatan ${Math.round(state.engine.speedDurationMs / 1000)} detik`, desc: 'Jawab sebanyak mungkin dengan tepat.' },
-    { mode: MODES.FACT_FAMILY, emoji: '👨‍👩‍👧', name: 'Keluarga Fakta', desc: 'Lengkapi empat fakta yang bersaudara.' },
-    { mode: MODES.FIX_ANSWER,  emoji: '🔍', name: 'Perbaiki Jawaban', desc: 'Temukan jawaban yang salah, lalu betulkan.' }
+    { mode: MODES.PRACTICE, icon: 'book', name: 'Latihan', desc: 'Tanpa batas waktu. Bantuan tersedia.' },
+    { mode: MODES.BATTLE,   icon: 'sword', name: 'Pertarungan', desc: 'Kalahkan musuh dengan jawaban benar.' },
+    { mode: MODES.SPEED,    icon: 'star', name: `Kecepatan ${Math.round(state.engine.speedDurationMs / 1000)} detik`, desc: 'Jawab sebanyak mungkin dengan tepat.' },
+    { mode: MODES.FACT_FAMILY, icon: 'heart', name: 'Keluarga Fakta', desc: 'Lengkapi empat fakta yang bersaudara.' },
+    { mode: MODES.FIX_ANSWER,  icon: 'settings', name: 'Perbaiki Jawaban', desc: 'Temukan jawaban yang salah, lalu betulkan.' }
   ];
 
   for (const m of modes) {
@@ -386,7 +387,10 @@ function openModeScreen(kingdom) {
     attrs: { type: 'button', disabled: kingdom.bossUnlocked ? null : 'disabled' }
   }, [
     el('div', {}, [
-      el('strong', { text: `${kingdom.bossUnlocked ? '👑' : '🔒'} Boss ${kingdom.shortName}` }),
+      el('strong', {}, [
+        createIcon('icons', 'sword', { size: 18 }),
+        ` Boss ${kingdom.shortName}${kingdom.bossUnlocked ? '' : ' (terkunci)'}`
+      ]),
       el('p', {
         className: 'text-sm text-muted mb-0',
         text: kingdom.bossUnlocked
@@ -439,7 +443,7 @@ function modeCard(m, kingdom) {
     attrs: { type: 'button' }
   }, [
     el('div', {}, [
-      el('strong', { text: `${m.emoji} ${m.name}` }),
+      el('strong', {}, [createIcon('icons', m.icon, { size: 18 }), ` ${m.name}`]),
       el('p', { className: 'text-sm text-muted mb-0', text: m.desc })
     ]),
     el('span', { text: '›', attrs: { 'aria-hidden': 'true' } })
@@ -456,7 +460,7 @@ function modeCard(m, kingdom) {
 
 async function startPlacementFlow() {
   await showModal({
-    title: '📝 Tes Awal',
+    title: 'Tes Awal',
     lines: [
       'Sebelum bertualang, kita ukur dulu kemampuanmu saat ini.',
       'Ada sekitar 40 soal dari keempat operasi. Kerjakan sebisamu.',
@@ -524,8 +528,11 @@ function startSession(options) {
 }
 
 /** Lambang kerajaan bergambar; jatuh kembali ke emoji bila gambar tak ada. */
-function kingdomEmblem(k) {
-  const wrap = el('span', { className: 'kingdom-card__emoji', attrs: { 'aria-hidden': 'true' } });
+function kingdomEmblem(k, locked = false) {
+  const wrap = el('span', {
+    className: `kingdom-card__emoji${locked ? ' is-locked' : ''}`,
+    attrs: { 'aria-hidden': 'true' }
+  });
   wrap.appendChild(createSafeSprite('kingdoms', k.icon, { size: 48, alt: '' }));
   return wrap;
 }
@@ -585,7 +592,7 @@ function advanceQuestion() {
 
   const total = state.session.mode === MODES.SPEED ? '∞' : state.session.plannedCount;
   $('#question-progress').textContent = q.isCorrection
-    ? '🔁 Soal ulangan'
+    ? 'Soal ulangan'
     : `Soal ${state.session.stats.total + 1} dari ${total}`;
 
   updateHud();
@@ -608,7 +615,7 @@ function buildKeypad() {
     let text = key;
     let label = `Angka ${key}`;
 
-    if (key === 'del') { className += ' keypad__key--del'; text = '⌫'; label = 'Hapus'; }
+    if (key === 'del') { className += ' keypad__key--del'; text = '\u2190'; label = 'Hapus'; }
     if (key === 'ok')  { className += ' keypad__key--ok';  text = 'OK'; label = 'Kirim jawaban'; }
 
     const btn = el('button', {
@@ -714,7 +721,7 @@ function renderOutcome(outcome, battleResult) {
       animationManager.floatText($('#fighter-player'), `+${battleResult.healed}`, 'heal');
     }
     if (outcome.mastery && outcome.mastery.newlyMastered) {
-      toast.success('Fakta baru dikuasai! 🎉');
+      toast.success('Fakta baru dikuasai!');
     }
   } else {
     answerNode.className = 'answer-display is-wrong';
@@ -809,7 +816,7 @@ async function handlePause() {
   if (wasTimer) stopTimer();
 
   const choice = await showModal({
-    title: '⏸️ Jeda',
+    title: 'Jeda',
     lines: [
       `Soal dijawab: ${state.session.stats.total}`,
       `Benar: ${state.session.stats.correct}`,
@@ -850,7 +857,10 @@ function renderCombo() {
   clearNode(wrap);
   const combo = state.session ? state.session.stats.combo : 0;
   if (combo >= 3) {
-    wrap.appendChild(el('span', { className: 'combo-badge', text: `🔥 Combo ×${combo}` }));
+    const comboBadge = el('span', { className: 'combo-badge' }, [
+    createIcon('effects', 'fire', { size: 14 }), ` Combo \u00d7${combo}`
+  ]);
+  wrap.appendChild(comboBadge);
   }
 }
 
@@ -926,13 +936,27 @@ async function endSession() {
   showScreen('screen-result');
 }
 
+/** Peta lencana ke ikon aset. */
+function badgeIcon(id) {
+  if (id.startsWith('streak_')) return ['effects', 'fire'];
+  if (id.startsWith('facts_') || id === 'graduate') return ['icons', 'book'];
+  if (id.startsWith('boss_')) return ['icons', 'sword'];
+  if (id === 'speed_demon') return ['icons', 'gem'];
+  return ['icons', 'star'];
+}
+
 function renderResult(r) {
   const boss = r.bossResult;
   const victory = boss ? boss.victory : r.accuracyRatio >= 0.7;
 
-  $('#result-emoji').textContent = boss
-    ? (victory ? '👑' : '🛡️')
-    : (r.accuracyRatio >= 0.9 ? '🌟' : r.accuracyRatio >= 0.7 ? '🎉' : '💪');
+  const hero = $('#result-emoji');
+  clearNode(hero);
+  const heroIcon = boss
+    ? (victory ? ['icons', 'star'] : ['icons', 'sword'])
+    : (r.accuracyRatio >= 0.9 ? ['icons', 'star']
+      : r.accuracyRatio >= 0.7 ? ['effects', 'correct']
+      : ['effects', 'fire']);
+  hero.appendChild(createIcon(heroIcon[0], heroIcon[1], { size: 72 }));
 
   $('#result-title').textContent = boss
     ? (victory ? 'Boss Dikalahkan!' : 'Boss Belum Tumbang')
@@ -965,7 +989,7 @@ function renderResult(r) {
   clearNode(detail);
 
   if (r.levelUp) {
-    detail.appendChild(el('div', { className: 'chip chip--primary', text: `🎊 Naik ke Level ${r.level}!` }));
+    detail.appendChild(el('div', { className: 'chip chip--primary', text: `Naik ke Level ${r.level}!` }));
   }
 
   if (boss && !victory) {
@@ -980,7 +1004,7 @@ function renderResult(r) {
   }
 
   if (r.factsMastered > 0) {
-    detail.appendChild(el('h3', { text: `✅ Fakta baru dikuasai (${r.factsMastered})` }));
+    detail.appendChild(el('h3', { text: `Fakta baru dikuasai (${r.factsMastered})` }));
     detail.appendChild(factPills(r.newlyMasteredIds, 'mastered'));
   }
 
@@ -990,10 +1014,12 @@ function renderResult(r) {
   }
 
   if (r.newBadges && r.newBadges.length > 0) {
-    detail.appendChild(el('h3', { text: '🏅 Lencana Baru' }));
+    detail.appendChild(el('h3', { text: 'Lencana Baru' }));
     const row = el('div', { className: 'row' });
     for (const b of r.newBadges) {
-      row.appendChild(el('span', { className: 'chip chip--primary', text: `${b.emoji} ${b.name}` }));
+      row.appendChild(el('span', { className: 'chip chip--primary' }, [
+        createIcon(...badgeIcon(b.id), { size: 16 }), ` ${b.name}`
+      ]));
     }
     detail.appendChild(row);
   }
@@ -1062,7 +1088,7 @@ function openReview() {
   }
 
   showModal({
-    title: '📖 Pembahasan',
+    title: 'Pembahasan',
     content,
     buttons: [{ id: 'ok', text: 'Tutup', variant: 'primary' }]
   });
@@ -1113,7 +1139,7 @@ function renderLeaderboardTabs() {
   for (const cat of LEADERBOARD_CATEGORIES) {
     const btn = el('button', {
       className: 'class-tab',
-      text: `${cat.emoji} ${cat.name.replace('Papan ', '')}`,
+      text: cat.name.replace('Papan ', ''),
       attrs: {
         type: 'button',
         role: 'tab',
@@ -1144,13 +1170,13 @@ function renderLeaderboard() {
 
   if (board.entries.length === 0) {
     list.appendChild(el('div', { className: 'empty-state' }, [
-      el('span', { className: 'empty-state__icon', text: '🏅', attrs: { 'aria-hidden': 'true' } }),
+      el('span', { className: 'empty-state__icon', attrs: { 'aria-hidden': 'true' } }, [createIcon('icons', 'star', { size: 40 })]),
       el('p', { className: 'mb-0', text: 'Belum ada yang masuk papan ini. Jadilah yang pertama!' })
     ]));
   }
 
   for (const entry of board.entries) {
-    const medal = entry.rank === 1 ? '🥇' : entry.rank === 2 ? '🥈' : entry.rank === 3 ? '🥉' : `${entry.rank}.`;
+    const rankClass = entry.rank <= 3 ? ` rank-chip--${entry.rank}` : '';
     const char = CHARACTERS.find((c) => c.id === entry.characterId) || CHARACTERS[0];
 
     const row = el('div', {
@@ -1160,8 +1186,8 @@ function renderLeaderboard() {
         : { padding: '8px' }
     }, [
       el('div', { className: 'row', style: { gap: '10px' } }, [
-        el('span', { text: medal, style: { minWidth: '32px', fontWeight: '700' } }),
-        el('span', { text: char.emoji, attrs: { 'aria-hidden': 'true' }, style: { fontSize: '22px' } }),
+        el('span', { className: `rank-chip${rankClass}`, text: `${entry.rank}` }),
+        createSafeSprite('characters', char.asset || char.id, { size: 24, alt: '' }),
         el('div', {}, [
           el('div', { text: entry.displayName + (entry.isMe ? ' (kamu)' : ''), className: entry.isMe ? 'text-bold' : '' }),
           el('div', { className: 'text-xs text-muted', text: `Level ${entry.level}` })
@@ -1199,7 +1225,7 @@ function renderLeaderboard() {
 
 function updatePrivacyButton() {
   const btn = $('#btn-lb-privacy');
-  btn.textContent = state.leaderboardHidden ? '🙈 Tersembunyi' : '👁️ Terlihat';
+  btn.textContent = state.leaderboardHidden ? 'Tersembunyi' : 'Terlihat';
   btn.setAttribute('aria-pressed', String(!state.leaderboardHidden));
 }
 

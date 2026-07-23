@@ -63,10 +63,10 @@ export function hideLoading() {
 }
 
 const SYNC_LABELS = {
-  saving: { text: '💾 Menyimpan…', bg: '#3b4a68' },
-  saved: { text: '✅ Tersimpan', bg: '#1f6f43' },
-  error: { text: '⚠️ Gagal menyimpan — akan dicoba lagi', bg: '#8a3b2b' },
-  queued: { text: '📥 Menunggu koneksi', bg: '#6a5a1f' }
+  saving: { text: 'Menyimpan\u2026', bg: '#3b4a68' },
+  saved: { text: 'Tersimpan', bg: '#1f6f43' },
+  error: { text: 'Gagal menyimpan \u2014 akan dicoba lagi', bg: '#8a3b2b' },
+  queued: { text: 'Menunggu koneksi', bg: '#6a5a1f' }
 };
 
 /**
@@ -106,12 +106,12 @@ export function watchConnection() {
   connectionWatched = true;
 
   window.addEventListener('offline', () => {
-    toast.warning('📴 Koneksi terputus. Hasil latihan disimpan di perangkat dulu.');
+    toast.warning('Koneksi terputus. Hasil latihan disimpan di perangkat dulu.');
     setSyncStatus('queued');
   });
 
   window.addEventListener('online', () => {
-    toast.success('📶 Koneksi kembali. Data akan disinkronkan.');
+    toast.success('Koneksi kembali. Data akan disinkronkan.');
   });
 
   if (typeof navigator !== 'undefined' && navigator.onLine === false) {

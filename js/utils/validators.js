@@ -130,11 +130,11 @@ export function firebaseErrorMessage(error) {
     'auth/network-request-failed': 'Koneksi internet bermasalah. Periksa jaringan Anda.',
     'auth/operation-not-allowed': 'Metode masuk ini belum diaktifkan di Firebase Console.',
     'auth/admin-restricted-operation': 'Masuk anonim belum diaktifkan di Firebase Console.',
-    'permission-denied': 'Anda tidak memiliki izin untuk data ini.',
+    'permission-denied': 'Izin ditolak. Pastikan firestore.rules sudah dipasang dan akun guru terdaftar di koleksi "teachers" dengan active = true (lihat README bagian 7).',
     'unavailable': 'Layanan sedang tidak tersedia. Periksa koneksi internet Anda.',
     'not-found': 'Data tidak ditemukan.',
     'already-exists': 'Data sudah ada.',
-    'failed-precondition': 'Permintaan tidak dapat diproses saat ini.',
+    'failed-precondition': 'Firestore menolak permintaan (kemungkinan indeks belum ada). Pasang firestore.indexes.json atau coba lagi.',
     'resource-exhausted': 'Kuota layanan habis. Coba lagi nanti.',
     'deadline-exceeded': 'Permintaan terlalu lama. Periksa koneksi internet Anda.',
     'unauthenticated': 'Sesi Anda berakhir. Silakan masuk kembali.'

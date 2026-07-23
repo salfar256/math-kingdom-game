@@ -106,7 +106,7 @@
 }
 
 .menu-frame.no-image::before {
-  content: '⚔️ Pertarungan Empat Kerajaan Hitungan';
+  content: 'Pertarungan Empat Kerajaan Hitungan';
   position: absolute;
   top: 14%;
   left: 8%;

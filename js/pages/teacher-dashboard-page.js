@@ -276,7 +276,7 @@ async function handleClassSettings() {
   }));
 
   const choice = await showModal({
-    title: `⚙️ Pengaturan ${klass.name}`,
+    title: `Pengaturan ${klass.name}`,
     content,
     buttons: [
       { id: 'cancel', text: 'Batal', variant: 'secondary' },
@@ -385,7 +385,7 @@ function renderStudents() {
     tr.appendChild(el('td', { className: 'num', text: `${Math.round(s.accuracy || 0)}%` }));
     tr.appendChild(el('td', { className: 'num', text: String(s.factsMastered || 0) }));
     tr.appendChild(el('td', { className: 'num', text: String(s.daysActive || 0) }));
-    tr.appendChild(el('td', { className: 'num', text: `${s.streak || 0} 🔥` }));
+    tr.appendChild(el('td', { className: 'num', text: `${s.streak || 0}` }));
     tr.appendChild(el('td', { text: relativeDayId(s.lastPracticeAt) }));
 
     const actions = el('td');
@@ -518,7 +518,7 @@ async function openStudentDetail(student) {
   }
 
   const choice = await showModal({
-    title: `👤 ${student.displayName}`,
+    title: `${student.displayName}`,
     content,
     buttons: [
       { id: 'reset', text: 'Reset Progres', variant: 'danger' },

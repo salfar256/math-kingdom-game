@@ -74,21 +74,18 @@ export const ASSETS = {
     fire:    `${ASSET_BASE}/effects/fire.png`,
     ice:     `${ASSET_BASE}/effects/ice.png`,
     heal:    `${ASSET_BASE}/effects/heal.png`,
-    smoke:   `${ASSET_BASE}/effects/smoke.png`
+    smoke:   `${ASSET_BASE}/effects/smoke.png`,
+    sparkle: `${ASSET_BASE}/effects/sparkle.png`,
+    magic:   `${ASSET_BASE}/effects/magic.png`
   },
   icons: {
-    addition:       `${ASSET_BASE}/icons/addition.png`,
-    subtraction:    `${ASSET_BASE}/icons/subtraction.png`,
-    multiplication: `${ASSET_BASE}/icons/multiplication.png`,
-    division:       `${ASSET_BASE}/icons/division.png`,
-    heart:          `${ASSET_BASE}/icons/heart.png`,
-    coin:           `${ASSET_BASE}/icons/coin.png`,
-    star:           `${ASSET_BASE}/icons/star.png`,
-    chest:          `${ASSET_BASE}/icons/chest.png`,
-    shield:         `${ASSET_BASE}/icons/shield.png`,
-    sword:          `${ASSET_BASE}/icons/sword.png`,
-    book:           `${ASSET_BASE}/icons/book.png`,
-    settings:       `${ASSET_BASE}/icons/settings.png`
+    heart:    `${ASSET_BASE}/icons/heart.png`,
+    gem:      `${ASSET_BASE}/icons/gem.png`,
+    coin:     `${ASSET_BASE}/icons/coin.png`,
+    sword:    `${ASSET_BASE}/icons/sword.png`,
+    book:     `${ASSET_BASE}/icons/book.png`,
+    settings: `${ASSET_BASE}/icons/settings.png`,
+    star:     `${ASSET_BASE}/icons/star.png`
   },
   audio: {
     correct:    `${ASSET_BASE}/audio/correct.mp3`,
@@ -102,37 +99,28 @@ export const ASSETS = {
 };
 
 /** Fallback emoji per kategori & kunci, dipakai bila gambar gagal dimuat. */
+/** Teks pengganti bila gambar gagal dimuat. Tidak memakai emoji. */
 export const FALLBACK_EMOJI = {
   kingdoms: {
-    addition: '➕', subtraction: '➖', multiplication: '✖️', division: '➗'
+    addition: '+', subtraction: '\u2212', multiplication: '\u00d7', division: '\u00f7'
   },
-  backgrounds: {
-    'addition-kingdom': '🏰',
-    'subtraction-kingdom': '🏜️',
-    'multiplication-kingdom': '🌋',
-    'division-kingdom': '🌊',
-    'mixed-tower': '🗼'
-  },
+  backgrounds: {},
   characters: {
-    leader: '👑', adventurer: '🧑‍🌾', knight: '🛡️',
-    mage: '🧙', archer: '🏹', healer: '💚'
+    leader: 'P', adventurer: 'P', knight: 'K',
+    mage: 'M', archer: 'A', healer: 'T'
   },
   enemies: {
-    slime: '🟢', skeleton: '💀', goblin: '👺',
-    'dark-mage': '🧟', orc: '👹', 'shadow-ninja': '🥷'
+    slime: 'S', skeleton: 'K', goblin: 'G',
+    'dark-mage': 'P', orc: 'O', 'shadow-ninja': 'N'
   },
   bosses: {
-    'boss-6': '👑', 'boss-7': '👑', 'boss-8': '👑',
-    'boss-9': '👑', 'mixed-boss': '🗿'
+    'boss-6': 'B', 'boss-7': 'B', 'boss-8': 'B',
+    'boss-9': 'B', 'mixed-boss': 'B'
   },
-  effects: {
-    correct: '✨', wrong: '💢', attack: '💥',
-    fire: '🔥', ice: '❄️', heal: '💚', smoke: '💨'
-  },
+  effects: {},
   icons: {
-    addition: '➕', subtraction: '➖', multiplication: '✖️', division: '➗',
-    heart: '❤️', coin: '🪙', star: '⭐', chest: '📦',
-    shield: '🛡️', sword: '⚔️', book: '📘', settings: '⚙️'
+    heart: '+HP', gem: '*', coin: 'Rp', sword: 'X',
+    book: 'B', settings: '#', star: '*'
   }
 };
 
@@ -145,8 +133,8 @@ export function getAssetPath(category, key) {
 
 export function getFallbackEmoji(category, key) {
   const group = FALLBACK_EMOJI[category];
-  if (!group) return '❔';
-  return group[key] || '❔';
+  if (!group) return '?';
+  return group[key] || '?';
 }
 
 /**
@@ -282,4 +270,29 @@ export function mountIdleSprite(node, staticCategory, key, { size = 96, alt = ''
   if (!node) return;
   node.textContent = '';
   node.appendChild(createIdleSprite(staticCategory, key, { size, alt }));
+}
+
+
+/**
+ * Ikon gambar kecil dari aset. Ikut menghilang bila berkas tidak ada,
+ * sehingga tidak pernah menampilkan emoji ataupun ikon rusak.
+ *
+ * @param {'icons'|'effects'} category
+ * @param {string} key
+ * @param {object} opts { size, className, alt }
+ * @returns {HTMLImageElement}
+ */
+export function createIcon(category, key, { size = 20, className = '', alt = '' } = {}) {
+  const img = document.createElement('img');
+  img.className = `icon-img ${className}`.trim();
+  img.width = size;
+  img.height = size;
+  img.alt = alt;
+  if (!alt) img.setAttribute('aria-hidden', 'true');
+  img.decoding = 'async';
+  const path = getAssetPath(category, key);
+  if (!path) { img.hidden = true; return img; }
+  img.addEventListener('error', () => { img.hidden = true; }, { once: true });
+  img.src = path;
+  return img;
 }

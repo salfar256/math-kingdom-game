@@ -57,8 +57,8 @@
       left: 0;
       top: 5px;
     }
-    .test.pass::before { content: '✅'; }
-    .test.fail::before { content: '❌'; }
+    .test.pass::before { content: 'LULUS '; }
+    .test.fail::before { content: 'GAGAL '; }
     .test.fail { color: var(--fail); }
     .message {
       margin: 4px 0 0 0;
@@ -77,7 +77,7 @@
 </head>
 <body>
   <div class="wrap">
-    <h1>🧪 Pengujian Otomatis</h1>
+    <h1> Pengujian Otomatis</h1>
     <p class="subtitle">Pertarungan Empat Kerajaan Hitungan — logika inti, tanpa Firebase.</p>
 
     <div id="summary" class="running">Menjalankan pengujian…</div>
@@ -137,8 +137,8 @@
       if (event.type === 'summary') {
         summary.className = event.failed === 0 ? 'pass' : 'fail';
         summary.textContent = event.failed === 0
-          ? `✅ Semua pengujian lulus (${event.passed} dari ${event.total})`
-          : `❌ ${event.failed} pengujian gagal dari ${event.total}`;
+          ? `LULUS  Semua pengujian lulus (${event.passed} dari ${event.total})`
+          : `GAGAL  ${event.failed} pengujian gagal dari ${event.total}`;
 
         const counts = document.createElement('div');
         counts.className = 'counts';

@@ -1,7 +1,7 @@
 /**
  * Data contoh untuk pengembangan.
  *
- * ⚠️ PERINGATAN
+ *  PERINGATAN
  * Skrip ini HANYA boleh dijalankan pada lingkungan pengembangan
  * (localhost atau Firebase Emulator). Skrip menolak berjalan di produksi.
  *
@@ -54,7 +54,7 @@ function pastikanDevelopment() {
   }
 
   console.warn(
-    '%c⚠️ MODE PENGEMBANGAN',
+    '%c MODE PENGEMBANGAN',
     'background:#f5b301;color:#1b1400;font-size:14px;padding:4px 8px;font-weight:bold;'
   );
   console.warn('Skrip ini akan menulis data contoh ke Firestore. Jangan jalankan di produksi.');
@@ -98,7 +98,7 @@ export async function seedClass() {
 
   await batch.commit();
 
-  console.log(`✅ Kelas contoh dibuat: ${KELAS_CONTOH.name} (kode: ${KELAS_CONTOH.classCode})`);
+  console.log(` Kelas contoh dibuat: ${KELAS_CONTOH.name} (kode: ${KELAS_CONTOH.classCode})`);
   return { classId, classCode: KELAS_CONTOH.classCode, teacherUid: teacher.uid };
 }
 
@@ -150,7 +150,7 @@ export async function seedStudents(classId = 'demo_kelas_7a') {
 
   await batch.commit();
 
-  console.log(`✅ ${SISWA_CONTOH.length} siswa contoh ditambahkan ke roster.`);
+  console.log(` ${SISWA_CONTOH.length} siswa contoh ditambahkan ke roster.`);
   console.table(hasil);
   return hasil;
 }
@@ -279,7 +279,7 @@ export async function seedMyProgress({ kemampuan = 0.7, hari = 14 } = {}) {
     updatedAt: serverTimestamp()
   }, { merge: true });
 
-  console.log(`✅ ${ditulis} fakta dan 10 sesi contoh dibuat untuk ${uid}.`);
+  console.log(` ${ditulis} fakta dan 10 sesi contoh dibuat untuk ${uid}.`);
   console.log('Muat ulang halaman untuk melihat hasilnya.');
   return { facts: ditulis, uid };
 }
@@ -288,12 +288,12 @@ export async function seedMyProgress({ kemampuan = 0.7, hari = 14 } = {}) {
 export async function seedAll() {
   pastikanDevelopment();
 
-  console.log('🌱 Memulai seeding data contoh…\n');
+  console.log(' Memulai seeding data contoh…\n');
 
   const klass = await seedClass();
   await seedStudents(klass.classId);
 
-  console.log('\n✅ Selesai.');
+  console.log('\n Selesai.');
   console.log(`\nKode kelas untuk diuji: ${klass.classCode}`);
   console.log('Buka student.html di jendela penyamaran, lalu masuk dengan kode itu.');
   console.log('\nUntuk membuat progres siswa contoh, masuk sebagai siswa lalu jalankan:');
@@ -320,5 +320,5 @@ export async function clearSeed(classId = 'demo_kelas_7a') {
   batch.delete(doc(db, 'classes', classId));
 
   await batch.commit();
-  console.log('✅ Data contoh dihapus.');
+  console.log(' Data contoh dihapus.');
 }

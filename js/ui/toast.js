@@ -2,6 +2,7 @@
 
 import { UI_CONFIG } from '../config/game-config.js';
 import { el } from '../utils/helpers.js';
+import { createIcon } from '../asset-manifest.js';
 
 let container = null;
 
@@ -25,7 +26,7 @@ export function showToast(message, type = 'info', duration = UI_CONFIG.toastDura
     className: `toast toast--${type}`,
     attrs: { role: type === 'error' ? 'alert' : 'status' }
   }, [
-    el('span', { className: 'toast__icon', text: iconFor(type) }),
+    el('span', { className: 'toast__icon', attrs: { 'aria-hidden': 'true' } }, [iconFor(type)]),
     el('span', { className: 'toast__text', text: message })
   ]);
 
@@ -44,10 +45,10 @@ export function showToast(message, type = 'info', duration = UI_CONFIG.toastDura
 
 function iconFor(type) {
   switch (type) {
-    case 'success': return '✅';
-    case 'error':   return '⚠️';
-    case 'warning': return '⚠️';
-    default:        return 'ℹ️';
+    case 'success': return createIcon('effects', 'correct', { size: 18 });
+    case 'error':
+    case 'warning': return createIcon('effects', 'wrong', { size: 18 });
+    default:        return createIcon('effects', 'sparkle', { size: 18 });
   }
 }
 

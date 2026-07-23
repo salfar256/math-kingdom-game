@@ -97,7 +97,7 @@ function togglePassword() {
   input.type = showing ? 'password' : 'text';
   btn.setAttribute('aria-pressed', String(!showing));
   btn.setAttribute('aria-label', showing ? 'Tampilkan kata sandi' : 'Sembunyikan kata sandi');
-  btn.textContent = showing ? '👁️' : '🙈';
+  btn.textContent = showing ? 'Sembunyikan' : 'Lihat';
 }
 
 async function handleLogout() {

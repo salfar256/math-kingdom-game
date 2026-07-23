@@ -146,3 +146,33 @@ img[data-pixel] {
   background: var(--color-panel-border);
   border-radius: var(--radius-pill);
 }
+/* ================= IKON GAMBAR (pengganti emoji) ================= */
+
+.icon-img {
+  image-rendering: pixelated;
+  vertical-align: -3px;
+  display: inline-block;
+}
+
+.btn .icon-img { margin-right: 4px; }
+
+.toast__icon .icon-img { vertical-align: -4px; }
+
+/* Peringkat papan skor: angka berwarna, bukan medali emoji */
+.rank-chip {
+  min-width: 32px;
+  display: inline-block;
+  text-align: center;
+  font-weight: 700;
+  border-radius: 8px;
+  padding: 2px 0;
+}
+.rank-chip--1 { background: #b8860b; color: #fff; }
+.rank-chip--2 { background: #8c96a6; color: #fff; }
+.rank-chip--3 { background: #a05a2c; color: #fff; }
+
+/* Lambang terkunci: abu-abu redup */
+.kingdom-card__emoji.is-locked img,
+.badge-item.is-locked .icon-img {
+  filter: grayscale(1) opacity(0.45);
+}
