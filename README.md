@@ -96,8 +96,10 @@ Seluruh aset gambar pixel sudah terpasang di folder `assets/` dan langsung dipak
 Fallback tetap berlaku: jika sebuah gambar gagal dimuat, game otomatis memakai
 gambar statis, lalu emoji — tidak pernah error.
 
-Catatan: karakter *Tabib (healer)* belum punya aset gambar, sehingga masih tampil
-sebagai emoji 💚. Berkas `js/ui/loading.js` yang sebelumnya hilang sudah dibuat.
+Catatan: berkas `js/ui/loading.js` yang sebelumnya hilang sudah dibuat.
+Pembaruan Juli 2026: karakter *Tabib (healer)* dan animasi idle *Pemimpin*
+kini punya aset gambar lengkap (`characters/healer.png`, `idle/healer.png`,
+`idle/leader.png`).
 
 ---
 

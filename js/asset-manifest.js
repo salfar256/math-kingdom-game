@@ -24,6 +24,8 @@ export const ASSETS = {
     division:       `${ASSET_BASE}/kingdoms/division.png`
   },
   idle: {
+    leader:         `${ASSET_BASE}/idle/leader.png`,
+    healer:         `${ASSET_BASE}/idle/healer.png`,
     adventurer:     `${ASSET_BASE}/idle/adventurer.png`,
     knight:         `${ASSET_BASE}/idle/knight.png`,
     mage:           `${ASSET_BASE}/idle/mage.png`,
