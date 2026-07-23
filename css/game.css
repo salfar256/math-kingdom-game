@@ -312,3 +312,59 @@
 .fact-map__cell--mastered    { background: var(--color-success); }
 .fact-map__cell--automatic   { background: var(--color-primary); }
 .fact-map__cell--needs_review{ background: var(--color-danger-dark); }
+/* ================= ANIMASI IDLE (strip 4 frame) ================= */
+
+.idle-wrap {
+  display: inline-flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.idle-sprite {
+  --idle-size: 96px;
+  display: block;
+  width: var(--idle-size);
+  height: var(--idle-size);
+  background-repeat: no-repeat;
+  background-size: calc(var(--idle-size) * 4) var(--idle-size);
+  background-position: 0 0;
+  image-rendering: pixelated;
+  animation: idle-play 0.9s steps(4) infinite;
+}
+
+@keyframes idle-play {
+  from { background-position-x: 0; }
+  to   { background-position-x: calc(var(--idle-size) * -4); }
+}
+
+/* Musuh menghadap pemain (gambar asli menghadap kiri/kanan sama; cerminkan musuh). */
+#enemy-sprite .idle-sprite,
+#enemy-sprite .pixel-img { transform: scaleX(-1); }
+
+/* Hormati preferensi "kurangi animasi": tampilkan frame pertama saja. */
+.reduce-motion .idle-sprite { animation: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .idle-sprite { animation: none; }
+}
+
+/* Sprite petarung berbasis gambar */
+.fighter__sprite { display: inline-flex; justify-content: center; align-items: flex-end; }
+.fighter__sprite .pixel-img { image-rendering: pixelated; }
+
+/* Gambar lambang pada kartu kerajaan */
+.kingdom-card__emoji .pixel-img {
+  width: 48px;
+  height: 48px;
+  image-rendering: pixelated;
+  display: block;
+}
+
+/* Pilihan karakter dengan gambar */
+.character-option .pixel-img {
+  width: 44px;
+  height: 44px;
+  image-rendering: pixelated;
+  display: block;
+  margin: 0 auto;
+}

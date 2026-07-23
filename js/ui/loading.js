@@ -1,92 +1,120 @@
-/** Overlay pemuatan layar penuh, indikator status sinkron, dan pemantauan koneksi. */
+/**
+ * Overlay pemuatan, indikator status sinkronisasi, dan pemantau koneksi.
+ * Tidak bergantung pada Firebase. Semua elemen dibuat sekali dan dipakai ulang.
+ */
 
-import { el } from '../utils/helpers.js';
+import { toast } from './toast.js';
 
 let overlay = null;
-let messageNode = null;
+let overlayText = null;
 let syncBadge = null;
-let showCount = 0;
+let connectionWatched = false;
 
 function ensureOverlay() {
-  if (overlay && document.body.contains(overlay)) return overlay;
+  if (overlay) return;
 
-  messageNode = el('p', { className: 'loading-overlay__text', text: 'Memuat…' });
-
-  overlay = el('div', {
-    className: 'loading-overlay',
-    attrs: { role: 'status', 'aria-live': 'polite' }
-  }, [
-    el('div', { className: 'loading-overlay__spinner', attrs: { 'aria-hidden': 'true' } }),
-    messageNode
-  ]);
-
-  document.body.appendChild(overlay);
-  return overlay;
-}
-
-/** Tampilkan overlay pemuatan dengan pesan tertentu. Panggilan bertumpuk aman. */
-export function showLoading(message = 'Memuat…') {
-  const root = ensureOverlay();
-  messageNode.textContent = message;
-  showCount += 1;
-  root.classList.add('is-visible');
-  root.hidden = false;
-}
-
-/** Sembunyikan overlay pemuatan. Hanya benar-benar hilang saat semua panggilan selesai. */
-export function hideLoading() {
-  if (showCount > 0) showCount -= 1;
-  if (showCount > 0) return;
-  if (!overlay) return;
-  overlay.classList.remove('is-visible');
+  overlay = document.createElement('div');
+  overlay.className = 'loading-overlay';
+  overlay.setAttribute('role', 'status');
+  overlay.setAttribute('aria-live', 'polite');
   overlay.hidden = true;
+  overlay.style.cssText = [
+    'position:fixed', 'inset:0', 'z-index:900',
+    'display:flex', 'flex-direction:column', 'align-items:center', 'justify-content:center',
+    'gap:12px', 'background:rgba(9,13,24,0.78)', 'backdrop-filter:blur(2px)'
+  ].join(';');
+
+  const spinner = document.createElement('div');
+  spinner.className = 'loading-overlay__spinner';
+  spinner.setAttribute('aria-hidden', 'true');
+  spinner.style.cssText = [
+    'width:44px', 'height:44px', 'border-radius:50%',
+    'border:4px solid rgba(255,255,255,0.2)', 'border-top-color:#ffffff',
+    'animation:loading-spin 0.8s linear infinite'
+  ].join(';');
+
+  overlayText = document.createElement('div');
+  overlayText.style.cssText = 'color:#fff;font-size:15px;text-align:center;padding:0 24px;';
+
+  if (!document.getElementById('loading-overlay-style')) {
+    const style = document.createElement('style');
+    style.id = 'loading-overlay-style';
+    style.textContent =
+      '@keyframes loading-spin { to { transform: rotate(360deg); } }' +
+      '.reduce-motion .loading-overlay__spinner { animation: none; }';
+    document.head.appendChild(style);
+  }
+
+  overlay.appendChild(spinner);
+  overlay.appendChild(overlayText);
+  document.body.appendChild(overlay);
 }
 
-function ensureSyncBadge() {
-  if (syncBadge && document.body.contains(syncBadge)) return syncBadge;
-  syncBadge = el('div', {
-    className: 'sync-badge',
-    attrs: { role: 'status', 'aria-live': 'polite' }
-  });
-  document.body.appendChild(syncBadge);
-  return syncBadge;
+/** Tampilkan overlay pemuatan dengan pesan. */
+export function showLoading(message = 'Memuat…') {
+  ensureOverlay();
+  overlayText.textContent = message;
+  overlay.hidden = false;
 }
+
+/** Sembunyikan overlay pemuatan. */
+export function hideLoading() {
+  if (overlay) overlay.hidden = true;
+}
+
+const SYNC_LABELS = {
+  saving: { text: '💾 Menyimpan…', bg: '#3b4a68' },
+  saved: { text: '✅ Tersimpan', bg: '#1f6f43' },
+  error: { text: '⚠️ Gagal menyimpan — akan dicoba lagi', bg: '#8a3b2b' },
+  queued: { text: '📥 Menunggu koneksi', bg: '#6a5a1f' }
+};
 
 /**
- * Perbarui indikator status sinkronisasi data ke server.
- * @param {'saving'|'saved'|'error'|'offline'} status
+ * Tampilkan status sinkronisasi kecil di sudut layar.
+ * Status: 'saving' | 'saved' | 'error' | 'queued'
  */
 export function setSyncStatus(status) {
-  const badge = ensureSyncBadge();
-  const labels = {
-    saving: '💾 Menyimpan…',
-    saved: '✅ Tersimpan',
-    error: '⚠️ Gagal menyimpan',
-    offline: '📡 Offline'
-  };
+  const info = SYNC_LABELS[status];
+  if (!info) return;
 
-  badge.textContent = labels[status] || '';
-  badge.className = `sync-badge sync-badge--${status}`;
-  badge.hidden = false;
+  if (!syncBadge) {
+    syncBadge = document.createElement('div');
+    syncBadge.setAttribute('role', 'status');
+    syncBadge.style.cssText = [
+      'position:fixed', 'right:12px', 'bottom:12px', 'z-index:800',
+      'padding:6px 12px', 'border-radius:999px', 'color:#fff',
+      'font-size:12px', 'box-shadow:0 2px 8px rgba(0,0,0,0.35)',
+      'transition:opacity 0.3s ease'
+    ].join(';');
+    document.body.appendChild(syncBadge);
+  }
 
+  syncBadge.textContent = info.text;
+  syncBadge.style.background = info.bg;
+  syncBadge.style.opacity = '1';
+  syncBadge.hidden = false;
+
+  clearTimeout(syncBadge._timer);
   if (status === 'saved') {
-    setTimeout(() => {
-      if (badge.classList.contains('sync-badge--saved')) badge.hidden = true;
-    }, 2000);
+    syncBadge._timer = setTimeout(() => { syncBadge.style.opacity = '0'; }, 2500);
   }
 }
 
-/** Pantau status koneksi online/offline dan perbarui badge secara otomatis. */
+/** Pantau koneksi dan beri tahu pengguna saat luring/daring kembali. */
 export function watchConnection() {
-  const update = () => {
-    if (!navigator.onLine) {
-      setSyncStatus('offline');
-    } else if (syncBadge && syncBadge.classList.contains('sync-badge--offline')) {
-      syncBadge.hidden = true;
-    }
-  };
+  if (connectionWatched) return;
+  connectionWatched = true;
 
-  window.addEventListener('online', update);
-  window.addEventListener('offline', update);
-  update();
+  window.addEventListener('offline', () => {
+    toast.warning('📴 Koneksi terputus. Hasil latihan disimpan di perangkat dulu.');
+    setSyncStatus('queued');
+  });
+
+  window.addEventListener('online', () => {
+    toast.success('📶 Koneksi kembali. Data akan disinkronkan.');
+  });
+
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+    setSyncStatus('queued');
+  }
 }

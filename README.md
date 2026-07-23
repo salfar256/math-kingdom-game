@@ -12,6 +12,27 @@ mengukur kecepatan dan ketepatan, serta menyimpan perkembangan setiap siswa.
 
 ---
 
+## Pembaruan Aset (Juli 2026)
+
+Seluruh aset gambar pixel sudah terpasang di folder `assets/` dan langsung dipakai game:
+
+| Lokasi | Isi |
+|---|---|
+| `assets/ui/main-menu.png` | Halaman depan (`index.html`) — tombol halaman diposisikan tepat di atas tombol yang tergambar |
+| `assets/backgrounds/` | Latar arena per kerajaan (battle field) |
+| `assets/kingdoms/` | Lambang kerajaan pada kartu peta |
+| `assets/characters/`, `assets/enemies/`, `assets/bosses/` | Sprite statis (latar transparan) |
+| `assets/idle/` | **Strip animasi idle 4 frame** (1024×256) — dimainkan otomatis di arena lewat CSS `steps(4)`; berhenti di frame 1 bila "kurangi animasi" aktif |
+| `assets/ui/ref-*.png` | Lembar referensi UI (HUD, keypad, ikon) untuk pengembangan lanjutan |
+
+Fallback tetap berlaku: jika sebuah gambar gagal dimuat, game otomatis memakai
+gambar statis, lalu emoji — tidak pernah error.
+
+Catatan: karakter *Tabib (healer)* belum punya aset gambar, sehingga masih tampil
+sebagai emoji 💚. Berkas `js/ui/loading.js` yang sebelumnya hilang sudah dibuat.
+
+---
+
 ## Daftar Isi
 
 1. [Fitur Utama](#1-fitur-utama)

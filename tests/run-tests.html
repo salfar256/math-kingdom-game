@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pengujian — Pertarungan Empat Kerajaan Hitungan</title>
+  <style>
+    :root {
+      --bg: #172033;
+      --panel: #24324a;
+      --border: #3d5275;
+      --text: #ffffff;
+      --muted: #b8c1d1;
+      --pass: #3dae5b;
+      --fail: #d94b4b;
+      --primary: #f5b301;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 24px;
+      font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+    .wrap { max-width: 900px; margin: 0 auto; }
+    h1 { font-size: 26px; margin-bottom: 4px; }
+    .subtitle { color: var(--muted); margin-top: 0; }
+    #summary {
+      padding: 16px;
+      border-radius: 10px;
+      border: 2px solid var(--border);
+      background: var(--panel);
+      margin: 20px 0;
+      font-size: 18px;
+      font-weight: 700;
+    }
+    #summary.pass { border-color: var(--pass); }
+    #summary.fail { border-color: var(--fail); }
+    .counts { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 8px; font-size: 15px; }
+    .suite {
+      margin-top: 22px;
+      padding-bottom: 6px;
+      border-bottom: 2px solid var(--border);
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+    .test {
+      padding: 5px 0 5px 26px;
+      position: relative;
+      font-size: 14px;
+    }
+    .test::before {
+      position: absolute;
+      left: 0;
+      top: 5px;
+    }
+    .test.pass::before { content: '✅'; }
+    .test.fail::before { content: '❌'; }
+    .test.fail { color: var(--fail); }
+    .message {
+      margin: 4px 0 0 0;
+      padding: 8px 12px;
+      background: rgba(217, 75, 75, 0.14);
+      border-left: 3px solid var(--fail);
+      border-radius: 4px;
+      font-family: ui-monospace, 'Courier New', monospace;
+      font-size: 13px;
+      white-space: pre-wrap;
+    }
+    .running { color: var(--muted); font-style: italic; }
+    footer { margin-top: 40px; color: var(--muted); font-size: 13px; }
+    a { color: var(--primary); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>🧪 Pengujian Otomatis</h1>
+    <p class="subtitle">Pertarungan Empat Kerajaan Hitungan — logika inti, tanpa Firebase.</p>
+
+    <div id="summary" class="running">Menjalankan pengujian…</div>
+    <div id="results"></div>
+
+    <footer>
+      <p>
+        Pengujian ini memeriksa generator soal, pemeriksa jawaban, mesin adaptif,
+        mesin penguasaan, sistem skor, mesin pertarungan, dan papan peringkat.
+      </p>
+      <p>
+        Untuk menguji Firestore Security Rules, jalankan:
+        <code>firebase emulators:exec --only firestore "node tests/rules.test.js"</code>
+      </p>
+      <p><a href="../index.html">← Kembali ke game</a></p>
+    </footer>
+  </div>
+
+  <script type="module">
+    import { runAll } from './test-framework.js';
+
+    // Impor seluruh berkas pengujian (efek samping: mendaftarkan suite).
+    await import('./question-generator.test.js');
+    await import('./mastery-engine.test.js');
+    await import('./adaptive-engine.test.js');
+    await import('./reward-engine.test.js');
+    await import('./battle-engine.test.js');
+    await import('./leaderboard.test.js');
+
+    const results = document.getElementById('results');
+    const summary = document.getElementById('summary');
+
+    function onResult(event) {
+      if (event.type === 'suite') {
+        const div = document.createElement('div');
+        div.className = 'suite';
+        div.textContent = event.name;
+        results.appendChild(div);
+        return;
+      }
+
+      if (event.type === 'pass' || event.type === 'fail') {
+        const div = document.createElement('div');
+        div.className = `test ${event.type}`;
+        div.textContent = event.name;
+        results.appendChild(div);
+
+        if (event.type === 'fail') {
+          const msg = document.createElement('pre');
+          msg.className = 'message';
+          msg.textContent = event.message;
+          results.appendChild(msg);
+        }
+        return;
+      }
+
+      if (event.type === 'summary') {
+        summary.className = event.failed === 0 ? 'pass' : 'fail';
+        summary.textContent = event.failed === 0
+          ? `✅ Semua pengujian lulus (${event.passed} dari ${event.total})`
+          : `❌ ${event.failed} pengujian gagal dari ${event.total}`;
+
+        const counts = document.createElement('div');
+        counts.className = 'counts';
+        counts.textContent = `Lulus: ${event.passed} · Gagal: ${event.failed} · Total: ${event.total}`;
+        summary.appendChild(counts);
+      }
+    }
+
+    await runAll(onResult);
+  </script>
+</body>
+</html>

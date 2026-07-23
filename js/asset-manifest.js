@@ -17,6 +17,33 @@ export const ASSETS = {
     'division-kingdom':       `${ASSET_BASE}/backgrounds/division-kingdom.png`,
     'mixed-tower':            `${ASSET_BASE}/backgrounds/mixed-tower.png`
   },
+  kingdoms: {
+    addition:       `${ASSET_BASE}/kingdoms/addition.png`,
+    subtraction:    `${ASSET_BASE}/kingdoms/subtraction.png`,
+    multiplication: `${ASSET_BASE}/kingdoms/multiplication.png`,
+    division:       `${ASSET_BASE}/kingdoms/division.png`
+  },
+  idle: {
+    adventurer:     `${ASSET_BASE}/idle/adventurer.png`,
+    knight:         `${ASSET_BASE}/idle/knight.png`,
+    mage:           `${ASSET_BASE}/idle/mage.png`,
+    archer:         `${ASSET_BASE}/idle/archer.png`,
+    slime:          `${ASSET_BASE}/idle/slime.png`,
+    goblin:         `${ASSET_BASE}/idle/goblin.png`,
+    skeleton:       `${ASSET_BASE}/idle/skeleton.png`,
+    orc:            `${ASSET_BASE}/idle/orc.png`,
+    'dark-mage':    `${ASSET_BASE}/idle/dark-mage.png`,
+    'shadow-ninja': `${ASSET_BASE}/idle/shadow-ninja.png`,
+    'boss-6':       `${ASSET_BASE}/idle/boss-6.png`,
+    'boss-7':       `${ASSET_BASE}/idle/boss-7.png`,
+    'boss-8':       `${ASSET_BASE}/idle/boss-8.png`,
+    'boss-9':       `${ASSET_BASE}/idle/boss-9.png`,
+    'mixed-boss':   `${ASSET_BASE}/idle/mixed-boss.png`
+  },
+  ui: {
+    'main-menu': `${ASSET_BASE}/ui/main-menu.png`,
+    story:       `${ASSET_BASE}/ui/story.png`
+  },
   characters: {
     leader:     `${ASSET_BASE}/characters/leader.png`,
     adventurer: `${ASSET_BASE}/characters/adventurer.png`,
@@ -76,6 +103,9 @@ export const ASSETS = {
 
 /** Fallback emoji per kategori & kunci, dipakai bila gambar gagal dimuat. */
 export const FALLBACK_EMOJI = {
+  kingdoms: {
+    addition: '➕', subtraction: '➖', multiplication: '✖️', division: '➗'
+  },
   backgrounds: {
     'addition-kingdom': '🏰',
     'subtraction-kingdom': '🏜️',
@@ -178,4 +208,78 @@ export function applySafeBackground(el, key) {
     el.classList.add('no-bg-image');
   };
   probe.src = path;
+}
+
+/* =====================================================================
+ * ANIMASI IDLE
+ * Setiap berkas di ASSETS.idle adalah strip horizontal 4 frame
+ * (1024 x 256; tiap frame 256 x 256). Frame dimainkan lewat CSS
+ * (kelas .idle-sprite, keyframes idle-play di css/game.css).
+ * ===================================================================== */
+
+export const IDLE_FRAME_COUNT = 4;
+
+/**
+ * Membuat sprite beranimasi idle dengan fallback bertingkat:
+ * strip idle → gambar statis → emoji.
+ *
+ * @param {'characters'|'enemies'|'bosses'} staticCategory kategori gambar statis
+ * @param {string} key   kunci aset (mis. 'knight', 'slime', 'boss-6')
+ * @param {object} opts  { size, alt, className }
+ * @returns {HTMLElement}
+ */
+export function createIdleSprite(staticCategory, key, { size = 96, alt = '', className = '' } = {}) {
+  const wrap = document.createElement('span');
+  wrap.className = `sprite idle-wrap ${className}`.trim();
+  wrap.style.width = `${size}px`;
+  wrap.style.height = `${size}px`;
+  wrap.style.fontSize = `${Math.round(size * 0.8)}px`;
+  wrap.style.lineHeight = `${size}px`;
+  wrap.setAttribute('role', 'img');
+  wrap.setAttribute('aria-label', alt || key);
+
+  const emoji = getFallbackEmoji(staticCategory, key);
+  const idlePath = getAssetPath('idle', key);
+  const staticPath = getAssetPath(staticCategory, key);
+
+  const useEmoji = () => { wrap.textContent = emoji; };
+
+  const useStatic = () => {
+    if (!staticPath) { useEmoji(); return; }
+    const img = document.createElement('img');
+    img.src = staticPath;
+    img.alt = '';
+    img.width = size;
+    img.height = size;
+    img.className = 'pixel-img';
+    img.decoding = 'async';
+    img.addEventListener('error', () => { img.remove(); useEmoji(); }, { once: true });
+    wrap.textContent = '';
+    wrap.appendChild(img);
+  };
+
+  if (!idlePath) { useStatic(); return wrap; }
+
+  const probe = new Image();
+  probe.onload = () => {
+    const node = document.createElement('span');
+    node.className = 'idle-sprite';
+    node.style.setProperty('--idle-size', `${size}px`);
+    node.style.backgroundImage = `url("${idlePath}")`;
+    wrap.textContent = '';
+    wrap.appendChild(node);
+  };
+  probe.onerror = useStatic;
+  probe.src = idlePath;
+
+  return wrap;
+}
+
+/**
+ * Ganti isi sebuah node dengan sprite idle (dipakai arena pertarungan).
+ */
+export function mountIdleSprite(node, staticCategory, key, { size = 96, alt = '' } = {}) {
+  if (!node) return;
+  node.textContent = '';
+  node.appendChild(createIdleSprite(staticCategory, key, { size, alt }));
 }

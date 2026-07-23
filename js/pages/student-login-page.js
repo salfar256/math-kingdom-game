@@ -10,6 +10,7 @@ import { getStudentProfile } from '../firebase/firestore-service.js';
 import { CHARACTERS, STORAGE_KEYS } from '../config/game-config.js';
 import { validateNickname, validateClassCode, firebaseErrorMessage } from '../utils/validators.js';
 import { el, $, safeStorage } from '../utils/helpers.js';
+import { createSafeSprite } from '../asset-manifest.js';
 import { showLoading, hideLoading, watchConnection } from '../ui/loading.js';
 import { toast } from '../ui/toast.js';
 import { soundManager } from '../ui/sound-manager.js';
@@ -54,7 +55,7 @@ function renderCharacters() {
         'data-char': char.id
       }
     }, [
-      el('span', { text: char.emoji, attrs: { 'aria-hidden': 'true' }, style: { fontSize: '34px' } }),
+      createSafeSprite('characters', char.asset || char.id, { size: 44, alt: '' }),
       el('span', { className: 'character-option__name', text: char.name }),
       el('span', { className: 'character-option__desc', text: char.desc })
     ]);

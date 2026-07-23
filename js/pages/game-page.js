@@ -20,7 +20,7 @@ import {
 } from '../firebase/leaderboard-service.js';
 import { getDb } from '../firebase/firebase-app.js';
 import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js';
-import { applySafeBackground } from '../asset-manifest.js';
+import { applySafeBackground, createSafeSprite, mountIdleSprite } from '../asset-manifest.js';
 import { showModal, confirmDialog } from '../ui/modal.js';
 import { toast } from '../ui/toast.js';
 import { showLoading, hideLoading, setSyncStatus, watchConnection } from '../ui/loading.js';
@@ -264,7 +264,9 @@ function renderKingdoms() {
       }
     }, [
       el('div', { className: 'kingdom-card__head' }, [
-        el('span', { className: 'kingdom-card__emoji', text: locked ? '🔒' : k.emoji, attrs: { 'aria-hidden': 'true' } }),
+        locked
+          ? el('span', { className: 'kingdom-card__emoji', text: '🔒', attrs: { 'aria-hidden': 'true' } })
+          : kingdomEmblem(k),
         el('div', {}, [
           el('div', { className: 'kingdom-card__title', text: k.shortName }),
           el('div', { className: 'kingdom-card__status text-muted', text: k.status })
@@ -521,15 +523,27 @@ function startSession(options) {
   advanceQuestion();
 }
 
+/** Lambang kerajaan bergambar; jatuh kembali ke emoji bila gambar tak ada. */
+function kingdomEmblem(k) {
+  const wrap = el('span', { className: 'kingdom-card__emoji', attrs: { 'aria-hidden': 'true' } });
+  wrap.appendChild(createSafeSprite('kingdoms', k.icon, { size: 48, alt: '' }));
+  return wrap;
+}
+
 function setupArenaChrome(title, mode, operation) {
   const p = state.engine.profile;
   const char = CHARACTERS.find((c) => c.id === p.characterId) || CHARACTERS[0];
 
-  $('#player-sprite').textContent = char.emoji;
+  mountIdleSprite($('#player-sprite'), 'characters', char.asset || char.id, { size: 96, alt: char.name });
   $('#player-name').textContent = p.displayName || 'Kamu';
 
   const enemy = state.battle.enemy;
-  $('#enemy-sprite').textContent = enemy.emoji;
+  mountIdleSprite(
+    $('#enemy-sprite'),
+    state.battle.isBoss ? 'bosses' : 'enemies',
+    enemy.asset || enemy.id,
+    { size: state.battle.isBoss ? 120 : 96, alt: enemy.name }
+  );
   $('#enemy-name').textContent = enemy.name;
 
   const isPlacement = mode === MODES.PLACEMENT;
@@ -670,7 +684,7 @@ function submitAnswer() {
   state.advanceTimeout = setTimeout(() => {
     if (battleResult.enemyDefeated && !state.battle.isBoss) {
       const next = state.battle.spawnNextEnemy();
-      $('#enemy-sprite').textContent = next.emoji;
+      mountIdleSprite($('#enemy-sprite'), 'enemies', next.asset || next.id, { size: 96, alt: next.name });
       $('#enemy-name').textContent = next.name;
       updateBattleBars();
     }

@@ -10,74 +10,62 @@
   <link rel="stylesheet" href="./css/variables.css" />
   <link rel="stylesheet" href="./css/global.css" />
   <link rel="stylesheet" href="./css/components.css" />
-  <link rel="stylesheet" href="./css/game.css" />
-  <link rel="stylesheet" href="./css/responsive.css" />
+  <link rel="stylesheet" href="./css/menu.css" />
 </head>
-<body>
+<body class="menu-body">
   <a class="skip-link" href="#main">Lompat ke konten utama</a>
 
-  <div class="page">
-    <main id="main" class="container container--narrow stack-lg" style="padding-top: 32px;">
+  <main id="main" class="menu-frame" aria-label="Menu utama Pertarungan Empat Kerajaan Hitungan">
 
-      <header class="text-center">
-        <div style="font-size: 64px; line-height: 1;" role="img" aria-label="Logo empat kerajaan">⚔️</div>
-        <h1>Pertarungan<br />Empat Kerajaan Hitungan</h1>
-        <p class="text-muted">
-          Kuasai penjumlahan, pengurangan, perkalian, dan pembagian 1–9
-          dalam 30 hari.
-        </p>
-        <p class="chip chip--primary">⏱️ Cukup 10–15 menit setiap hari</p>
-      </header>
+    <div id="firebase-warning" class="form-error" hidden></div>
 
-      <div id="firebase-warning" class="form-error" hidden></div>
+    <!-- Tombol utama (tepat di atas tombol yang tergambar) -->
+    <a class="menu-hotspot menu-hotspot--battle" href="./student.html">
+      ⚔️ Mulai Pertarungan — Masuk Siswa
+    </a>
+    <a class="menu-hotspot menu-hotspot--map" href="./game.html">
+      🗺️ Peta Kerajaan
+    </a>
+    <a class="menu-hotspot menu-hotspot--daily" href="./game.html">
+      🏆 Tantangan Harian
+    </a>
+    <a class="menu-hotspot menu-hotspot--profile" href="./profile.html">
+      🎒 Profil
+    </a>
+    <button type="button" class="menu-hotspot menu-hotspot--shop" id="btn-shop">
+      📦 Toko
+    </button>
+    <a class="menu-hotspot menu-hotspot--badges" href="./profile.html">
+      📜 Achievement
+    </a>
 
-      <nav class="panel stack" aria-label="Menu utama">
-        <a class="btn btn--primary btn--block btn--lg" href="./student.html">
-          🎮 Masuk Siswa
-        </a>
-        <a class="btn btn--info btn--block" href="./teacher.html">
-          🧑‍🏫 Masuk Guru
-        </a>
-        <button type="button" class="btn btn--ghost btn--block" id="btn-about">
-          📖 Tentang Game
-        </button>
-        <button type="button" class="btn btn--ghost btn--block" id="btn-sound">
-          🔊 Pengaturan Suara
-        </button>
-      </nav>
+    <!-- Roda gigi kanan-atas: pengaturan suara & tampilan -->
+    <button type="button" class="menu-hotspot menu-hotspot--gear" id="btn-sound"
+            aria-label="Pengaturan suara dan tampilan">
+      ⚙️
+    </button>
 
-      <section class="panel stack" aria-labelledby="kingdoms-heading">
-        <h2 id="kingdoms-heading">Empat Kerajaan</h2>
-        <div class="grid" style="grid-template-columns: repeat(2, 1fr);">
-          <div class="card text-center">
-            <div style="font-size: 32px;" aria-hidden="true">➕</div>
-            <strong>Penjumlahan</strong>
-          </div>
-          <div class="card text-center">
-            <div style="font-size: 32px;" aria-hidden="true">➖</div>
-            <strong>Pengurangan</strong>
-          </div>
-          <div class="card text-center">
-            <div style="font-size: 32px;" aria-hidden="true">✖️</div>
-            <strong>Perkalian</strong>
-          </div>
-          <div class="card text-center">
-            <div style="font-size: 32px;" aria-hidden="true">➗</div>
-            <strong>Pembagian</strong>
-          </div>
-        </div>
-        <p class="text-sm text-muted mb-0">
-          Selesaikan keempat kerajaan untuk membuka 🗼 Menara Operasi Campuran.
-        </p>
-      </section>
+    <!-- Navigasi bawah -->
+    <nav aria-label="Navigasi bawah">
+      <a class="menu-hotspot menu-hotspot--nav menu-hotspot--nav-1" href="./index.html" aria-current="page">
+        🏠 Beranda
+      </a>
+      <a class="menu-hotspot menu-hotspot--nav menu-hotspot--nav-2" href="./student.html">
+        ⚔️ Bertarung
+      </a>
+      <button type="button" class="menu-hotspot menu-hotspot--nav menu-hotspot--nav-3" id="btn-about">
+        📖 Belajar
+      </button>
+      <a class="menu-hotspot menu-hotspot--nav menu-hotspot--nav-4" href="./teacher.html">
+        🧑‍🏫 Kelas — Masuk Guru
+      </a>
+      <a class="menu-hotspot menu-hotspot--nav menu-hotspot--nav-5" href="./game.html">
+        🏅 Ranking
+      </a>
+    </nav>
 
-      <footer class="text-center text-sm text-dim">
-        <p class="mb-0">Dibuat untuk pembelajaran matematika dasar kelas 7 SMP.</p>
-      </footer>
+  </main>
 
-    </main>
-  </div>
-
-  <script type="module" src="./js/pages/landing-pages.js"></script>
+  <script type="module" src="./js/pages/landing-page.js"></script>
 </body>
 </html>
