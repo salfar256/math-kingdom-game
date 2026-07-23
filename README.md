@@ -12,6 +12,25 @@ mengukur kecepatan dan ketepatan, serta menyimpan perkembangan setiap siswa.
 
 ---
 
+## Pembaruan Ketujuh (Juli 2026) — Bug Urutan Login Siswa
+
+**Akar masalah "Missing or insufficient permissions" saat daftar akun siswa
+ditemukan.** Pada pembaruan sistem akun sebelumnya, `student-login-page.js`
+memanggil `findClassByCode()` (baca koleksi `classCodes`) SEBELUM
+`registerStudentAccount()` (sign-in). Rule Firestore `classCodes` mewajibkan
+`isSignedIn()`, jadi pencarian kode kelas selalu ditolak karena belum ada
+sesi autentikasi sama sekali di titik itu.
+
+**Perbaikan:** urutan dibalik -- akun dibuat (sign-in) lebih dulu, baru kode
+kelas dicari. Bila ternyata kode kelasnya tidak valid, akun yang baru dibuat
+otomatis dihapus lagi supaya tidak menyisakan akun "yatim" tanpa kelas.
+
+Berkat perbaikan `devError()` pada pembaruan sebelumnya (selalu tampil di
+console produksi), error asli ini akhirnya terlihat di DevTools dan bisa
+langsung didiagnosis dari pesannya.
+
+---
+
 ## Pembaruan Keenam (Juli 2026) — 12 Perbaikan & Fitur
 
 1. **Karakter dibetulkan** — Pemimpin kini bertopi hijau (seni resolusi tinggi),

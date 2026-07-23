@@ -162,20 +162,29 @@ async function handleSubmit(event) {
     }
 
     // ===== AKUN BARU =====
+    // PENTING: harus masuk (sign-in) dulu sebelum mencari kode kelas, karena
+    // rule Firestore classCodes mewajibkan pengguna sudah terautentikasi
+    // (isSignedIn()) -- mencari kode kelas sebelum sign-in selalu ditolak
+    // dengan "Missing or insufficient permissions".
+    showLoading('Membuat akunmu…');
+    const uid = await registerStudentAccount(nameCheck.value, codeCheck.value, pinCheck.value);
+
     showLoading('Mencari kelas…');
     const klass = await findClassByCode(codeCheck.value);
 
-    if (!klass) {
-      setFieldError('classcode', 'Kode kelas tidak ditemukan. Periksa kembali kodenya.');
-      return;
-    }
-    if (klass.active === false) {
-      setFieldError('classcode', 'Kelas ini sudah tidak aktif. Hubungi gurumu.');
-      return;
-    }
+    if (!klass || klass.active === false) {
+      // Kode kelas ternyata tidak valid -- batalkan akun yang baru dibuat
+      // supaya tidak menyisakan akun "yatim" tanpa kelas.
+      try {
+        const u = getCurrentUser();
+        if (u) await u.delete();
+      } catch { /* pembersihan gagal tidak fatal */ }
 
-    showLoading('Membuat akunmu…');
-    const uid = await registerStudentAccount(nameCheck.value, codeCheck.value, pinCheck.value);
+      setFieldError('classcode',
+        !klass ? 'Kode kelas tidak ditemukan. Periksa kembali kodenya.'
+               : 'Kelas ini sudah tidak aktif. Hubungi gurumu.');
+      return;
+    }
 
     showLoading('Menyiapkan petualanganmu…');
     await enrollStudent(uid, klass.id, {
