@@ -180,45 +180,75 @@ service cloud.firestore {
           || ownsClass(classId);
 
         allow delete: if ownsClass(classId);
+      }
+    }
 
-        // ---- fakta hitungan ----
-        match /facts/{factId} {
-          allow read: if isSelf(studentUid) || teacherOfStudent(studentUid);
+    // ============ students (LEVEL ATAS) ============
+    // Profil utama siswa + subkoleksi fakta/sesi. Path ini TERPISAH dari
+    // roster classes/{classId}/students/{uid} di atas (itu cuma ringkasan
+    // untuk dashboard guru & leaderboard). Semua data gameplay sungguhan
+    // (level, XP, fakta hitungan, riwayat sesi) hidup di sini.
+    //
+    // BUG LAMA: rule facts/sessions sebelumnya bersarang di bawah
+    // classes/{classId}/students/{uid}, padahal kode aplikasi menulis ke
+    // students/{uid}/facts dan students/{uid}/sessions (TANPA classes/{id}
+    // di depannya). Akibatnya seluruh penyimpanan progres siswa selalu
+    // ditolak default-deny. Sudah dipindahkan ke tempat yang benar di sini.
+    //
+    // Skema profil cukup kaya (badges, practiceDays, placementResult, dst)
+    // dan terus berkembang, jadi validasi dibatasi pada kepemilikan
+    // (isSelf) bukan whitelist field kaku -- whitelist yang ketinggalan
+    // satu field baru adalah persis bug yang membuat fitur ini rusak total.
 
-          allow write: if isSelf(studentUid)
-            && request.resource.data.keys().hasOnly([
-                 'operation','operandA','operandB','answer','familyId','status',
-                 'totalAttempts','correctAttempts','wrongAttempts',
-                 'consecutiveCorrect','consecutiveWrong',
-                 'averageResponseMs','fastestResponseMs','helpUsedCount',
-                 'daysPracticed','practiceDays',
-                 'lastSeenAt','lastCorrectAt','nextReviewAt','updatedAt'
-               ])
-            && numRange(request.resource.data.totalAttempts, 0, 1000000)
-            && numRange(request.resource.data.correctAttempts, 0, 1000000)
-            && isStr(request.resource.data.status);
+    match /students/{studentUid} {
+      allow get:  if isSelf(studentUid) || teacherOfStudent(studentUid);
+      allow list: if false;
 
+      allow create: if isSelf(studentUid)
+        && strLen(request.resource.data.displayName, 2, 30)
+        && strLen(request.resource.data.characterId, 1, 20);
+
+      allow update: if isSelf(studentUid) || teacherOfStudent(studentUid);
+
+      allow delete: if false;
+
+      // ---- fakta hitungan ----
+      match /facts/{factId} {
+        allow read: if isSelf(studentUid) || teacherOfStudent(studentUid);
+
+        allow write: if isSelf(studentUid)
+          && request.resource.data.keys().hasOnly([
+               'operation','operandA','operandB','answer','familyId','status',
+               'totalAttempts','correctAttempts','wrongAttempts',
+               'consecutiveCorrect','consecutiveWrong',
+               'averageResponseMs','fastestResponseMs','helpUsedCount',
+               'daysPracticed','practiceDays','sessionsSeen',
+               'lastSeenAt','lastCorrectAt','nextReviewAt','updatedAt'
+             ])
+          && numRange(request.resource.data.totalAttempts, 0, 1000000)
+          && numRange(request.resource.data.correctAttempts, 0, 1000000)
+          && isStr(request.resource.data.status);
+
+        allow delete: if isSelf(studentUid) || teacherOfStudent(studentUid);
+      }
+
+      // ---- sesi latihan ----
+      match /sessions/{sessionId} {
+        allow read: if isSelf(studentUid) || teacherOfStudent(studentUid);
+
+        allow create, update: if isSelf(studentUid)
+          && numRange(request.resource.data.correct, 0, 100000)
+          && numRange(request.resource.data.wrong, 0, 100000)
+          && numRange(request.resource.data.accuracy, 0, 100);
+
+        allow delete: if isSelf(studentUid) || teacherOfStudent(studentUid);
+
+        match /attempts/{attemptId} {
+          allow read:   if isSelf(studentUid) || teacherOfStudent(studentUid);
+          allow create: if isSelf(studentUid)
+            && request.resource.data.correct is bool;
+          allow update: if false;
           allow delete: if isSelf(studentUid) || teacherOfStudent(studentUid);
-        }
-
-        // ---- sesi latihan ----
-        match /sessions/{sessionId} {
-          allow read: if isSelf(studentUid) || teacherOfStudent(studentUid);
-
-          allow create, update: if isSelf(studentUid)
-            && numRange(request.resource.data.correct, 0, 100000)
-            && numRange(request.resource.data.wrong, 0, 100000)
-            && numRange(request.resource.data.accuracy, 0, 100);
-
-          allow delete: if isSelf(studentUid) || teacherOfStudent(studentUid);
-
-          match /attempts/{attemptId} {
-            allow read:   if isSelf(studentUid) || teacherOfStudent(studentUid);
-            allow create: if isSelf(studentUid)
-              && request.resource.data.correct is bool;
-            allow update: if false;
-            allow delete: if isSelf(studentUid) || teacherOfStudent(studentUid);
-          }
         }
       }
     }

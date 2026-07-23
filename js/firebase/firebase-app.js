@@ -65,7 +65,7 @@ function initialize() {
 
 initialize();
 
-/** Log teknis hanya pada mode development. */
+/** Log info verbose — hanya tampil di mode development (localhost). */
 export function devLog(...args) {
   if (IS_DEV) console.log('[MathKingdom]', ...args);
 }
@@ -74,8 +74,16 @@ export function devWarn(...args) {
   if (IS_DEV) console.warn('[MathKingdom]', ...args);
 }
 
+/**
+ * Log error TEKNIS — SELALU tampil di console, termasuk di produksi
+ * (GitHub Pages, dsb). Tanpa ini, error asli dari Firebase (kode error,
+ * pesan detail) tidak akan pernah terlihat di luar localhost, sehingga
+ * mustahil didiagnosis lewat DevTools. Pesan ramah untuk pengguna tetap
+ * ditampilkan lewat toast di tempat lain; ini murni untuk developer/guru
+ * yang membuka Console (F12) saat menelusuri masalah.
+ */
 export function devError(...args) {
-  if (IS_DEV) console.error('[MathKingdom]', ...args);
+  console.error('[MathKingdom]', ...args);
 }
 
 /** @returns {boolean} apakah Firebase siap dipakai. */

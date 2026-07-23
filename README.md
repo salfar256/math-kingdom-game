@@ -12,6 +12,46 @@ mengukur kecepatan dan ketepatan, serta menyimpan perkembangan setiap siswa.
 
 ---
 
+## Pembaruan Kelima (Juli 2026) — Bug Kritis: Login Siswa Selalu Ditolak
+
+**Akar masalah "Izin ditolak" saat Masuk Siswa ditemukan dan diperbaiki.**
+
+`firestore.rules` sebelumnya TIDAK PERNAH punya aturan untuk koleksi
+`students/{uid}` di level atas — tempat profil utama siswa, fakta hitungan,
+dan riwayat sesi tersimpan. Yang ada hanya aturan untuk
+`classes/{classId}/students/{uid}` (roster ringkas dashboard guru, sesuatu
+yang berbeda). Karena rules diakhiri dengan default-deny, SETIAP tulisan ke
+profil siswa (termasuk langkah pertama saat masuk: `enrollStudent()`) selalu
+ditolak — walau akun guru dan `firestore.rules` versi lama sudah ter-deploy
+dengan benar.
+
+Ditambah, aturan `facts` dan `sessions` sebelumnya bersarang salah tempat
+(di bawah `classes/{classId}/students/{uid}/facts`, padahal kode menulis ke
+`students/{uid}/facts` tanpa `classes/{classId}` di depannya) — jadi bahkan
+kalau bug pertama tidak ada, fakta & sesi tetap akan ditolak.
+
+Bug ketiga yang ikut ditemukan: field `sessionsSeen` pada objek fakta hitungan
+tidak ada di whitelist rules, jadi `saveFactsBatch()` akan selalu ditolak juga.
+
+**Perbaikan** (di `firestore.rules`):
+1. Ditambahkan `match /students/{studentUid}` di level atas dengan aturan
+   get/create/update yang benar (kepemilikan lewat `isSelf()`, guru pemilik
+   kelas lewat `teacherOfStudent()`).
+2. Aturan `facts` dan `sessions`/`attempts` dipindah ke lokasi yang benar
+   di bawah `students/{studentUid}` (bukan di bawah `classes/{classId}`).
+3. Field `sessionsSeen` ditambahkan ke whitelist fakta.
+4. `devError()` (di `js/firebase/firebase-app.js`) sekarang SELALU mencetak
+   ke console, termasuk di produksi (GitHub Pages) — sebelumnya hanya aktif
+   di localhost, sehingga error Firestore asli tidak pernah terlihat di
+   DevTools saat production, membuat bug ini sangat sulit dilacak.
+
+**PENTING: `firestore.rules` yang baru wajib di-deploy ulang** (copy-paste ke
+Firebase Console → Firestore Database → Rules → Publish, atau
+`firebase deploy --only firestore:rules`) — versi lama di Console TIDAK akan
+otomatis ikut berubah walau file di repo sudah diperbarui.
+
+---
+
 ## Pembaruan Keempat (Juli 2026) — Perombakan Tampilan
 
 Akar masalah tampilan "belum jadi" ditemukan: berkas `css/components.css` pada
