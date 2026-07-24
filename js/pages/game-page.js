@@ -50,6 +50,9 @@ const state = {
   isSubmitting: false
 };
 
+/** Jeda minimum agar animasi aksi selalu sempat terlihat (item 2). */
+const MIN_ACTION_VISIBLE_MS = 1000;
+
 const SCREENS = ['screen-story', 'screen-map', 'screen-mode', 'screen-arena', 'screen-result', 'screen-leaderboard'];
 
 function showScreen(id) {
@@ -723,9 +726,14 @@ function submitAnswer() {
   const needsDeathPause = isBattleMode
     && (battleResult.battleWon || (battleResult.enemyDefeated && !state.battle.isBoss) || battleResult.playerDown);
 
-  const delay = outcome.correct
+  let delay = outcome.correct
     ? (needsDeathPause ? ACTION_DURATION_MS.death + 80 : SESSION_CONFIG.autoAdvanceCorrectMs)
     : (needsDeathPause ? ACTION_DURATION_MS.hurt + SESSION_CONFIG.autoAdvanceWrongMs : SESSION_CONFIG.autoAdvanceWrongMs);
+
+  // Jeda MINIMUM 1 detik sebelum soal berikutnya: pemain yang menjawab sangat
+  // cepat tidak lagi "memotong" animasi menyerang/terkena damage sebelum
+  // sempat terlihat. Mode Latihan tetap responsif (tanpa animasi pertarungan).
+  if (isBattleMode) delay = Math.max(delay, MIN_ACTION_VISIBLE_MS);
 
   state.advanceTimeout = setTimeout(() => {
     const inBattle = state.session.mode !== MODES.PRACTICE;

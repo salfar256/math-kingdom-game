@@ -12,6 +12,47 @@ mengukur kecepatan dan ketepatan, serta menyimpan perkembangan setiap siswa.
 
 ---
 
+## Pembaruan Ketiga Belas (Juli 2026) — Animasi Battle & PWA Potret
+
+1. **Karakter menghilang saat menjawab — DUA bug ditemukan sekaligus.**
+
+   *Bug A (CSS, penyebab utama):* animasi sekali-main memakai keyframe
+   `idle-play` yang berakhir di `background-position-x: -4x` lebar frame.
+   Untuk strip 4 frame, posisi itu ADA DI LUAR gambar (frame ke-5 yang tidak
+   ada). Dengan `animation-fill-mode: forwards`, sprite tersangkut di posisi
+   kosong tersebut -- karakter tampak lenyap sampai soal berikutnya me-mount
+   ulang sprite. Diperbaiki dengan keyframe khusus `action-play` yang berhenti
+   tepat di frame ke-4.
+
+   *Bug B (aset):* ekstraksi strip dari sheet memakai clustering centroid,
+   yang salah memecah baris saat sprite dalam satu baris punya tinggi berbeda
+   (efek gerakan/partikel). Akibatnya banyak strip berisi frame kosong --
+   `death` hanya 4% terisi, `attack` frame 2-4 hanya 2%. Ekstraksi ditulis
+   ulang memakai PROYEKSI HORIZONTAL + pembuangan kolom anomali (partikel).
+   Hasil: 68 strip (naik dari 51), diverifikasi TIDAK ADA frame kosong.
+
+   *Bug C (race condition):* dua aksi beruntun (attack lalu hurt dalam satu
+   jawaban) membuat panggilan kedua menangkap URL animasi sebagai "idle".
+   URL idle kini disimpan di `dataset.idleBg`, dan timer pemulihan dibatalkan
+   bila ada aksi baru.
+
+2. **Jeda minimum 1 detik** sebelum soal berikutnya pada semua mode
+   pertarungan, agar pemain yang menjawab sangat cepat tidak memotong animasi.
+   Mode Latihan tetap responsif.
+
+3. **Ikon aplikasi baru** (`Ikon_Aplikasi.png`) dipasang untuk layar HP:
+   ukuran 192 & 512 untuk ikon biasa, PLUS versi `maskable` dengan safe-zone
+   78% supaya tidak terpotong saat Android memangkasnya jadi lingkaran.
+   Favicon turut diperbarui.
+
+4. **Orientasi dikunci POTRET** — `manifest.webmanifest` disetel
+   `"orientation": "portrait"`. Karena sebagian perangkat mengabaikannya,
+   ditambahkan lapisan pemberitahuan "Putar Perangkatmu" yang muncul hanya
+   pada ponsel dalam mode lanskap (tablet & desktop tidak terpengaruh agar
+   dashboard guru tetap nyaman dipakai).
+
+---
+
 ## Pembaruan Kedua Belas (Juli 2026) — 5 Perbaikan & Fitur
 
 1. **Data dashboard guru tidak selaras dengan progres siswa — bug ditemukan.**

@@ -613,11 +613,24 @@
 .question-text { letter-spacing: 2px; }
 .class-code-box__code { letter-spacing: 5px; }
 
-/* ================= AKSI SEKALI-MAIN + HATI + PILIHAN GANDA ============= */
+/* ================= AKSI SEKALI-MAIN + PILIHAN GANDA ============= */
+
+/*
+ * PENTING: animasi sekali-main TIDAK boleh memakai keyframe idle-play.
+ * idle-play berakhir di background-position-x = -4x lebar frame, yang untuk
+ * strip 4 frame berarti posisi DI LUAR gambar (frame ke-5 yang tidak ada).
+ * Dengan animation-fill-mode: forwards, sprite tersangkut di posisi kosong
+ * itu -- inilah sebab karakter tampak MENGHILANG saat menyerang/terkena
+ * damage. Keyframe di bawah berhenti tepat di frame ke-4 (-3x lebar).
+ */
+@keyframes action-play {
+  from { background-position-x: 0; }
+  to   { background-position-x: calc(var(--idle-size) * -3); }
+}
 
 .idle-sprite--oneshot {
-  animation-name: idle-play;
-  animation-timing-function: steps(4);
+  animation-name: action-play;
+  animation-timing-function: steps(3, end);
   animation-iteration-count: 1;
   animation-fill-mode: forwards;
 }

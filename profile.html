@@ -105,5 +105,16 @@
   </div>
 
   <script type="module" src="./js/pages/profile-page.js"></script>
+  <!-- Pemberitahuan orientasi: tampil hanya di ponsel saat mode lanskap.
+       Game ini dirancang untuk mode POTRET (lihat manifest + responsive.css). -->
+  <div class="rotate-notice" role="alertdialog" aria-live="polite">
+    <img class="rotate-notice__icon" src="./assets/icons/app-icon-192.png" alt="" aria-hidden="true" />
+    <h2 class="rotate-notice__title">Putar Perangkatmu</h2>
+    <p class="rotate-notice__text">
+      Pertarungan Empat Kerajaan dimainkan dalam mode potret (tegak).
+      Putar HP-mu kembali untuk melanjutkan petualangan.
+    </p>
+  </div>
+
 </body>
 </html>

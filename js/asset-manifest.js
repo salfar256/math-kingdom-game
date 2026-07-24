@@ -317,21 +317,32 @@ export function playActionSprite(wrapNode, action) {
   const sprite = wrapNode.querySelector('.idle-sprite');
   if (!key || !sprite) return;
 
+  // URL idle disimpan sekali saat sprite dipasang. JANGAN membaca
+  // style.backgroundImage saat ini sebagai "idle" -- kalau ada dua aksi
+  // beruntun (mis. attack lalu hurt dalam satu jawaban), panggilan kedua
+  // akan menangkap URL ANIMASI sebagai "idle", lalu mengembalikannya ke situ.
+  // Frame terakhir strip aksi hampir kosong -> karakter tampak MENGHILANG
+  // sampai soal berikutnya me-mount ulang sprite. Ini bug yang dilaporkan.
+  const idleBg = sprite.dataset.idleBg || sprite.style.backgroundImage;
+  if (!sprite.dataset.idleBg) sprite.dataset.idleBg = idleBg;
+
   const path = `${ASSET_BASE}/anim/${action}/${key}.png`;
   const probe = new Image();
   probe.onload = () => {
-    const prevBg = sprite.style.backgroundImage;
+    // Batalkan pemulihan dari aksi sebelumnya agar tidak saling menimpa.
+    if (sprite._actionTimer) clearTimeout(sprite._actionTimer);
+
     sprite.style.backgroundImage = `url("${path}")`;
     sprite.classList.add('idle-sprite--oneshot');
     const dur = ACTION_DURATION_MS[action] || 550;
     sprite.style.animationDuration = `${dur}ms`;
-    setTimeout(() => {
-      // SELALU kembali ke idle -- termasuk setelah 'death'. Sebelumnya sprite
-      // dibiarkan di frame terakhir, sehingga saat musuh berikutnya muncul
-      // karakter tampak menghilang (frame tumbang = hampir kosong).
-      sprite.style.backgroundImage = prevBg;
+
+    sprite._actionTimer = setTimeout(() => {
+      // SELALU kembali ke strip idle yang tersimpan.
+      sprite.style.backgroundImage = sprite.dataset.idleBg;
       sprite.style.animationDuration = '';
       sprite.classList.remove('idle-sprite--oneshot');
+      sprite._actionTimer = null;
     }, dur);
   };
   probe.src = path;
