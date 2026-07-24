@@ -12,6 +12,38 @@ mengukur kecepatan dan ketepatan, serta menyimpan perkembangan setiap siswa.
 
 ---
 
+## Pembaruan Kelima Belas (Juli 2026) — 2 Bug Kritis Sistem Boss
+
+1. **Boss salah tampil di kerajaan lain — bug ditemukan.** `pickBossFor()`
+   memilih boss berdasarkan ANGKA TERSULIT yang pernah dilatih siswa (6/7/8/9)
+   dari fakta di kerajaan itu -- BUKAN berdasarkan identitas kerajaan itu
+   sendiri. Seorang siswa yang lemah di angka 9 pada Kerajaan Penjumlahan akan
+   diberi "boss-9" untuk dilawan -- padahal boss-9 secara tematik/visual
+   adalah boss Kerajaan Pembagian. Persis laporan: boss Penjumlahan dan
+   Perkalian menampilkan gambar boss Pembagian.
+
+   **Perbaikan:** setiap kerajaan sekarang punya `bossId` tetap 1:1 di
+   `game-config.js` (Penjumlahan→boss-6, Pengurangan→boss-7, Perkalian→boss-8,
+   Pembagian→boss-9). `pickBossFor()` disederhanakan menjadi sekadar
+   `kingdom.bossId`. Baris kode mati yang juga salah (`BOSSES.find(b => b.focus === 7)`,
+   selalu memilih boss-7 tak peduli kerajaan) turut dihapus.
+
+2. **Kerajaan tidak terbuka meski boss sudah dikalahkan — bug ditemukan.**
+   `#isKingdomUnlocked()` mensyaratkan DUA hal: boss kerajaan sebelumnya
+   dikalahkan DAN level pemain mencapai `requiredLevel` kerajaan tujuan.
+   Syarat level ini bertentangan dengan keputusan sebelumnya ("kerajaan
+   berikutnya wajib mengalahkan boss" sebagai SATU-SATUNYA syarat) --
+   pemain yang sudah mengalahkan boss tapi levelnya belum cukup tetap
+   terkunci tanpa penjelasan yang jelas.
+
+   **Perbaikan:** syarat level dihapus dari unlock kerajaan maupun Menara
+   Campuran. Sekarang murni: kalahkan boss kerajaan sebelumnya = kerajaan
+   berikutnya terbuka. Diverifikasi dengan simulasi: profil level rendah
+   (0 XP) yang sudah mengalahkan boss Perkalian -> Pembagian langsung
+   terbuka.
+
+---
+
 ## Pembaruan Keempat Belas (Juli 2026) — Download Game di Menu Utama + Bug Kritis
 
 1. **Bug pada screenshot Anda ditemukan & diperbaiki:** `index.html` (halaman

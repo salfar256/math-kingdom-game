@@ -40,7 +40,8 @@ export const KINGDOMS = [
     background: 'addition-kingdom',
     icon: 'addition',
     order: 1,
-    requiredLevel: 1
+    requiredLevel: 1,
+    bossId: 'boss-6'
   },
   {
     id: OPERATIONS.SUBTRACTION,
@@ -50,7 +51,8 @@ export const KINGDOMS = [
     background: 'subtraction-kingdom',
     icon: 'subtraction',
     order: 2,
-    requiredLevel: 3
+    requiredLevel: 3,
+    bossId: 'boss-7'
   },
   {
     id: OPERATIONS.MULTIPLICATION,
@@ -60,7 +62,8 @@ export const KINGDOMS = [
     background: 'multiplication-kingdom',
     icon: 'multiplication',
     order: 3,
-    requiredLevel: 5
+    requiredLevel: 5,
+    bossId: 'boss-8'
   },
   {
     id: OPERATIONS.DIVISION,
@@ -70,7 +73,8 @@ export const KINGDOMS = [
     background: 'division-kingdom',
     icon: 'division',
     order: 4,
-    requiredLevel: 8
+    requiredLevel: 8,
+    bossId: 'boss-9'
   }
 ];
 

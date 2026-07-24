@@ -10,7 +10,7 @@ import { GameEngine } from '../game/game-engine.js';
 import { flushSyncQueue } from '../game/session-manager.js';
 import {
   MODES, BATTLE_CONFIG, MODE_LABEL, KINGDOMS, OPERATION_LABEL, CHARACTERS, ENEMIES,
-  SESSION_CONFIG, BOSSES, MASTERY_LABEL, MASTERY_STATUS
+  SESSION_CONFIG, MASTERY_LABEL, MASTERY_STATUS
 } from '../config/game-config.js';
 import { BattleEngine } from '../game/battle-engine.js';
 import { getHint, explainMistake, quickFeedback } from '../game/feedback-engine.js';
@@ -310,7 +310,7 @@ function renderKingdoms() {
         el('div', { className: 'kingdom-card__title', text: tower.shortName }),
         el('div', {
           className: 'kingdom-card__status text-muted',
-          text: tower.unlocked ? 'terbuka' : 'Kuasai keempat kerajaan dulu'
+          text: tower.unlocked ? 'terbuka' : 'Kalahkan semua Boss kerajaan dulu'
         })
       ])
     ]),
@@ -390,7 +390,6 @@ function openModeScreen(kingdom) {
   }
 
   // Boss.
-  const boss = BOSSES.find((b) => b.focus === 7) || BOSSES[0];
   const bossCard = el('button', {
     className: 'card card--clickable row row--between',
     attrs: { type: 'button', disabled: kingdom.bossUnlocked ? null : 'disabled' }
@@ -426,24 +425,9 @@ function openModeScreen(kingdom) {
   showScreen('screen-mode');
 }
 
+/** Boss suatu kerajaan SELALU tetap -- satu kerajaan, satu boss (item 1). */
 function pickBossFor(kingdom) {
-  // Boss mewakili hitungan sulit: pilih berdasarkan angka terlemah siswa.
-  const weakNumbers = [6, 7, 8, 9];
-  let worst = 7;
-  let worstScore = Infinity;
-
-  for (const n of weakNumbers) {
-    let attempts = 0, correct = 0;
-    for (const fact of state.engine.factMap.values()) {
-      if (fact.operation !== kingdom.id) continue;
-      if (fact.operandA !== n && fact.operandB !== n && fact.answer !== n) continue;
-      attempts += fact.totalAttempts || 0;
-      correct += fact.correctAttempts || 0;
-    }
-    const acc = attempts > 0 ? correct / attempts : 0.5;
-    if (acc < worstScore) { worstScore = acc; worst = n; }
-  }
-  return `boss-${worst}`;
+  return kingdom.bossId;
 }
 
 function modeCard(m, kingdom) {

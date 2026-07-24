@@ -176,10 +176,13 @@ export class GameEngine {
     const idx = KINGDOMS.findIndex((k) => k.id === operation);
     if (idx <= 0) return true;
 
+    // Satu-satunya syarat: boss kerajaan sebelumnya sudah dikalahkan.
+    // (requiredLevel per kerajaan TIDAK lagi menjadi syarat tambahan --
+    // sebelumnya kerajaan tetap terkunci meski boss sudah dikalahkan kalau
+    // level belum cukup, membingungkan pemain yang sudah memenuhi syarat
+    // yang diberitahukan ke mereka.)
     const prev = KINGDOMS[idx - 1];
-    if (!this.isBossDefeated(prev.id)) return false;
-
-    return this.playerLevel >= (KINGDOMS[idx].requiredLevel || 1);
+    return this.isBossDefeated(prev.id);
   }
 
   /** Semua progres kerajaan + menara. */
@@ -189,7 +192,7 @@ export class GameEngine {
       .map((k) => ({ ...k, ...this.getKingdomProgress(k.id) }));
 
     const allBossesDown = KINGDOMS.every((k) => this.isBossDefeated(k.id));
-    const towerOpen = allBossesDown && this.playerLevel >= (MIXED_TOWER.requiredLevel || 10);
+    const towerOpen = allBossesDown;
 
     const towerRatio = kingdoms.length > 0
       ? kingdoms.reduce((sum, k) => sum + k.ratio, 0) / kingdoms.length
@@ -202,11 +205,7 @@ export class GameEngine {
         unlocked: towerOpen,
         percent: Math.round(towerRatio * 100),
         ratio: towerRatio,
-        status: towerOpen
-          ? 'terbuka'
-          : (allBossesDown
-              ? `Terbuka di Level ${MIXED_TOWER.requiredLevel || 10}`
-              : 'Kalahkan semua Boss kerajaan dulu')
+        status: towerOpen ? 'terbuka' : 'Kalahkan semua Boss kerajaan dulu'
       }
     };
   }
