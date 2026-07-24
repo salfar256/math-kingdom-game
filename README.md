@@ -12,6 +12,31 @@ mengukur kecepatan dan ketepatan, serta menyimpan perkembangan setiap siswa.
 
 ---
 
+## Pembaruan Keempat Belas (Juli 2026) — Download Game di Menu Utama + Bug Kritis
+
+1. **Bug pada screenshot Anda ditemukan & diperbaiki:** `index.html` (halaman
+   utama) TIDAK PERNAH memuat `responsive.css` -- padahal aturan default
+   `.rotate-notice { display: none; }` ada di file itu. Akibatnya kotak
+   "Putar Perangkatmu" selalu tampil, bahkan saat HP dalam mode potret
+   (persis seperti di screenshot Anda). `<link rel="stylesheet" href="./css/responsive.css">`
+   kini ditambahkan.
+2. **Kotak "Download Game" di halaman utama**, ditaruh tepat di atas tombol
+   "Mulai Pertarungan" -- muncul hanya bila browser mendukung instalasi PWA,
+   dan hilang otomatis begitu game selesai dipasang (dan bila dibuka kembali
+   sebagai app yang sudah terpasang).
+3. **Bug arsitektur kritis ditemukan & diperbaiki di index.html DAN profile.html:**
+   tombol instal terlihat tapi TIDAK BERFUNGSI saat diklik jika Firebase gagal
+   dimuat (jaringan sekolah tersendat, dsb). Penyebabnya: `landing-page.js`
+   dan `profile-page.js` mengimpor Firebase secara statis di baris pertama --
+   kalau impor itu gagal, SELURUH modul gagal dimuat, termasuk kode pemasang
+   event listener tombol di dalamnya. Diperbaiki dengan memindahkan seluruh
+   logika instalasi (bukan hanya penangkapan event, tapi juga klik tombolnya)
+   ke `<script>` inline di masing-masing HTML, benar-benar independen dari
+   status Firebase. Diverifikasi: tombol tetap berfungsi 100% walau seluruh
+   domain Firebase diblokir dalam pengujian.
+
+---
+
 ## Pembaruan Ketiga Belas (Juli 2026) — Animasi Battle & PWA Potret
 
 1. **Karakter menghilang saat menjawab — DUA bug ditemukan sekaligus.**

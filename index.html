@@ -14,6 +14,69 @@
   <link rel="stylesheet" href="./css/global.css" />
   <link rel="stylesheet" href="./css/components.css" />
   <link rel="stylesheet" href="./css/menu.css" />
+  <link rel="stylesheet" href="./css/responsive.css" />
+
+  <!--
+    Seluruh logika instalasi PWA ("Download Game") ditaruh inline di sini,
+    TERPISAH TOTAL dari js/pages/landing-page.js yang mengimpor Firebase
+    secara statis. Kalau Firebase gagal dimuat (jaringan sekolah tersendat),
+    modul itu bisa gagal load SEPENUHNYA -- termasuk kode di dalamnya yang
+    memasang event listener tombol. Supaya tombol Download Game selalu
+    berfungsi apa pun kondisi Firebase, click handler-nya juga ditaruh di
+    sini, bukan menunggu modul lain selesai dimuat.
+  -->
+  <script>
+    window.__deferredInstallPrompt = null;
+
+    function __isInstalledApp() {
+      return window.matchMedia('(display-mode: standalone)').matches
+        || window.navigator.standalone === true;
+    }
+
+    function __showMenuInstall() {
+      const s = document.querySelector('#menu-install-section');
+      if (s && !__isInstalledApp()) s.hidden = false;
+    }
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      window.__deferredInstallPrompt = e;
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', __showMenuInstall);
+      } else {
+        __showMenuInstall();
+      }
+    });
+
+    window.addEventListener('appinstalled', () => {
+      window.__deferredInstallPrompt = null;
+      const s = document.querySelector('#menu-install-section');
+      if (s) s.hidden = true;
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (__isInstalledApp()) {
+        const s = document.querySelector('#menu-install-section');
+        if (s) s.hidden = true;
+      }
+      const btn = document.querySelector('#btn-menu-install');
+      if (btn) {
+        btn.addEventListener('click', async () => {
+          const promptEvent = window.__deferredInstallPrompt;
+          if (!promptEvent) return;
+          promptEvent.prompt();
+          try {
+            const choice = await promptEvent.userChoice;
+            if (choice.outcome === 'accepted') {
+              const s = document.querySelector('#menu-install-section');
+              if (s) s.hidden = true; // Item 2: kotak hilang setelah dipasang
+            }
+          } catch (err) { /* pengguna menutup dialog -- tidak fatal */ }
+          window.__deferredInstallPrompt = null;
+        });
+      }
+    });
+  </script>
 </head>
 <body class="menu-body">
   <a class="skip-link" href="#main">Lompat ke konten utama</a>
@@ -35,6 +98,16 @@
     <div class="menu-vignette" aria-hidden="true"></div>
 
     <div id="firebase-warning" class="form-error" hidden></div>
+
+    <!-- Download Game: muncul hanya bila browser mendukung instalasi PWA.
+         Hilang otomatis begitu game selesai dipasang. -->
+    <div class="menu-install-bar" id="menu-install-section" hidden>
+      <img class="menu-install-bar__icon" src="./assets/icons/app-icon-192.png" alt="" width="36" height="36" />
+      <span class="menu-install-bar__text">Pasang di HP-mu, main tanpa browser</span>
+      <button type="button" class="btn btn--sm btn--primary menu-install-bar__btn" id="btn-menu-install">
+        Download Game
+      </button>
+    </div>
 
     <!-- Tombol utama (tepat di atas tombol yang tergambar) -->
     <a class="menu-hotspot menu-hotspot--battle" href="./student.html">

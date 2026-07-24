@@ -17,31 +17,6 @@ import { lastNDayKeys, dayKey, formatDateId } from '../utils/date-utils.js';
 
 let engine = null;
 
-/* ============ INSTALASI PWA ("Download Game") ============
- * Event 'beforeinstallprompt' ditangkap lewat <script> inline di
- * profile.html (bukan di sini), supaya tidak bergantung pada Firebase --
- * kalau Firebase gagal dimuat, tombol download tetap berfungsi.
- */
-
-function isRunningAsInstalledApp() {
-  return window.matchMedia('(display-mode: standalone)').matches
-    || window.navigator.standalone === true; // iOS Safari lama
-}
-
-async function handleInstallClick() {
-  const promptEvent = window.__deferredInstallPrompt;
-  if (!promptEvent) return;
-  promptEvent.prompt();
-  try {
-    const { outcome } = await promptEvent.userChoice;
-    if (outcome === 'accepted') {
-      toast.success('Game sedang dipasang di perangkatmu!');
-      show($('#install-section'), false);
-    }
-  } catch { /* pengguna menutup dialog -- tidak fatal */ }
-  window.__deferredInstallPrompt = null;
-}
-
 /** Peta lencana ke ikon aset (selaras dengan game-page). */
 function badgeIcon(id) {
   if (id.startsWith('streak_')) return ['effects', 'fire'];
@@ -89,16 +64,9 @@ async function init() {
   renderFactMap();
   renderBadges();
 
-  // Tombol instal: sembunyikan total bila sudah berjalan sebagai app
-  // terpasang (mis. dibuka dari ikon home screen), tampilkan bila prompt
-  // sempat tertangkap SEBELUM init() ini selesai.
-  if (isRunningAsInstalledApp()) {
-    show($('#install-section'), false);
-  } else if (window.__deferredInstallPrompt) {
-    show($('#install-section'), true);
-  }
-  const installBtn = $('#btn-install');
-  if (installBtn) installBtn.addEventListener('click', handleInstallClick);
+  // Tombol Download Game sepenuhnya ditangani inline di profile.html
+  // (lihat komentar di sana) -- tidak bergantung pada modul ini, supaya
+  // tetap berfungsi meski Firebase gagal dimuat.
 }
 
 function renderHeader() {

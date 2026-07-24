@@ -16,28 +16,64 @@
   <link rel="stylesheet" href="./css/dashboard.css" />
   <link rel="stylesheet" href="./css/responsive.css" />
   <!--
-    Penangkapan 'beforeinstallprompt' TERPISAH dari js/pages/profile-page.js
-    yang bergantung pada Firebase. Kalau Firebase gagal dimuat (mis. jaringan
-    sekolah tersendat), tombol download tetap berfungsi. Ditaruh inline di
-    <head> agar terpasang sedini mungkin -- event ini bisa terjadi kapan saja
-    setelah halaman mulai dimuat, dan yang terlewat tidak bisa ditangkap lagi.
+    Seluruh logika instalasi PWA ditaruh inline, TERPISAH TOTAL dari
+    js/pages/profile-page.js yang mengimpor Firebase secara statis. Kalau
+    Firebase gagal dimuat, modul itu bisa gagal load SEPENUHNYA -- termasuk
+    kode di dalamnya yang memasang event listener tombol. Supaya tombol
+    Download Game selalu berfungsi apa pun kondisi Firebase, click
+    handler-nya juga ditaruh di sini, bukan menunggu modul lain selesai
+    dimuat. (Pola identik dengan index.html.)
   -->
   <script>
     window.__deferredInstallPrompt = null;
+
+    function __isInstalledApp() {
+      return window.matchMedia('(display-mode: standalone)').matches
+        || window.navigator.standalone === true;
+    }
+
+    function __showProfileInstall() {
+      const s = document.querySelector('#install-section');
+      if (s && !__isInstalledApp()) s.hidden = false;
+    }
+
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       window.__deferredInstallPrompt = e;
-      document.addEventListener('DOMContentLoaded', () => {
-        const s = document.querySelector('#install-section');
-        if (s) s.hidden = false;
-      });
-      const s = document.querySelector('#install-section');
-      if (s) s.hidden = false;
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', __showProfileInstall);
+      } else {
+        __showProfileInstall();
+      }
     });
+
     window.addEventListener('appinstalled', () => {
       window.__deferredInstallPrompt = null;
       const s = document.querySelector('#install-section');
       if (s) s.hidden = true;
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (__isInstalledApp()) {
+        const s = document.querySelector('#install-section');
+        if (s) s.hidden = true;
+      }
+      const btn = document.querySelector('#btn-install');
+      if (btn) {
+        btn.addEventListener('click', async () => {
+          const promptEvent = window.__deferredInstallPrompt;
+          if (!promptEvent) return;
+          promptEvent.prompt();
+          try {
+            const choice = await promptEvent.userChoice;
+            if (choice.outcome === 'accepted') {
+              const s = document.querySelector('#install-section');
+              if (s) s.hidden = true;
+            }
+          } catch (err) { /* pengguna menutup dialog -- tidak fatal */ }
+          window.__deferredInstallPrompt = null;
+        });
+      }
     });
   </script>
 </head>
