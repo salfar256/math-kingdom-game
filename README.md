@@ -12,6 +12,57 @@ mengukur kecepatan dan ketepatan, serta menyimpan perkembangan setiap siswa.
 
 ---
 
+## Pembaruan Keenam Belas (Juli 2026) — Audio, Misi Harian, Teks Pertarungan
+
+1. **Musik & efek suara asli dipasang** (7 berkas yang diunggah), diganti nama
+   sesuai fungsinya di `assets/audio/`:
+
+   | Berkas asli | Nama di game | Dipakai di |
+   |---|---|---|
+   | Music_Latar_Setiap_Halaman.mp3 | `bgm-main.mp3` | Semua halaman (default) |
+   | Music_Battle_Biasa.mp3 | `bgm-battle.mp3` | Pertarungan, Campuran, Kecepatan, Expert, Keluarga Angka |
+   | Music_Battle_Bos.mp3 | `bgm-boss.mp3` | Pertarungan Boss |
+   | Music_Profil.mp3 | `bgm-profile.mp3` | Halaman Profil |
+   | Sound_Effect_Klik_Tombol.mp3 | `click.mp3` | Semua tombol & pilihan |
+   | Sound_Effect_Game_Over.mp3 | `defeat.mp3` | Kalah / akurasi rendah |
+   | Sound_Effect_Menyelesaikan_Sesi.wav | `session-complete.wav` | Sesi selesai dengan baik |
+
+   Berkas `.wav` sintetis lama yang digantikan (click, defeat, background)
+   sudah dihapus. `sound-manager.js` kini mendukung pergantian trek per
+   konteks: memanggil trek yang SAMA tidak memulai ulang lagu, sehingga
+   musik mengalir mulus saat berpindah layar dalam konteks yang sama.
+
+2. **Bunyi klik otomatis untuk SEMUA tombol** — dipasang sebagai satu listener
+   global (event delegation) di `sound-manager.js`, bukan ditambahkan manual
+   di puluhan tempat. Cara ini juga menangkap elemen yang dibuat dinamis oleh
+   JS: keypad, pilihan ganda, kartu mode, kartu kerajaan, tombol modal, tab
+   kelas, dan pilihan karakter. Throttle dinaikkan ke 120ms supaya panggilan
+   manual yang masih ada di kode tidak berbunyi ganda.
+
+3. **"Tes Awal" diganti "Misi Harian"** di halaman siswa: kalahkan 4 musuh
+   ATAU selesaikan 2 pertarungan dalam sehari. Progres ditampilkan langsung
+   ("2/4 musuh dikalahkan · 0/2 pertarungan") dan muncul tanda **"Selesai"**
+   begitu tercapai. Data disimpan bersama tanggalnya sehingga otomatis
+   kembali nol saat berganti hari.
+
+4. **Cakupan misi harian diperluas** — progres misi kini dihitung di SEMUA
+   mode yang benar-benar melawan musuh (Pertarungan, Boss, Campuran,
+   Kecepatan, Expert, Keluarga Angka), bukan hanya tiga mode pertama.
+   Sebelumnya tombol "Mulai" pada panel misi bisa menjalankan mode Kecepatan
+   (bila rencana harian kebetulan `speed`) yang TIDAK dihitung -- pemain
+   bertarung tapi progres misinya tidak naik tanpa alasan yang bisa dipahami.
+   Mode Latihan tetap tidak dihitung (HP tak terbatas, bukan pertarungan
+   sungguhan). Judul sesi juga diselaraskan menjadi "Misi Harian".
+   Fungsi mati `startPlacementFlow()` (sisa fitur Tes Awal) turut dihapus.
+
+5. **Teks kartu pertanyaan diperbaiki** — mode pertarungan tidak lagi
+   menampilkan "Soal N dari 40" (menyesatkan, karena pertarungan berakhir
+   lewat sistem HP, bukan jumlah soal). Kini menampilkan
+   "Kalahkan musuh 1 dari 2" atau "Kalahkan Boss!". Mode non-pertarungan
+   (Latihan, Kecepatan) tetap memakai hitungan soal seperti sebelumnya.
+
+---
+
 ## Pembaruan Kelima Belas (Juli 2026) — 2 Bug Kritis Sistem Boss
 
 1. **Boss salah tampil di kerajaan lain — bug ditemukan.** `pickBossFor()`

@@ -10,11 +10,13 @@ import { validateEmail, validatePassword, firebaseErrorMessage } from '../utils/
 import { initDashboard } from './teacher-dashboard-page.js';
 import { showLoading, hideLoading, watchConnection } from '../ui/loading.js';
 import { toast } from '../ui/toast.js';
+import { soundManager } from '../ui/sound-manager.js';
 import { $ } from '../utils/helpers.js';
 
 let isSubmitting = false;
 
 async function init() {
+  soundManager.playBackground('background');
   watchConnection();
 
   if (!isFirebaseReady()) {

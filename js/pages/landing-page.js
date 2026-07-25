@@ -10,6 +10,7 @@ import { getAssetPath } from '../asset-manifest.js';
 
 function init() {
   watchConnection();
+  soundManager.playBackground('background');
   showFirebaseWarningIfNeeded();
 
   const aboutBtn = $('#btn-about');

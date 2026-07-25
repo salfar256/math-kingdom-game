@@ -90,13 +90,22 @@ export const ASSETS = {
     star:     `${ASSET_BASE}/icons/star.png`
   },
   audio: {
+    // --- Efek suara ---
+    click:      `${ASSET_BASE}/audio/click.mp3`,
     correct:    `${ASSET_BASE}/audio/correct.wav`,
     wrong:      `${ASSET_BASE}/audio/wrong.wav`,
     attack:     `${ASSET_BASE}/audio/attack.wav`,
     victory:    `${ASSET_BASE}/audio/victory.wav`,
-    defeat:     `${ASSET_BASE}/audio/defeat.wav`,
-    click:      `${ASSET_BASE}/audio/click.wav`,
-    background: `${ASSET_BASE}/audio/background.wav`
+    defeat:     `${ASSET_BASE}/audio/defeat.mp3`,
+    sessionComplete: `${ASSET_BASE}/audio/session-complete.wav`,
+
+    // --- Musik latar (per konteks) ---
+    // 'background' = musik umum semua halaman; konteks tertentu memakai
+    // musiknya sendiri lewat soundManager.playBackground('<kunci>').
+    background:  `${ASSET_BASE}/audio/bgm-main.mp3`,
+    bgmBattle:   `${ASSET_BASE}/audio/bgm-battle.mp3`,
+    bgmBoss:     `${ASSET_BASE}/audio/bgm-boss.mp3`,
+    bgmProfile:  `${ASSET_BASE}/audio/bgm-profile.mp3`
   }
 };
 

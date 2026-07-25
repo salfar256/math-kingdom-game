@@ -40,10 +40,13 @@
         <div class="panel panel--tight" id="daily-panel">
           <div class="row row--between">
             <div>
-              <strong id="daily-title">Latihan Hari Ini</strong>
+              <strong id="daily-title">Misi Harian</strong>
               <p class="text-sm text-muted mb-0" id="daily-desc"></p>
             </div>
-            <button type="button" class="btn btn--primary" id="btn-daily">Mulai</button>
+            <div class="row" style="gap:8px;align-items:center;">
+              <span class="chip chip--primary" id="daily-done-badge" hidden>Selesai</span>
+              <button type="button" class="btn btn--primary" id="btn-daily">Mulai</button>
+            </div>
           </div>
         </div>
 

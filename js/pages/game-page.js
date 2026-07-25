@@ -58,6 +58,11 @@ const SCREENS = ['screen-story', 'screen-map', 'screen-mode', 'screen-arena', 's
 function showScreen(id) {
   for (const s of SCREENS) show($(`#${s}`), s === id);
   window.scrollTo(0, 0);
+
+  // Musik latar mengikuti layar. Arena mengatur treknya sendiri di
+  // startSession() (battle/boss), jadi di sini cukup pastikan layar lain
+  // kembali ke musik umum -- termasuk saat keluar dari pertarungan.
+  if (id !== 'screen-arena') soundManager.playBackground('background');
 }
 
 /* ============ INISIALISASI ============ */
@@ -216,13 +221,18 @@ function renderMap() {
 
   $('#map-greeting').textContent = `Halo, ${p.displayName || 'Petualang'}!`;
 
-  const plan = engine.getTodayPlan();
   const day = engine.getProgramDay();
   $('#map-subtitle').textContent =
     `Hari ke-${day} dari 30 · ${state.className || 'Kelasmu'}`;
-  $('#daily-title').textContent = `Latihan Hari Ini: ${plan.title}`;
-  $('#daily-desc').textContent = plan.note ||
-    `Fokus: ${(plan.ops || []).map((o) => OPERATION_LABEL[o] || o).join(', ')}`;
+  // MISI HARIAN (item 4): kalahkan 4 musuh atau selesaikan 2 pertarungan.
+  const mission = engine.getDailyMission();
+  $('#daily-title').textContent = `Misi Harian: Kalahkan ${mission.targetEnemies} Musuh`;
+  $('#daily-desc').textContent = mission.done
+    ? `Kerja bagus! Kamu sudah menyelesaikan misi hari ini.`
+    : `${mission.progressText} — atau selesaikan ${mission.targetBattles} pertarungan.`;
+
+  show($('#daily-done-badge'), mission.done);
+  $('#btn-daily').textContent = mission.done ? 'Lanjut Berlatih' : 'Mulai';
 
   renderMapStats();
   renderKingdoms();
@@ -467,22 +477,6 @@ function showStoryScreen() {
   showScreen('screen-story');
 }
 
-async function startPlacementFlow() {
-  await showModal({
-    title: 'Tes Awal',
-    lines: [
-      'Sebelum bertualang, kita ukur dulu kemampuanmu saat ini.',
-      'Ada sekitar 40 soal dari keempat operasi. Kerjakan sebisamu.',
-      'Tes ini tidak dinilai dan tidak mengurangi HP. Kalau tidak tahu, tekan Lewati saja.',
-      'Hasilnya dipakai untuk menyusun latihan yang pas untukmu.'
-    ],
-    buttons: [{ id: 'ok', text: 'Siap, mulai!', variant: 'primary' }],
-    dismissible: false
-  });
-
-  startSession({ mode: MODES.PLACEMENT, operation: null, title: 'Tes Awal' });
-}
-
 /* ============ SESI & ARENA ============ */
 
 function startDailySession() {
@@ -502,7 +496,7 @@ function startDailySession() {
     mode,
     operation,
     targets: plan.targets || null,
-    title: `Latihan Hari Ini — ${plan.title}`
+    title: `Misi Harian — ${plan.title}`
   });
 }
 
@@ -530,7 +524,14 @@ function startSession(options) {
   setupArenaChrome(title, mode, operation);
   showScreen('screen-arena');
 
-  soundManager.playBackground();
+  // Musik latar sesuai konteks pertarungan.
+  if (mode === MODES.BOSS) {
+    soundManager.playBackground('bgmBoss');
+  } else if ([MODES.BATTLE, MODES.MIXED, MODES.SPEED, MODES.EXPERT, MODES.FACT_FAMILY].includes(mode)) {
+    soundManager.playBackground('bgmBattle');
+  } else {
+    soundManager.playBackground('background'); // Latihan: musik umum yang tenang
+  }
 
   if (mode === MODES.SPEED) startTimer(state.engine.speedDurationMs);
   if (mode === MODES.EXPERT) startTimer(60000);
@@ -611,10 +612,25 @@ function advanceQuestion() {
   $('#feedback-line').textContent = '';
   $('#feedback-line').className = 'feedback-line';
 
-  const total = state.session.mode === MODES.SPEED ? '∞' : state.session.plannedCount;
-  $('#question-progress').textContent = q.isCorrection
-    ? 'Soal ulangan'
-    : `Soal ${state.session.stats.total + 1} dari ${total}`;
+  // Teks progres. Pada mode pertarungan, jumlah soal TIDAK relevan --
+  // pertarungan berakhir lewat sistem HP (musuh kalah / hati pemain habis),
+  // bukan setelah sekian soal. Menampilkan "N dari 40" hanya menyesatkan.
+  const isBattleLike = [MODES.BATTLE, MODES.BOSS, MODES.MIXED].includes(state.session.mode);
+  let progressText;
+
+  if (q.isCorrection) {
+    progressText = 'Soal ulangan';
+  } else if (isBattleLike && state.battle) {
+    const s = state.battle.getState();
+    progressText = s.isBoss
+      ? 'Kalahkan Boss!'
+      : `Kalahkan musuh ${Math.min(s.defeatedCount + 1, s.enemiesToDefeat)} dari ${s.enemiesToDefeat}`;
+  } else {
+    const total = state.session.mode === MODES.SPEED ? '∞' : state.session.plannedCount;
+    progressText = `Soal ${state.session.stats.total + 1} dari ${total}`;
+  }
+
+  $('#question-progress').textContent = progressText;
 
   updateHud();
 }
@@ -1015,7 +1031,11 @@ async function endSession() {
 
   let result;
   try {
-    result = await state.engine.finishSession({ bossId, enemyHp, playerHp });
+    result = await state.engine.finishSession({
+      bossId, enemyHp, playerHp,
+      enemiesDefeated: state.battle ? state.battle.defeatedCount : 0,
+      battleWon: state.battle ? state.battle.isVictory : false
+    });
   } catch (e) {
     devError('finishSession gagal:', e);
     hideLoading();
@@ -1036,7 +1056,10 @@ async function endSession() {
   state.lastResult = result;
   state.session = null;
 
-  if (result.accuracyRatio >= 0.8) soundManager.victory();
+  // Efek suara akhir sesi: 'Menyelesaikan Sesi' bila berhasil,
+  // 'Game Over' bila kalah/akurasi rendah.
+  const kalah = state.battle && state.battle.playerHp <= 0;
+  if (!kalah && result.accuracyRatio >= 0.6) soundManager.sessionComplete();
   else soundManager.defeat();
 
   renderResult(result);

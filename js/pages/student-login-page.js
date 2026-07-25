@@ -22,6 +22,7 @@ let isSubmitting = false;
 let authMode = 'register'; // 'register' | 'login'
 
 function init() {
+  soundManager.playBackground('background');
   watchConnection();
 
   if (!isFirebaseReady()) {

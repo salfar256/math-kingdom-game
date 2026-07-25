@@ -131,6 +131,34 @@ export class GameEngine {
   }
 
   /**
+   * Misi harian (item 4): kalahkan 4 musuh ATAU selesaikan 2 pertarungan.
+   * Data otomatis dianggap nol bila tanggalnya bukan hari ini.
+   */
+  getDailyMission() {
+    const TARGET_ENEMIES = 4;
+    const TARGET_BATTLES = 2;
+
+    const raw = (this.profile && this.profile.dailyMission) || {};
+    const isToday = raw.date === dayKey(new Date());
+
+    const enemies = isToday ? (raw.enemiesDefeated || 0) : 0;
+    const battles = isToday ? (raw.battlesCompleted || 0) : 0;
+    const done = enemies >= TARGET_ENEMIES || battles >= TARGET_BATTLES;
+
+    return {
+      targetEnemies: TARGET_ENEMIES,
+      targetBattles: TARGET_BATTLES,
+      enemiesDefeated: enemies,
+      battlesCompleted: battles,
+      done,
+      // Tampilkan jalur yang paling dekat selesai.
+      progressText: done
+        ? 'Misi selesai!'
+        : `${enemies}/${TARGET_ENEMIES} musuh dikalahkan · ${battles}/${TARGET_BATTLES} pertarungan`
+    };
+  }
+
+  /**
    * Boss muncul bila progres kerajaan sudah >= 50%, ATAU level pemain sudah
    * mencapai syarat kerajaan berikutnya. Dua jalur ini memberi pilihan:
    * tekun melatih satu kerajaan, atau naik level dari kerajaan lain.
@@ -287,12 +315,17 @@ export class GameEngine {
    * Selesaikan sesi: simpan ke Firestore, perbarui profil, hitung lencana.
    * @returns {Promise<object>} ringkasan lengkap untuk halaman hasil
    */
-  async finishSession({ bossId = null, enemyHp = null, playerHp = 1 } = {}) {
+  async finishSession({ bossId = null, enemyHp = null, playerHp = 1,
+                        enemiesDefeated = 0, battleWon = false } = {}) {
     if (!this.session) return null;
 
     const dailyTarget = (this.classSettings && this.classSettings.dailyTargetQuestions) || 40;
     const completedDaily = this.session.stats.total >= Math.min(dailyTarget, 20);
     const summary = this.session.buildSummary({ completedDaily });
+
+    // Data pertarungan untuk misi harian (item 4).
+    summary.enemiesDefeated = enemiesDefeated;
+    summary.battleWon = battleWon;
 
     // Boss.
     let bossResult = null;
@@ -397,6 +430,22 @@ export class GameEngine {
     if (bossResult && bossResult.victory) {
       const defeated = Array.isArray(p.bossesDefeated) ? p.bossesDefeated : [];
       patch.bossesDefeated = defeated;
+    }
+
+    // ---- MISI HARIAN: catat musuh dikalahkan & pertarungan selesai ----
+    // Disimpan bersama tanggalnya; otomatis mulai dari nol saat ganti hari.
+    const isBattleMode = summary.mode !== MODES.PRACTICE;
+    if (isBattleMode) {
+      const prev = p.dailyMission || {};
+      const sameDay = prev.date === todayKey;
+      const enemies = (sameDay ? prev.enemiesDefeated || 0 : 0) + (summary.enemiesDefeated || 0);
+      const battles = (sameDay ? prev.battlesCompleted || 0 : 0) + (summary.battleWon ? 1 : 0);
+
+      patch.dailyMission = {
+        date: todayKey,
+        enemiesDefeated: enemies,
+        battlesCompleted: battles
+      };
     }
 
     Object.assign(this.profile, patch);

@@ -11,6 +11,7 @@ import { levelFromXp } from '../game/reward-engine.js';
 import { getAllFactsFor } from '../game/question-generator.js';
 import { showLoading, hideLoading, watchConnection } from '../ui/loading.js';
 import { toast } from '../ui/toast.js';
+import { soundManager } from '../ui/sound-manager.js';
 import { el, $, clearNode, show, formatMs, percent } from '../utils/helpers.js';
 import { createIcon, createIdleSprite } from '../asset-manifest.js';
 import { lastNDayKeys, dayKey, formatDateId } from '../utils/date-utils.js';
@@ -28,6 +29,7 @@ function badgeIcon(id) {
 
 async function init() {
   watchConnection();
+  soundManager.playBackground('bgmProfile');
 
   if (!isFirebaseReady()) {
     toast.error('Firebase belum dikonfigurasi.');
