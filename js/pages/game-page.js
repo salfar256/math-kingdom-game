@@ -21,7 +21,8 @@ import {
 import { getDb } from '../firebase/firebase-app.js';
 import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js';
 import {
-  applySafeBackground, createSafeSprite, mountIdleSprite, createIcon, playActionSprite, ACTION_DURATION_MS
+  applySafeBackground, createSafeSprite, mountIdleSprite, createIcon, playActionSprite,
+  ACTION_DURATION_MS, getAssetPath
 } from '../asset-manifest.js';
 import { showModal, confirmDialog } from '../ui/modal.js';
 import { toast } from '../ui/toast.js';
@@ -1098,18 +1099,36 @@ function renderResult(r) {
   const boss = r.bossResult;
   const victory = boss ? boss.victory : r.accuracyRatio >= 0.7;
 
-  const hero = $('#result-emoji');
-  clearNode(hero);
-  const heroIcon = boss
-    ? (victory ? ['icons', 'star'] : ['icons', 'sword'])
-    : (r.accuracyRatio >= 0.9 ? ['icons', 'star']
-      : r.accuracyRatio >= 0.7 ? ['effects', 'correct']
-      : ['effects', 'fire']);
-  hero.appendChild(createIcon(heroIcon[0], heroIcon[1], { size: 72 }));
+  // Kemenangan atas Boss Menara Campuran = tamat permainan. Rayakan dengan
+  // ilustrasi penuh, bukan ikon kecil seperti hasil sesi biasa.
+  const menangCampuran = victory && r.bossId === 'mixed-boss';
+  const heroWrap = $('#result-emoji');
+  clearNode(heroWrap);
+  show($('#result-victory-art'), menangCampuran);
 
-  $('#result-title').textContent = boss
-    ? (victory ? 'Boss Dikalahkan!' : 'Boss Belum Tumbang')
-    : (r.mode === MODES.PLACEMENT ? 'Tes Awal Selesai' : 'Sesi Selesai');
+  if (menangCampuran) {
+    const art = $('#result-victory-art');
+    clearNode(art);
+    const img = document.createElement('img');
+    img.className = 'victory-art__img';
+    img.src = getAssetPath('ui', 'victory-mixed') || '';
+    img.alt = 'Kerajaan Manusia diselamatkan. Sesi 1 selesai!';
+    img.addEventListener('error', () => { show(art, false); }, { once: true });
+    art.appendChild(img);
+  } else {
+    const heroIcon = boss
+      ? (victory ? ['icons', 'star'] : ['icons', 'sword'])
+      : (r.accuracyRatio >= 0.9 ? ['icons', 'star']
+        : r.accuracyRatio >= 0.7 ? ['effects', 'correct']
+        : ['effects', 'fire']);
+    heroWrap.appendChild(createIcon(heroIcon[0], heroIcon[1], { size: 72 }));
+  }
+
+  $('#result-title').textContent = menangCampuran
+    ? 'Kerajaan Manusia Diselamatkan!'
+    : (boss
+        ? (victory ? 'Boss Dikalahkan!' : 'Boss Belum Tumbang')
+        : 'Sesi Selesai');
 
   $('#result-message').textContent = r.motivation;
 

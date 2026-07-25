@@ -43,8 +43,9 @@ export const ASSETS = {
     'mixed-boss':   `${ASSET_BASE}/idle/mixed-boss.png`
   },
   ui: {
-    'main-menu': `${ASSET_BASE}/ui/main-menu.png`,
-    story:       `${ASSET_BASE}/ui/story.png`
+    'main-menu':     `${ASSET_BASE}/ui/main-menu.png`,
+    story:           `${ASSET_BASE}/ui/story.png`,
+    'victory-mixed': `${ASSET_BASE}/ui/victory-mixed.jpg`
   },
   characters: {
     leader:     `${ASSET_BASE}/characters/leader.png`,

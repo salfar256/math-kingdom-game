@@ -379,6 +379,7 @@ export class GameEngine {
       ...summary,
       ...profileUpdate,
       bossResult,
+      bossId,                 // dipakai layar hasil, mis. kemenangan Boss Campuran
       newBadges,
       mastery,
       recommendations: this.getRecommendations().slice(0, 3),

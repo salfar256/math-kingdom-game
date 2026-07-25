@@ -448,8 +448,17 @@
 }
 
 /* Musuh menghadap pemain (gambar asli menghadap kiri/kanan sama; cerminkan musuh). */
+/* Musuh menghadap pemain (pemain di kiri, musuh di kanan). */
 #enemy-sprite .idle-sprite,
 #enemy-sprite .pixel-img { transform: scaleX(-1); }
+
+/*
+ * PENGECUALIAN: Boss Menara Campuran. Seni sprite-nya SUDAH menghadap kiri
+ * (ke arah pemain), jadi mencerminkannya justru membuatnya membelakangi
+ * pemain. Ditandai lewat data-sprite-key yang dipasang mountIdleSprite().
+ */
+#enemy-sprite[data-sprite-key="mixed-boss"] .idle-sprite,
+#enemy-sprite[data-sprite-key="mixed-boss"] .pixel-img { transform: none; }
 
 /* Hormati preferensi "kurangi animasi": tampilkan frame pertama saja. */
 .reduce-motion .idle-sprite { animation: none; }
@@ -759,3 +768,29 @@
 }
 
 .reduce-motion .progress__fill--critical { animation: none; }
+
+/* ============ ILUSTRASI KEMENANGAN BOSS CAMPURAN (tamat) ============ */
+
+.victory-art {
+  margin: 0 auto var(--space-3);
+  max-width: min(92vw, 420px);
+  animation: victory-rise 600ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.victory-art__img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 62dvh;
+  object-fit: contain;
+  border: 3px solid var(--color-primary);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 8px 0 rgba(4, 7, 15, 0.85), 0 0 24px rgba(255, 201, 60, 0.35);
+}
+
+@keyframes victory-rise {
+  from { transform: translateY(18px) scale(0.94); opacity: 0; }
+  to   { transform: none; opacity: 1; }
+}
+
+.reduce-motion .victory-art { animation: none; }

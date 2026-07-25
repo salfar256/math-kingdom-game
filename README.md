@@ -12,6 +12,39 @@ mengukur kecepatan dan ketepatan, serta menyimpan perkembangan setiap siswa.
 
 ---
 
+## Pembaruan Kedelapan Belas (Juli 2026) — Boss Campuran: Animasi & Layar Kemenangan
+
+1. **Animasi Boss Campuran diperbaiki — bug ekstraksi ditemukan.**
+   Baris *attack* dan *death* pada sheet Boss Campuran hanya terdeteksi
+   3 kolom, bukan 4: dua sprite terakhir letaknya sangat rapat sehingga
+   celah pemisahnya lebih tipis dari ambang deteksi, dan keduanya menyatu
+   menjadi SATU frame selebar ~500px (persis laporan "ketika menyerang dia
+   ada 2 gambar"). Frame sisanya lalu kosong.
+
+   Ekstraksi kini memecah kolom yang lebarnya jauh di atas median, dengan
+   memotong tepat di titik paling "sepi" (lembah terdalam) di antara kedua
+   sprite. Hasil: keempat baris kini 4 kolom penuh, dan isi frame membaik
+   drastis — attack 9%→29%, death 6%→21%.
+
+2. **Boss Campuran kini menghadap pemain.** Seni sprite-nya sudah menghadap
+   kiri (ke arah pemain), tetapi CSS mencerminkan SEMUA sprite musuh sehingga
+   ia justru membelakangi pemain. Ditambahkan pengecualian berbasis
+   `data-sprite-key`, sehingga hanya Boss Campuran yang tidak dicerminkan.
+   Diverifikasi: slime & boss-8 tetap dicerminkan, mixed-boss tidak.
+
+3. **Layar kemenangan Boss Campuran.** Mengalahkan penjaga terakhir kini
+   menampilkan ilustrasi penuh "Kerajaan Manusia Diselamatkan" (gambar yang
+   diunggah), bukan ikon kecil seperti hasil sesi biasa. Judulnya pun berubah
+   menjadi "Kerajaan Manusia Diselamatkan!".
+
+   Gambar dikonversi ke JPG dan diperkecil ke lebar 720px: **258 KB**
+   dibanding 2,2 MB versi asli — penting karena game ini dipakai siswa
+   dengan kuota terbatas. Tingginya dibatasi 62% layar agar tombol di
+   bawahnya tetap terlihat, dan bila gambar gagal dimuat, layar otomatis
+   kembali ke tampilan hasil biasa.
+
+---
+
 ## Pembaruan Ketujuh Belas (Juli 2026) — Lencana, Dashboard, Menara Campuran
 
 1. **Kata "fakta" dibersihkan tuntas** dari seluruh teks yang tampil ke
