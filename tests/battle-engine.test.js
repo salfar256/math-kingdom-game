@@ -127,3 +127,33 @@ describe('evaluateBossVictory', () => {
     expect(r.victory).toBeFalsy();
   });
 });
+
+describe('BattleEngine — Boss Menara Campuran', () => {
+  it('Boss Campuran punya 20 hati', () => {
+    const b = new BattleEngine({ mode: MODES.BOSS, bossId: 'mixed-boss' });
+    expect(b.enemyMaxHp).toBe(BATTLE_CONFIG.mixedBossHearts);
+    expect(b.enemyMaxHp).toBe(20);
+  });
+
+  it('Boss kerajaan biasa tetap 15 hati', () => {
+    const b = new BattleEngine({ mode: MODES.BOSS, bossId: 'boss-8' });
+    expect(b.enemyMaxHp).toBe(BATTLE_CONFIG.bossHearts);
+    expect(b.enemyMaxHp).toBe(15);
+  });
+
+  it('fallback acak tidak pernah memilih Boss Campuran', () => {
+    for (let i = 0; i < 60; i++) {
+      const b = new BattleEngine({ mode: MODES.BOSS });
+      expect(b.enemy.id !== 'mixed-boss').toBeTruthy();
+    }
+  });
+
+  it('Boss Campuran kalah setelah 20 jawaban benar', () => {
+    const b = new BattleEngine({ mode: MODES.BOSS, bossId: 'mixed-boss' });
+    let last;
+    for (let i = 0; i < BATTLE_CONFIG.mixedBossHearts; i++) {
+      last = b.applyAnswer({ correct: true, responseMs: 3000 });
+    }
+    expect(last.battleWon).toBeTruthy();
+  });
+});

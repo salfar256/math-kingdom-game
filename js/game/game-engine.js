@@ -334,11 +334,15 @@ export class GameEngine {
 
       // Catat kemenangan boss: inilah kunci pembuka kerajaan berikutnya.
       if (bossResult.victory) {
-        const operation = this.session.operations[0];
+        // Boss Campuran dicatat sebagai 'mixed'. TIDAK BOLEH memakai
+        // operations[0] untuknya -- sesi campuran memuat SEMUA operasi,
+        // sehingga operations[0] ('addition') akan salah mencatat kemenangan
+        // Boss Campuran sebagai kemenangan boss Penjumlahan.
+        const kunci = bossId === 'mixed-boss' ? 'mixed' : this.session.operations[0];
         const defeated = Array.isArray(this.profile.bossesDefeated)
           ? this.profile.bossesDefeated : [];
-        if (operation && !defeated.includes(operation)) {
-          this.profile.bossesDefeated = [...defeated, operation];
+        if (kunci && !defeated.includes(kunci)) {
+          this.profile.bossesDefeated = [...defeated, kunci];
           await upsertStudentProfile(this.uid, { bossesDefeated: this.profile.bossesDefeated })
             .catch(() => { /* tidak fatal; akan dicoba lagi sesi berikutnya */ });
         }

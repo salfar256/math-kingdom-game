@@ -336,7 +336,7 @@ function renderKingdoms() {
   if (tower.unlocked) {
     towerCard.addEventListener('click', () => {
       soundManager.click();
-      startSession({ mode: MODES.MIXED, operation: null, title: tower.name });
+      openModeScreen(tower);
     });
   }
   grid.appendChild(towerCard);
@@ -380,9 +380,14 @@ function renderRecommendations() {
 /* ============ PILIH MODE ============ */
 
 function openModeScreen(kingdom) {
+  // Menara Campuran bukan kerajaan satu-operasi: ia tidak punya total poin
+  // per operasi, dan soalnya memakai SEMUA operasi.
+  const isMixed = Boolean(kingdom.isMixed);
+
   $('#mode-title').textContent = kingdom.name;
-  $('#mode-progress').textContent =
-    `${kingdom.points} dari ${kingdom.total} poin (${kingdom.mastered}/${kingdom.factCount} hitungan tuntas 2x benar) — ${kingdom.percent}%`;
+  $('#mode-progress').textContent = isMixed
+    ? `Semua operasi bercampur — rata-rata penguasaanmu ${kingdom.percent}%`
+    : `${kingdom.points} dari ${kingdom.total} poin (${kingdom.mastered}/${kingdom.factCount} hitungan tuntas 2x benar) — ${kingdom.percent}%`;
 
   const list = $('#mode-list');
   clearNode(list);
@@ -399,32 +404,36 @@ function openModeScreen(kingdom) {
     list.appendChild(modeCard(m, kingdom));
   }
 
-  // Boss.
+  // Boss. Menara Campuran: boss langsung tersedia begitu menaranya terbuka
+  // (menaranya sendiri sudah mensyaratkan semua boss kerajaan dikalahkan).
+  const bossUnlocked = isMixed ? Boolean(kingdom.unlocked) : Boolean(kingdom.bossUnlocked);
   const bossCard = el('button', {
     className: 'card card--clickable row row--between',
-    attrs: { type: 'button', disabled: kingdom.bossUnlocked ? null : 'disabled' }
+    attrs: { type: 'button', disabled: bossUnlocked ? null : 'disabled' }
   }, [
     el('div', {}, [
       el('strong', {}, [
         createIcon('icons', 'sword', { size: 18 }),
-        ` Boss ${kingdom.shortName}${kingdom.bossUnlocked ? '' : ' (terkunci)'}`
+        ` Boss ${kingdom.shortName}${bossUnlocked ? '' : ' (terkunci)'}`
       ]),
       el('p', {
         className: 'text-sm text-muted mb-0',
-        text: kingdom.bossUnlocked
-          ? 'Butuh akurasi minimal 85%. Kalahkan penjaga kerajaan.'
-          : 'Terbuka setelah 50% hitungan kerajaan ini dikuasai.'
+        text: isMixed
+          ? 'Penjaga terakhir: 20 hati, soal semua operasi bercampur.'
+          : (bossUnlocked
+              ? 'Butuh akurasi minimal 85%. Kalahkan penjaga kerajaan.'
+              : 'Terbuka setelah 50% hitungan kerajaan ini dikuasai.')
       })
     ]),
     el('span', { text: '›', attrs: { 'aria-hidden': 'true' } })
   ]);
 
-  if (kingdom.bossUnlocked) {
+  if (bossUnlocked) {
     bossCard.addEventListener('click', () => {
       soundManager.click();
       startSession({
         mode: MODES.BOSS,
-        operation: kingdom.id,
+        operation: isMixed ? null : kingdom.id,
         bossId: pickBossFor(kingdom),
         title: `Boss ${kingdom.shortName}`
       });
@@ -454,7 +463,14 @@ function modeCard(m, kingdom) {
 
   card.addEventListener('click', () => {
     soundManager.click();
-    startSession({ mode: m.mode, operation: kingdom.id, title: `${m.name} — ${kingdom.shortName}` });
+    // Menara Campuran: operation null -> mesin memakai seluruh operasi aktif,
+    // sehingga soalnya bercampur (+, −, ×, ÷). Memakai kingdom.id di sini
+    // akan mengirim 'mixed' yang bukan operasi valid.
+    startSession({
+      mode: m.mode,
+      operation: kingdom.isMixed ? null : kingdom.id,
+      title: `${m.name} — ${kingdom.shortName}`
+    });
   });
   return card;
 }
@@ -970,7 +986,9 @@ function updateBattleBars() {
   $('#enemy-hp-value').textContent = `${s.enemyHp} / ${s.enemyMaxHp}`;
 
   // Boss terdesak -> sesi mulai menyajikan hitungan dua digit.
-  if (s.isBoss && state.session) state.session.setBossHp(s.enemyHp);
+  if (s.isBoss && state.session) {
+    state.session.setBossHp(s.enemyHp, s.enemy && s.enemy.id === 'mixed-boss');
+  }
   $('#enemy-hp-text').textContent = `${s.enemyHp} / ${s.enemyMaxHp}`;
 }
 
@@ -1069,7 +1087,8 @@ async function endSession() {
 /** Peta lencana ke ikon aset. */
 function badgeIcon(id) {
   if (id.startsWith('streak_')) return ['effects', 'fire'];
-  if (id.startsWith('facts_') || id === 'graduate') return ['icons', 'book'];
+  if (id.startsWith('facts_')) return ['icons', 'book'];
+  if (id === 'hero') return ['icons', 'star'];
   if (id.startsWith('boss_')) return ['icons', 'sword'];
   if (id === 'speed_demon') return ['icons', 'gem'];
   return ['icons', 'star'];

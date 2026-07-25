@@ -39,11 +39,11 @@ export const LEADERBOARD_CATEGORIES = [
   {
     id: 'mastery',
     name: 'Papan Hitungan Dikuasai',
-    description: 'Siapa yang paling banyak menguasai fakta.',
-    metricLabel: 'Fakta',
+    description: 'Siapa yang paling banyak menguasai hitungan.',
+    metricLabel: 'Hitungan',
     sortKey: 'factsMastered',
     tieKey: 'accuracy',
-    format: (v) => `${v || 0} fakta`
+    format: (v) => `${v || 0} hitungan`
   },
   {
     id: 'xp',

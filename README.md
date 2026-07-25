@@ -12,6 +12,46 @@ mengukur kecepatan dan ketepatan, serta menyimpan perkembangan setiap siswa.
 
 ---
 
+## Pembaruan Ketujuh Belas (Juli 2026) — Lencana, Dashboard, Menara Campuran
+
+1. **Kata "fakta" dibersihkan tuntas** dari seluruh teks yang tampil ke
+   pengguna: lencana ("Pengumpul/Ahli/Master Hitungan"), papan peringkat
+   ("Hitungan", "12 hitungan"), statistik profil ("Hitungan otomatis"),
+   dashboard guru ("Hitungan dikuasai", "Hitungan Paling Sering Salah",
+   kolom tabel & filter), pesan motivasi, dan judul rencana harian.
+
+2. **Lencana boss dinamai per KERAJAAN** — "Penakluk Tujuh/Delapan" (yang
+   tidak bermakna bagi siswa) menjadi "Penakluk Kerajaan Penjumlahan",
+   "... Pengurangan", "... Perkalian", "... Pembagian".
+
+3. **Dashboard guru disederhanakan** — progres per operasi kini menampilkan
+   poin saja ("36/90 poin · akurasi 82%"), tanpa angka hitungan tambahan
+   yang membuat baris terlalu panjang.
+
+4. **"Lulusan Kerajaan" menjadi "Pahlawan Kerajaan"** dan syaratnya diperbaiki:
+   diraih dengan mengalahkan Boss Menara Campuran (puncak permainan), bukan
+   "menyelesaikan tes akhir" -- fitur yang sudah tidak ada di game.
+
+5. **Menara Campuran menjadi stage penuh:**
+   - Klik menara kini membuka layar mode (seperti kerajaan lain), sehingga
+     Boss Campuran bisa dilawan. Sebelumnya klik langsung masuk sesi campuran
+     biasa dan boss-nya TIDAK PERNAH bisa ditemui.
+   - Semua mode di menara memakai operasi bercampur (+, −, ×, ÷).
+   - **Boss Campuran: 20 hati** (boss kerajaan biasa tetap 15).
+   - Soal berubah menjadi dua digit saat sisa hati boss <= 3 (boss kerajaan
+     biasa: <= 2).
+
+   **Dua bug ikut ditemukan saat pengerjaan:**
+   - Kemenangan Boss Campuran akan salah tercatat sebagai kemenangan boss
+     Penjumlahan, karena sesi campuran memuat SEMUA operasi sehingga
+     `operations[0]` bernilai 'addition'. Kini dicatat sebagai 'mixed'.
+   - `pickRandom(BOSSES)` bisa memilih Boss Campuran secara acak sebagai
+     fallback, membuat boss kerajaan biasa tiba-tiba punya 20 hati (terdeteksi
+     oleh unit test yang mendadak gagal). Fallback kini hanya memilih boss
+     kerajaan. 4 unit test baru ditambahkan untuk Boss Campuran.
+
+---
+
 ## Pembaruan Keenam Belas (Juli 2026) — Audio, Misi Harian, Teks Pertarungan
 
 1. **Musik & efek suara asli dipasang** (7 berkas yang diunggah), diganti nama

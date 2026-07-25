@@ -85,7 +85,9 @@ export const MIXED_TOWER = {
   background: 'mixed-tower',
   icon: 'star',
   order: 5,
-  requiredLevel: 10
+  requiredLevel: 10,
+  bossId: 'mixed-boss',
+  isMixed: true            // soal memakai SEMUA operasi, bukan satu saja
 };
 
 export const MASTERY_STATUS = {
@@ -203,6 +205,7 @@ export const BATTLE_CONFIG = {
   playerHearts: 3,
   enemyHearts: 5,
   bossHearts: 15,
+  mixedBossHearts: 20,        // Boss Menara Campuran lebih tangguh
   enemiesPerBattle: 2,       // pertarungan selesai setelah 2 musuh kalah
   questionTimeLimitMs: 10000, // 10 detik per soal di mode pertarungan
   fastDamageThresholdMs: 4000,
@@ -252,6 +255,7 @@ export const CORRECT_PER_FACT = 2;
 export const BOSS_CONFIG = {
   unlockProgressPercent: 0.5,   // boss muncul mulai progres 50%
   twoDigitAtHp: 2,              // boss memakai soal 2 digit saat sisa HP <= 2
+  twoDigitAtHpMixed: 3,         // Boss Campuran: mulai lebih awal (sisa HP <= 3)
   minAccuracy: 0.85,
   maxWrong: 6,
   unlockMasteryPercent: 0.5   // kerajaan harus 50% dikuasai
@@ -306,15 +310,19 @@ export const BADGES = [
   { id: 'streak_30',      name: 'Api Abadi',         desc: 'Latihan 30 hari berturut-turut.' },
   { id: 'accuracy_90',    name: 'Mata Tajam',        desc: 'Akurasi sesi 90% atau lebih.' },
   { id: 'perfect_session',name: 'Sempurna',          desc: 'Satu sesi tanpa kesalahan.' },
-  { id: 'facts_25',       name: 'Pengumpul Fakta',   desc: 'Menguasai 25 fakta.' },
-  { id: 'facts_100',      name: 'Ahli Fakta',        desc: 'Menguasai 100 fakta.' },
-  { id: 'facts_250',      name: 'Master Fakta',      desc: 'Menguasai 250 fakta.' },
-  { id: 'boss_6',         name: 'Penakluk Enam',     desc: 'Mengalahkan Raja Enam.' },
-  { id: 'boss_7',         name: 'Penakluk Tujuh',    desc: 'Mengalahkan Raja Tujuh.' },
-  { id: 'boss_8',         name: 'Penakluk Delapan',  desc: 'Mengalahkan Raja Delapan.' },
-  { id: 'boss_9',         name: 'Penakluk Sembilan', desc: 'Mengalahkan Raja Sembilan.' },
+  { id: 'facts_25',       name: 'Pengumpul Hitungan',desc: 'Menguasai 25 hitungan.' },
+  { id: 'facts_100',      name: 'Ahli Hitungan',     desc: 'Menguasai 100 hitungan.' },
+  { id: 'facts_250',      name: 'Master Hitungan',   desc: 'Menguasai 250 hitungan.' },
+
+  // Lencana boss dinamai berdasarkan KERAJAAN-nya (bukan angka), agar jelas
+  // bagi siswa apa yang sebenarnya mereka taklukkan.
+  { id: 'boss_6',         name: 'Penakluk Kerajaan Penjumlahan', desc: 'Mengalahkan Boss Kerajaan Penjumlahan.' },
+  { id: 'boss_7',         name: 'Penakluk Kerajaan Pengurangan', desc: 'Mengalahkan Boss Kerajaan Pengurangan.' },
+  { id: 'boss_8',         name: 'Penakluk Kerajaan Perkalian',   desc: 'Mengalahkan Boss Kerajaan Perkalian.' },
+  { id: 'boss_9',         name: 'Penakluk Kerajaan Pembagian',   desc: 'Mengalahkan Boss Kerajaan Pembagian.' },
+
   { id: 'speed_demon',    name: 'Secepat Kilat',     desc: '20 benar dalam mode kecepatan.' },
-  { id: 'graduate',       name: 'Lulusan Kerajaan',  desc: 'Menyelesaikan tes akhir.' }
+  { id: 'hero',           name: 'Pahlawan Kerajaan', desc: 'Mengalahkan Boss Menara Campuran.' }
 ];
 
 export const MOTIVATION_MESSAGES = {
@@ -326,7 +334,7 @@ export const MOTIVATION_MESSAGES = {
   good: [
     'Bagus! Sedikit lagi menuju penguasaan penuh.',
     'Kamu berkembang. Latihan besok akan lebih mudah.',
-    'Terus maju! Fakta yang sulit mulai kamu kuasai.'
+    'Terus maju! Hitungan yang sulit mulai kamu kuasai.'
   ],
   needsWork: [
     'Tidak apa-apa. Setiap kesalahan adalah latihan.',
@@ -360,7 +368,7 @@ export const THIRTY_DAY_PLAN = [
   { day: 21, title: 'Ulangan Minggu 3', focus: 'review', ops: OPERATION_LIST },
   { day: 22, title: 'Operasi Campuran', focus: 'mixed', ops: OPERATION_LIST },
   { day: 23, title: 'Keluarga Angka Campuran', focus: 'family', ops: OPERATION_LIST },
-  { day: 24, title: 'Fakta Sulit', focus: 'hard', ops: OPERATION_LIST },
+  { day: 24, title: 'Hitungan Sulit', focus: 'hard', ops: OPERATION_LIST },
   { day: 25, title: 'Tes Kecepatan', focus: 'speed', ops: OPERATION_LIST },
   { day: 26, title: 'Pengulangan Adaptif', focus: 'review', ops: OPERATION_LIST },
   { day: 27, title: 'Boss Kerajaan', focus: 'boss', ops: OPERATION_LIST },

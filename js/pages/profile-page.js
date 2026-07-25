@@ -21,7 +21,8 @@ let engine = null;
 /** Peta lencana ke ikon aset (selaras dengan game-page). */
 function badgeIcon(id) {
   if (id.startsWith('streak_')) return ['effects', 'fire'];
-  if (id.startsWith('facts_') || id === 'graduate') return ['icons', 'book'];
+  if (id.startsWith('facts_')) return ['icons', 'book'];
+  if (id === 'hero') return ['icons', 'star'];
   if (id.startsWith('boss_')) return ['icons', 'sword'];
   if (id === 'speed_demon') return ['icons', 'gem'];
   return ['icons', 'star'];
@@ -116,7 +117,7 @@ function renderStats() {
     { label: 'Akurasi', value: `${percent(totalC, totalQ, 1)}%` },
     { label: 'Kecepatan rata-rata', value: formatMs(avgMs) },
     { label: 'Hitungan dikuasai', value: mastery.totalMastered },
-    { label: 'Fakta otomatis', value: mastery.counts.automatic }
+    { label: 'Hitungan otomatis', value: mastery.counts.automatic }
   ];
 
   const grid = $('#profile-stats');

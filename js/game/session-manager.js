@@ -80,7 +80,8 @@ export class SessionManager {
 
     this.startedAt = new Date();
     this.endOfSessionDrained = false;
-    this.bossHp = null;   // diperbarui arena; memicu fase 2 digit boss
+    this.bossHp = null;      // diperbarui arena; memicu fase 2 digit boss
+    this.isMixedBoss = false; // Boss Campuran punya ambang & soal berbeda
   }
 
   #buildQuestions(count, targets, assignedFactIds) {
@@ -129,8 +130,9 @@ export class SessionManager {
 
   /** Ambil soal berikutnya. @returns {object|null} null jika sesi selesai */
   /** Arena melaporkan sisa hati boss agar fase 2 digit bisa dipicu. */
-  setBossHp(hp) {
+  setBossHp(hp, isMixedBoss = false) {
     this.bossHp = typeof hp === 'number' ? hp : null;
+    this.isMixedBoss = Boolean(isMixedBoss);
   }
 
   nextQuestion() {
@@ -140,9 +142,14 @@ export class SessionManager {
     // melemparkan hitungan dua digit -- HANYA dari operasi kerajaan boss ini
     // (mis. boss Penjumlahan tetap memberi soal penjumlahan, bukan acak dari
     // keempat operasi seperti sebelumnya). Dipicu lewat setBossHp() dari arena.
-    if (this.mode === MODES.BOSS && this.bossHp !== null
-        && this.bossHp <= BOSS_CONFIG.twoDigitAtHp) {
-      return this.#serve(generateExpertQuestion(this.operations));
+    // Boss Campuran punya ambang sendiri (sisa 3 HP) dan soal semua operasi.
+    if (this.mode === MODES.BOSS && this.bossHp !== null) {
+      const ambang = this.isMixedBoss
+        ? BOSS_CONFIG.twoDigitAtHpMixed
+        : BOSS_CONFIG.twoDigitAtHp;
+      if (this.bossHp <= ambang) {
+        return this.#serve(generateExpertQuestion(this.operations));
+      }
     }
 
     // Prioritas 1: antrean koreksi yang sudah waktunya.

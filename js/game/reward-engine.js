@@ -145,9 +145,15 @@ export function checkBadges(stats, owned = []) {
   if ((stats.totalMastered || 0) >= 25) award('facts_25');
   if ((stats.totalMastered || 0) >= 100) award('facts_100');
   if ((stats.totalMastered || 0) >= 250) award('facts_250');
-  if (stats.bossDefeated) award(`boss_${String(stats.bossDefeated).replace('boss-', '')}`);
+  // Boss kerajaan biasa -> lencana penakluk kerajaan itu.
+  // Boss Menara Campuran -> lencana Pahlawan Kerajaan (puncak permainan).
+  if (stats.bossDefeated === 'mixed-boss') {
+    award('hero');
+  } else if (stats.bossDefeated) {
+    award(`boss_${String(stats.bossDefeated).replace('boss-', '')}`);
+  }
+
   if ((stats.speedCorrect || 0) >= 20) award('speed_demon');
-  if (stats.finalTestDone) award('graduate');
 
   return earned;
 }

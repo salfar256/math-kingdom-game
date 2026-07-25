@@ -27,11 +27,19 @@ export class BattleEngine {
     this.playerHp = this.playerMaxHp;
 
     this.isBoss = mode === MODES.BOSS || Boolean(bossId);
+
+    // Fallback acak TIDAK boleh memilih Boss Campuran -- ia penjaga terakhir
+    // yang hanya muncul bila diminta eksplisit lewat bossId.
+    const bossKerajaan = BOSSES.filter((b) => b.id !== 'mixed-boss');
     this.enemy = this.isBoss
-      ? (BOSSES.find((b) => b.id === bossId) || pickRandom(BOSSES))
+      ? (BOSSES.find((b) => b.id === bossId) || pickRandom(bossKerajaan))
       : (ENEMIES.find((e) => e.id === enemyId) || pickRandom(ENEMIES));
 
-    this.enemyMaxHp = this.isBoss ? BATTLE_CONFIG.bossHearts : BATTLE_CONFIG.enemyHearts;
+    this.enemyMaxHp = this.isBoss
+      ? (this.enemy && this.enemy.id === 'mixed-boss'
+          ? BATTLE_CONFIG.mixedBossHearts
+          : BATTLE_CONFIG.bossHearts)
+      : BATTLE_CONFIG.enemyHearts;
     this.enemyHp = this.enemyMaxHp;
 
     this.enemiesToDefeat = this.isBoss ? 1 : BATTLE_CONFIG.enemiesPerBattle;

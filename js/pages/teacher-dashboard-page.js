@@ -271,7 +271,7 @@ async function handleClassSettings() {
   content.appendChild(el('p', {
     className: 'text-xs text-muted mb-0',
     text: 'Papan peringkat hanya menampilkan sepuluh teratas dalam kelas ini, ' +
-          'dengan empat kategori (usaha, ketepatan, fakta dikuasai, XP). ' +
+          'dengan empat kategori (usaha, ketepatan, hitungan dikuasai, XP). ' +
           'Siswa dapat menyembunyikan namanya sendiri.'
   }));
 
@@ -331,7 +331,7 @@ function renderClassStats() {
     { label: 'Jumlah siswa', value: total },
     { label: 'Aktif hari ini', value: activeToday },
     { label: 'Rata-rata akurasi', value: `${avgAccuracy}%` },
-    { label: 'Rata-rata fakta', value: avgMastered }
+    { label: 'Rata-rata hitungan', value: avgMastered }
   ];
 
   for (const s of stats) {
@@ -454,7 +454,7 @@ async function openStudentDetail(student) {
   const summaryStats = [
     { label: 'Level', value: student.level || 1 },
     { label: 'Akurasi', value: `${Math.round(student.accuracy || 0)}%` },
-    { label: 'Fakta dikuasai', value: mastery.totalMastered },
+    { label: 'Hitungan dikuasai', value: mastery.totalMastered },
     { label: 'Hari aktif', value: student.daysActive || 0 }
   ];
   for (const s of summaryStats) {
@@ -477,7 +477,7 @@ async function openStudentDetail(student) {
         el('span', { className: 'op-progress__name', text: OPERATION_LABEL[op] }),
         el('span', {
           className: 'text-muted',
-          text: `${b.points}/${b.total} poin (${b.mastered}/${b.factCount} hitungan) · akurasi ${Math.round(b.accuracy * 100)}%`
+          text: `${b.points}/${b.total} poin · akurasi ${Math.round(b.accuracy * 100)}%`
         })
       ]),
       el('div', { className: 'progress' }, [
@@ -493,7 +493,7 @@ async function openStudentDetail(student) {
     .slice(0, 12);
 
   if (worst.length > 0) {
-    content.appendChild(el('h3', { text: 'Fakta Paling Sering Salah' }));
+    content.appendChild(el('h3', { text: 'Hitungan Paling Sering Salah' }));
     const pills = el('div', { className: 'fact-list' });
     for (const f of worst) {
       const symbol = { addition: '+', subtraction: '−', multiplication: '×', division: '÷' }[f.operation] || '?';
@@ -563,7 +563,7 @@ async function handleResetStudent(student) {
   const confirmed = await confirmWithTyping(
     `Reset progres ${student.displayName}?`,
     [
-      'Seluruh riwayat fakta dan sesi siswa ini akan dihapus permanen.',
+      'Seluruh riwayat hitungan dan sesi siswa ini akan dihapus permanen.',
       'Tindakan ini tidak dapat dibatalkan.'
     ],
     'RESET'
